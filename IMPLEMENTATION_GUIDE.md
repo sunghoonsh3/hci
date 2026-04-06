@@ -6,7 +6,8 @@ This is an HCI Sprint 3 project for Notre Dame. Full architecture decisions are 
 
 **Project:** Registration Clarity at Notre Dame — redesigned PATH-to-NOVO course planning & registration workflow.
 **Demo persona:** BACS (BA Computer Science) student. Real audit data, display name "Alex Murphy".
-**Stack:** Next.js 14+ (App Router) + TypeScript + Tailwind CSS + Prisma + SQLite.
+**Stack:** Next.js 16 (App Router) + TypeScript + Tailwind CSS + Prisma + Neon PostgreSQL.
+**Deployed:** Vercel — https://hci-opal-sigma.vercel.app (auto-deploys from `main` branch).
 **Working directory:** `/Users/tristanshin/Downloads/registration-clarity`
 **Node.js:** Installed via nvm (v24 LTS). Always run: `export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"` before any node/npm/npx commands.
 
@@ -18,17 +19,20 @@ All steps (1–10) are now implemented and functional. See details below.
 
 ### 1. Project Setup ✅
 - Next.js 16.2.2 (App Router, Turbopack) with TypeScript, Tailwind, src directory
-- Prisma 7.6.0 with SQLite via `@prisma/adapter-better-sqlite3`
+- Prisma 7.6.0 with Neon PostgreSQL via `@prisma/adapter-pg`
+- Deployed to Vercel (auto-deploys from GitHub `main` branch)
 - Dev server on localhost:3000
 
 ### 2. Database Schema & Seeding ✅
 - Four tables: Course, Section, Meeting, Instructor (see `prisma/schema.prisma`)
-- Seed script: `prisma/seed.js` (uses better-sqlite3 directly)
+- Seed script: `prisma/seed.js` (uses `pg` driver directly against Neon)
 - **569 courses, 1179 sections, 1434 meetings, 1251 instructors**
+- Database hosted on Neon (AWS US East 1), connection string in `.env` (gitignored) and Vercel env vars
 
 ### 3. Prisma Client ✅
 - Generated at `src/generated/prisma/` — import from `@/generated/prisma/client` (not `/prisma`)
-- DB singleton at `src/lib/db.ts` using `PrismaBetterSqlite3` adapter (Prisma 7 requires adapter, not zero-arg constructor)
+- DB singleton at `src/lib/db.ts` using `PrismaPg` adapter from `@prisma/adapter-pg` (Prisma 7 requires adapter, not zero-arg constructor)
+- `prisma generate` runs as part of the build command for Vercel (`"build": "prisma generate && next build"`)
 
 ### 4. Types & Utility Libraries ✅
 - `src/types/index.ts` — CompletedCourse, ParsedAudit, PlanEntry, EligibilityStatus, PlanSlot, etc.
@@ -78,7 +82,14 @@ All steps (1–10) are now implemented and functional. See details below.
 ### Prisma 7 Breaking Changes
 - `PrismaClient` requires `adapter` option — cannot use zero-arg constructor
 - Import from `@/generated/prisma/client` (not `@/generated/prisma`)
-- Adapter: `PrismaBetterSqlite3` from `@prisma/adapter-better-sqlite3` (note casing: `Sqlite3` not `SQLite3`)
+- Adapter: `PrismaPg` from `@prisma/adapter-pg` with `connectionString` from `process.env.DATABASE_URL`
+- `datasource` block in `schema.prisma` must NOT have `url` — connection URL goes in `prisma.config.ts` (for migrations) and adapter constructor (for runtime)
+
+### Deployment (Vercel + Neon)
+- GitHub repo: `sunghoonsh3/hci` — Vercel auto-deploys on push to `main`
+- `DATABASE_URL` env var set in Vercel project settings (same value as local `.env`)
+- `pg` listed in `serverExternalPackages` in `next.config.ts` (required for Node.js runtime on Vercel)
+- Prisma client is gitignored and regenerated during build via `"build": "prisma generate && next build"`
 
 ### Safari Compatibility
 - Calendar events use `onPointerDown` with `e.preventDefault()` instead of `onClick` to prevent double-fire on DOM re-render
@@ -146,7 +157,7 @@ Key screens by page number:
 
 ## Key Design Decisions
 
-1. **Plans in localStorage** — no auth, no DB persistence for Sprint 3
+1. **Plans in localStorage** — no auth, no DB persistence for Sprint 3. Plans only persist within the same browser (not across devices/browsers/incognito). Sprint 5 will migrate to DB.
 2. **Plans are section-level** — keyed by sectionId, not courseId. Multiple sections of same course allowed.
 3. **Audit in localStorage** — parsed from copy-paste text, no PDF parsing
 4. **Eligibility is deterministic** — computed from section data + audit data, no AI. Order: already-taken → full → restricted → needs-prereq → eligible. Accepts `hasAudit` param to skip audit-dependent checks when no audit loaded.
@@ -188,9 +199,24 @@ npm run dev
 # Regenerate Prisma client after schema changes
 npx prisma generate
 
-# Re-seed database
+# Re-seed database (seeds remote Neon DB)
 node prisma/seed.js
+
+# Push schema changes to Neon (no migration files)
+npx prisma db push
 
 # New migration after schema changes
 npx prisma migrate dev --name description
 ```
+
+### Deploying
+
+Push to `main` — Vercel auto-deploys. No manual steps needed.
+
+```bash
+git push origin main
+```
+
+If you need to update the Neon connection string, change it in:
+1. Local `.env` file
+2. Vercel project settings → Environment Variables → `DATABASE_URL`

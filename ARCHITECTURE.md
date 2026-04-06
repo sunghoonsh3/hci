@@ -17,18 +17,19 @@
 | **Framework** | Next.js 14+ (App Router) | Full-stack in one project, server components for fast data loading, great DX |
 | **Language** | TypeScript | Type-safe queries, better refactoring, Prisma integration |
 | **Styling** | Tailwind CSS | Matches Sprint 2 design system, rapid iteration |
-| **Database** | SQLite (via Prisma) | Zero infrastructure, file-based, trivial Postgres migration later |
+| **Database** | Neon PostgreSQL | Hosted Postgres, free tier, supports Vercel deployment with DB writes |
 | **ORM** | Prisma | Type-safe client, auto-generated types, schema migrations |
 | **Search/Filter** | SQL queries with LIKE + indexed columns | Dataset is small (569 courses, 1179 sections) — no search engine needed |
 | **State (plans)** | localStorage | No auth needed for Sprint 3, clean migration to DB later |
 | **State (audit)** | localStorage | Parsed from paste, persists across pages |
-| **Dev environment** | Local `next dev`, SQLite file in project | No Docker, no hosted DB, no env vars |
+| **Hosting** | Vercel | Zero-config Next.js deployment, auto-deploys from GitHub |
+| **Dev environment** | Local `next dev`, Neon DB | No Docker, env vars in `.env` |
 
 ### Why not alternatives
 
-- **JSON files only:** No query layer for filtering, sorting, joining sections. SQLite gives this for free.
-- **PostgreSQL now:** Unnecessary infrastructure for 569 courses. Prisma makes SQLite→Postgres a config change.
-- **Supabase/Neon:** Network dependency + account setup for zero benefit at this scale.
+- **JSON files only:** No query layer for filtering, sorting, joining sections. A database gives this for free.
+- **SQLite:** Used initially for zero-config dev, but incompatible with Vercel's ephemeral filesystem. Migrated to Neon PostgreSQL.
+- **Supabase:** Neon was simpler for our needs (just Postgres, no extra services).
 - **Separate frontend + backend:** Two projects, CORS, separate deploys — pointless for prototype.
 - **Python backend:** Scraper is Python, but web app benefits from React/Next.js ecosystem for UI quality.
 - **Vector DB:** Data is structured and small. No semantic search needed.
@@ -373,7 +374,7 @@ registration-clarity/
 │   ├── generated/prisma/    (auto-generated Prisma client)
 │   └── types/
 │       └── index.ts
-├── dev.db                   (SQLite database — seeded)
+├── .env                     (DATABASE_URL for Neon — gitignored)
 ├── prisma.config.ts
 ├── ARCHITECTURE.md          (this file)
 ├── IMPLEMENTATION_GUIDE.md
