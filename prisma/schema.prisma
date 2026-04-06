@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Course {
+  id                       Int       @id @default(autoincrement())
+  subject                  String
+  courseNumber              String
+  courseTitle               String
+  description              String?
+  creditHoursMin           Int?
+  creditHoursMax           Int?
+  cannotHaveTaken          String?   // JSON string array
+  registrationRestrictions String?   // JSON string array
+  crosslistedWith          String?   // JSON string array
+  attributes               String?   // JSON array of {code, description}
+  sections                 Section[]
+
+  @@index([subject])
+  @@index([courseNumber])
+  @@index([subject, courseNumber])
+}
+
+model Section {
+  id               Int          @id @default(autoincrement())
+  course           Course       @relation(fields: [courseId], references: [id])
+  courseId          Int
+  sectionNumber    String?
+  crn              Int?
+  status           String?
+  maxEnrollment    Int?
+  seatsAvailable   Int?
+  waitlistCurrent  Int?
+  waitlistCapacity Int?
+  campus           String?
+  gradeMode        String?
+  specialApproval  String?
+  sectionNotes     String?
+  meetings         Meeting[]
+  instructors      Instructor[]
+}
+
+model Meeting {
+  id        Int     @id @default(autoincrement())
+  section   Section @relation(fields: [sectionId], references: [id])
+  sectionId Int
+  room      String?
+  startDate String?
+  endDate   String?
+  days      String? // JSON array e.g. ["M","W","F"]
+  startTime String?
+  endTime   String?
+}
+
+model Instructor {
+  id        Int     @id @default(autoincrement())
+  section   Section @relation(fields: [sectionId], references: [id])
+  sectionId Int
+  name      String
+}

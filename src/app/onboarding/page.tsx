@@ -1,0 +1,119 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAudit } from "@/contexts/AuditContext";
+
+export default function OnboardingPage() {
+  const router = useRouter();
+  const { audit, setAuditText } = useAudit();
+  const [rawText, setRawText] = useState("");
+  const [error, setError] = useState("");
+
+  // If audit already loaded, offer to continue
+  if (audit) {
+    return (
+      <div className="max-w-2xl mx-auto py-12">
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">
+          Welcome back, {audit.studentName || "Student"}
+        </h1>
+        <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <span className="text-gray-500">Major:</span>{" "}
+              <span className="font-medium">{audit.major}</span>
+            </div>
+            <div>
+              <span className="text-gray-500">Classification:</span>{" "}
+              <span className="font-medium">{audit.classification}</span>
+            </div>
+            <div>
+              <span className="text-gray-500">Credits:</span>{" "}
+              <span className="font-medium">
+                {audit.creditsApplied}/{audit.creditsRequired}
+              </span>
+            </div>
+            <div>
+              <span className="text-gray-500">GPA:</span>{" "}
+              <span className="font-medium">{audit.gpa.toFixed(3)}</span>
+            </div>
+            <div>
+              <span className="text-gray-500">Courses completed:</span>{" "}
+              <span className="font-medium">{audit.completedCourses.length}</span>
+            </div>
+            <div>
+              <span className="text-gray-500">In progress:</span>{" "}
+              <span className="font-medium">{audit.inProgressCourses.length}</span>
+            </div>
+          </div>
+        </div>
+        <div className="flex gap-3">
+          <button
+            onClick={() => router.push("/search")}
+            className="bg-[#1B6B3A] text-white px-6 py-2.5 rounded-lg font-medium hover:bg-[#155a2f] transition-colors"
+          >
+            Continue to Search
+          </button>
+          <button
+            onClick={() => {
+              setRawText("");
+              setError("");
+              // Force re-render without audit
+              window.localStorage.removeItem("registration-clarity-audit");
+              window.location.reload();
+            }}
+            className="bg-gray-100 text-gray-700 px-6 py-2.5 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+          >
+            Re-paste Audit
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  function handleParse() {
+    setError("");
+    if (!rawText.trim()) {
+      setError("Please paste your degree audit text.");
+      return;
+    }
+    const parsed = setAuditText(rawText);
+    if (!parsed) {
+      setError(
+        "Could not parse any courses from the text. Make sure you copied the full degree audit from GPS/Degree Works."
+      );
+      return;
+    }
+  }
+
+  return (
+    <div className="max-w-2xl mx-auto py-12">
+      <h1 className="text-2xl font-bold text-gray-900 mb-2">
+        Welcome to PATH
+      </h1>
+      <p className="text-gray-600 mb-6">
+        Paste your Degree Audit from GPS (Degree Works) below to get started.
+        We&apos;ll parse your completed courses to check eligibility and
+        prerequisites automatically.
+      </p>
+
+      <textarea
+        value={rawText}
+        onChange={(e) => setRawText(e.target.value)}
+        placeholder="Paste your full degree audit text here..."
+        className="w-full h-64 p-4 border border-gray-300 rounded-lg text-sm font-mono resize-y focus:outline-none focus:ring-2 focus:ring-[#1B6B3A] focus:border-transparent"
+      />
+
+      {error && (
+        <p className="mt-2 text-sm text-red-600">{error}</p>
+      )}
+
+      <button
+        onClick={handleParse}
+        className="mt-4 bg-[#1B6B3A] text-white px-6 py-2.5 rounded-lg font-medium hover:bg-[#155a2f] transition-colors"
+      >
+        Parse Audit
+      </button>
+    </div>
+  );
+}
