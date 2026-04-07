@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useAudit } from "@/contexts/AuditContext";
 import { usePlans } from "@/contexts/PlansContext";
@@ -71,7 +71,87 @@ function formatTime(start: string | null, end: string | null): string {
   return `${start}-${end}`;
 }
 
-export default function CourseDetailClient({ course }: { course: Course }) {
+// Hardcoded guidance data for demo courses
+const GUIDANCE_DATA: Record<
+  string,
+  {
+    commonPairings: string;
+    typicalSemester: string;
+    fillSpeed: string;
+    majorTakeRate: string;
+  }
+> = {
+  "ACCT 20100": {
+    commonPairings: "FIN 20100, ECON 10010",
+    typicalSemester: "Sophomore Fall",
+    fillSpeed: "Usually fills by Week 1",
+    majorTakeRate: "95% sophomore year",
+  },
+  "CSE 20311": {
+    commonPairings: "MATH 10560, CSE 20110",
+    typicalSemester: "Sophomore Fall",
+    fillSpeed: "Usually fills by Week 2",
+    majorTakeRate: "98% sophomore year",
+  },
+  "CSE 20312": {
+    commonPairings: "CSE 20289, CSE 20311",
+    typicalSemester: "Sophomore Spring",
+    fillSpeed: "Usually fills by Week 2",
+    majorTakeRate: "97% sophomore year",
+  },
+  "CSE 30151": {
+    commonPairings: "CSE 20312, CSE 40113",
+    typicalSemester: "Junior Fall",
+    fillSpeed: "Moderate demand",
+    majorTakeRate: "100% CS majors",
+  },
+  "CSE 20289": {
+    commonPairings: "CSE 20312, CSE 20311",
+    typicalSemester: "Sophomore Spring",
+    fillSpeed: "Usually fills by Week 2",
+    majorTakeRate: "98% CS majors",
+  },
+  "ECON 10010": {
+    commonPairings: "MATH 10250, ECON 10020",
+    typicalSemester: "Freshman Fall or Spring",
+    fillSpeed: "Usually fills by Week 2",
+    majorTakeRate: "92% freshman year",
+  },
+  "FIN 20100": {
+    commonPairings: "ACCT 20100, ECON 10010",
+    typicalSemester: "Sophomore Spring",
+    fillSpeed: "Usually fills by Week 1",
+    majorTakeRate: "88% sophomore year",
+  },
+  "MATH 10550": {
+    commonPairings: "MATH 10560, CSE 20110",
+    typicalSemester: "Freshman Fall",
+    fillSpeed: "Usually available",
+    majorTakeRate: "100% STEM majors",
+  },
+};
+
+// Hardcoded course path chains for demo
+const COURSE_PATHS: Record<string, string[]> = {
+  "CSE 20311": ["No prerequisites", "CSE 20311", "CSE 20312", "CSE 30151"],
+  "CSE 20312": ["CSE 20311", "CSE 20312", "CSE 30151", "CSE 40113"],
+  "CSE 20289": ["CSE 20311", "CSE 20289", "CSE 40113"],
+  "CSE 30151": ["CSE 20312", "CSE 30151", "CSE 40175"],
+  "CSE 40113": ["CSE 20312", "CSE 40113"],
+  "CSE 40175": ["CSE 30151", "CSE 40175"],
+  "ACCT 20100": ["No prerequisites", "ACCT 20100", "ACCT 20210", "ACCT 30100"],
+  "FIN 20100": ["ACCT 20100", "FIN 20100", "FIN 30100"],
+  "ECON 10010": ["No prerequisites", "ECON 10010", "ECON 20010", "ECON 30020"],
+  "MATH 10550": ["No prerequisites", "MATH 10550", "MATH 10560", "MATH 20550"],
+};
+
+export default function CourseDetailClient({
+  course,
+  courseTitleMap = {},
+}: {
+  course: Course;
+  courseTitleMap?: Record<string, string>;
+}) {
   const { audit } = useAudit();
   const { addToPlan, isSectionInPlan } = usePlans();
   const [showPreCheck, setShowPreCheck] = useState(false);
@@ -94,21 +174,38 @@ export default function CourseDetailClient({ course }: { course: Course }) {
     audit?.completedCourses ?? []
   );
   const badges = getRequirementBadges(course.subject, course.courseNumber);
-  const isBlocked = status === "full" || status === "needs-prereq" || status === "restricted";
-  const primaryInstructor = course.sections[0]?.instructors[0]?.name ?? "TBA";
+  const isBlocked =
+    status === "full" || status === "needs-prereq" || status === "restricted";
+  const primaryInstructor =
+    course.sections[0]?.instructors[0]?.name ?? "TBA";
   const credits =
     course.creditHoursMin === course.creditHoursMax
       ? `${course.creditHoursMin}`
       : `${course.creditHoursMin}-${course.creditHoursMax}`;
 
+  const courseKey = `${course.subject} ${course.courseNumber}`;
+  const guidance = GUIDANCE_DATA[courseKey];
+  const coursePath = COURSE_PATHS[courseKey];
+
+  const totalSeats = course.sections.reduce(
+    (s, sec) => s + (sec.seatsAvailable ?? 0),
+    0
+  );
+  const totalMax = course.sections.reduce(
+    (s, sec) => s + (sec.maxEnrollment ?? 0),
+    0
+  );
+
   function handleAddToPlan(sectionId: number, slot: PlanSlot) {
     addToPlan(course.id, sectionId, slot);
-    setToast(`${course.subject} ${course.courseNumber} Sec added to Plan ${slot}`);
+    setToast(
+      `${course.subject} ${course.courseNumber} Sec added to Plan ${slot}`
+    );
     setTimeout(() => setToast(""), 3000);
   }
 
   return (
-    <div className="max-w-4xl">
+    <div>
       {/* Toast */}
       {toast && (
         <div className="fixed top-16 right-6 bg-[#1B6B3A] text-white px-4 py-2 rounded-lg shadow-lg text-sm z-50">
@@ -124,226 +221,514 @@ export default function CourseDetailClient({ course }: { course: Course }) {
         / {course.subject} {course.courseNumber}
       </div>
 
-      {/* Header */}
-      <div className="flex items-start justify-between mb-6">
+      <div className="grid grid-cols-[1fr_280px] gap-6">
+        {/* Main content */}
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            {course.subject} {course.courseNumber} — {course.courseTitle}
-          </h1>
-          <div className="flex items-center gap-3 mt-2 text-sm text-gray-600">
-            <span>{primaryInstructor}</span>
-            <span>·</span>
-            <span>{credits} credits</span>
-            <span>·</span>
-            <span>Summer 2026</span>
-            <EligibilityBadge status={status} size="md" />
-          </div>
-        </div>
-      </div>
-
-      {/* Action buttons */}
-      <div className="flex gap-3 mb-6">
-        <button
-          onClick={() => setShowPreCheck(true)}
-          className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
-        >
-          Pre-check
-        </button>
-        {isBlocked && (
-          <button
-            onClick={() => setShowRecovery(true)}
-            className="bg-white border border-orange-300 text-orange-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-orange-50 transition-colors"
-          >
-            Recovery Options
-          </button>
-        )}
-      </div>
-
-      {/* Blocked banner */}
-      {isBlocked && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-          <div className="flex items-center gap-2">
-            <span className="text-red-600 font-medium">Registration Blocked</span>
-            <span className="text-sm text-red-500">
-              {status === "full"
-                ? "All sections are full"
-                : status === "needs-prereq"
-                ? "Missing prerequisites"
-                : "Special approval required"}
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* Description */}
-      {course.description && (
-        <div className="mb-6">
-          <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
-            Description
-          </h2>
-          <p className="text-sm text-gray-600 leading-relaxed">
-            {course.description}
-          </p>
-        </div>
-      )}
-
-      {/* Prerequisites */}
-      {prereqChecks.length > 0 && (
-        <div className="mb-6">
-          <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
-            Prerequisites
-          </h2>
-          <div className="space-y-1">
-            {prereqChecks.map((check) => (
-              <div key={check.courseCode} className="flex items-center gap-2 text-sm">
-                <span className={check.completed ? "text-green-600" : "text-red-600"}>
-                  {check.completed ? "✓" : "✗"}
-                </span>
-                <span className="font-medium">{check.courseCode}</span>
-                {check.completed ? (
-                  <span className="text-green-600">
-                    — completed {check.term} ({check.grade})
-                  </span>
-                ) : (
-                  <span className="text-red-600">— not completed</span>
-                )}
+          {/* Header */}
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {course.subject} {course.courseNumber}: {course.courseTitle}
+              </h1>
+              <div className="flex items-center gap-3 mt-2 text-sm text-gray-600">
+                <span>{primaryInstructor}</span>
+                <span>·</span>
+                <span>{credits} credits</span>
+                <span>·</span>
+                <span>Summer 2026</span>
+                <EligibilityBadge status={status} size="md" />
               </div>
-            ))}
+            </div>
           </div>
-        </div>
-      )}
 
-      {/* Restrictions */}
-      {restrictions.length > 0 && (
-        <div className="mb-6">
-          <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
-            Restrictions
-          </h2>
-          <ul className="space-y-1">
-            {restrictions.map((r, i) => (
-              <li key={i} className="text-sm text-gray-600">
-                <span className="font-medium">{r.label}</span>
-                {r.type === "other" ? "" : ` — ${r.raw}`}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Requirement badges */}
-      {badges.length > 0 && (
-        <div className="mb-6">
-          <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
-            Requirements Fulfilled
-          </h2>
-          <div className="flex gap-2">
-            {badges.map((b) => (
-              <span
-                key={b}
-                className="inline-flex items-center rounded-full bg-blue-50 text-blue-700 px-3 py-1 text-sm font-medium"
+          {/* Action buttons */}
+          <div className="flex gap-3 mb-6">
+            {isBlocked ? (
+              <button
+                disabled
+                className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium opacity-75 cursor-not-allowed"
               >
-                {b}
-              </span>
-            ))}
+                Register (Blocked)
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  setToast(
+                    "Registration would be executed in NOVO. This is a prototype."
+                  );
+                  setTimeout(() => setToast(""), 3000);
+                }}
+                className="bg-[#1B6B3A] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#155a2f] transition-colors"
+              >
+                Register
+              </button>
+            )}
+            <button
+              onClick={() => setShowPreCheck(true)}
+              className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+            >
+              Pre-check
+            </button>
+            {isBlocked && (
+              <button
+                onClick={() => setShowRecovery(true)}
+                className="bg-white border border-orange-300 text-orange-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-orange-50 transition-colors"
+              >
+                Recovery Options
+              </button>
+            )}
           </div>
-        </div>
-      )}
 
-      {/* Sections table */}
-      <div className="mb-6">
-        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
-          Sections
-        </h2>
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="text-left px-4 py-2 font-medium text-gray-600">Sec</th>
-                <th className="text-left px-4 py-2 font-medium text-gray-600">CRN</th>
-                <th className="text-left px-4 py-2 font-medium text-gray-600">Time</th>
-                <th className="text-left px-4 py-2 font-medium text-gray-600">Room</th>
-                <th className="text-left px-4 py-2 font-medium text-gray-600">Instructor</th>
-                <th className="text-left px-4 py-2 font-medium text-gray-600">Seats</th>
-                <th className="text-right px-4 py-2 font-medium text-gray-600">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {course.sections.map((section) => {
-                const meeting = section.meetings[0];
-                const isFull =
-                  section.seatsAvailable !== null && section.seatsAvailable <= 0;
-                return (
-                  <tr
-                    key={section.id}
-                    className="border-b border-gray-100 hover:bg-gray-50"
+          {/* Blocked banner with inline actions */}
+          {isBlocked && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-red-600 font-medium">
+                    Registration Blocked
+                  </span>
+                  <span className="text-sm text-red-500">
+                    {status === "full"
+                      ? `This course is full (${totalSeats} seats remaining)`
+                      : status === "needs-prereq"
+                      ? "Missing prerequisite courses"
+                      : "Special approval required"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 text-sm shrink-0">
+                  <button
+                    onClick={() => setShowPreCheck(true)}
+                    className="text-red-600 hover:text-red-800 font-medium hover:underline"
                   >
-                    <td className="px-4 py-2">{section.sectionNumber ?? "-"}</td>
-                    <td className="px-4 py-2 text-gray-500">{section.crn ?? "-"}</td>
-                    <td className="px-4 py-2">
-                      {meeting ? (
-                        <>
-                          {formatDays(meeting.days)}{" "}
-                          {formatTime(meeting.startTime, meeting.endTime)}
-                        </>
+                    Why?
+                  </button>
+                  <Link
+                    href={`/search?subject=${course.subject}`}
+                    className="text-red-600 hover:text-red-800 font-medium hover:underline"
+                  >
+                    Find Alternatives
+                  </Link>
+                  <button
+                    onClick={() => {
+                      const open = course.sections.find(
+                        (s) =>
+                          s.seatsAvailable === null || s.seatsAvailable! > 0
+                      );
+                      if (open) addToPlan(course.id, open.id, "B");
+                      setToast(
+                        `${course.subject} ${course.courseNumber} moved to Plan B`
+                      );
+                      setTimeout(() => setToast(""), 3000);
+                    }}
+                    className="text-red-600 hover:text-red-800 font-medium hover:underline"
+                  >
+                    Move to Plan B
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Official Next Steps (blocked courses) */}
+          {isBlocked && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+              <h3 className="text-sm font-semibold text-amber-900 mb-2">
+                Official Next Steps (
+                {status === "full"
+                  ? "Full Course"
+                  : status === "needs-prereq"
+                  ? "Missing Prerequisites"
+                  : "Restricted"}
+                )
+              </h3>
+              <ul className="space-y-1 text-sm text-amber-800">
+                {status === "full" && (
+                  <>
+                    <li>
+                      • <strong>Waitlist:</strong> Available — add yourself via
+                      NOVO
+                    </li>
+                    <li>
+                      • <strong>Seat Alert:</strong> Enable notifications when a
+                      seat opens
+                    </li>
+                    <li>
+                      • <strong>Override:</strong> Submit override request
+                      through department
+                    </li>
+                  </>
+                )}
+                {status === "needs-prereq" && (
+                  <>
+                    <li>
+                      • <strong>Check GPS:</strong> Verify prerequisite
+                      completion in Degree Works
+                    </li>
+                    <li>
+                      • <strong>Contact Advisor:</strong> Request prerequisite
+                      override if equivalent taken
+                    </li>
+                    <li>
+                      • <strong>Alternatives:</strong> Find courses without this
+                      prerequisite
+                    </li>
+                  </>
+                )}
+                {status === "restricted" && (
+                  <>
+                    <li>
+                      • <strong>Permission:</strong> Contact the instructor or
+                      department for approval
+                    </li>
+                    <li>
+                      • <strong>Override:</strong> Submit an override request
+                      through your advisor
+                    </li>
+                    <li>
+                      • <strong>Alternatives:</strong> Look for unrestricted
+                      sections or similar courses
+                    </li>
+                  </>
+                )}
+              </ul>
+            </div>
+          )}
+
+          {/* Description */}
+          {course.description && (
+            <div className="mb-6">
+              <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
+                Description
+              </h2>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                {course.description}
+              </p>
+            </div>
+          )}
+
+          {/* Availability bar */}
+          <div className="mb-6">
+            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
+              Availability
+            </h2>
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium">
+                {totalSeats}/{totalMax} seats
+              </span>
+              <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden max-w-xs">
+                <div
+                  className={`h-full rounded-full ${
+                    totalSeats === 0
+                      ? "bg-red-500"
+                      : totalMax > 0 &&
+                        (totalMax - totalSeats) / totalMax > 0.8
+                      ? "bg-yellow-500"
+                      : "bg-green-500"
+                  }`}
+                  style={{
+                    width: `${
+                      totalMax > 0
+                        ? ((totalMax - totalSeats) / totalMax) * 100
+                        : 0
+                    }%`,
+                  }}
+                />
+              </div>
+              <span
+                className={`text-xs font-medium ${
+                  totalSeats === 0 ? "text-red-600" : "text-green-600"
+                }`}
+              >
+                {totalSeats === 0 ? "Filled" : "Available"}
+              </span>
+            </div>
+          </div>
+
+          {/* Prerequisites */}
+          {prereqChecks.length > 0 && (
+            <div className="mb-6">
+              <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
+                Prerequisites
+              </h2>
+              <div className="space-y-1">
+                {prereqChecks.map((check) => {
+                  const title = courseTitleMap[check.courseCode];
+                  return (
+                    <div
+                      key={check.courseCode}
+                      className="flex items-center gap-2 text-sm"
+                    >
+                      <span
+                        className={
+                          check.completed ? "text-green-600" : "text-red-600"
+                        }
+                      >
+                        {check.completed ? "✓" : "✗"}
+                      </span>
+                      <span className="font-medium">
+                        {check.courseCode}
+                        {title ? `: ${title}` : ""}
+                      </span>
+                      {check.completed ? (
+                        <span className="text-green-600">
+                          — completed {check.term} ({check.grade})
+                        </span>
                       ) : (
-                        "TBA"
+                        <span className="text-red-600">— not completed</span>
                       )}
-                    </td>
-                    <td className="px-4 py-2 text-gray-500">
-                      {meeting?.room ?? "TBA"}
-                    </td>
-                    <td className="px-4 py-2 text-gray-500">
-                      {section.instructors.map((i) => i.name).join(", ") || "TBA"}
-                    </td>
-                    <td className="px-4 py-2">
-                      {(() => {
-                        const avail = section.seatsAvailable ?? 0;
-                        const max = section.maxEnrollment ?? 0;
-                        const pct = max > 0 ? ((max - avail) / max) * 100 : 0;
-                        return (
-                          <div className="flex items-center gap-2">
-                            <div className="w-16 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                              <div
-                                className={`h-full rounded-full ${
-                                  avail === 0 ? "bg-red-500" : pct > 80 ? "bg-yellow-500" : "bg-green-500"
-                                }`}
-                                style={{ width: `${pct}%` }}
-                              />
-                            </div>
-                            <span className={`text-xs ${isFull ? "text-red-600 font-medium" : "text-gray-600"}`}>
-                              {avail}/{max}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Restrictions */}
+          {restrictions.length > 0 && (
+            <div className="mb-6">
+              <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
+                Restrictions
+              </h2>
+              <ul className="space-y-1">
+                {restrictions.map((r, i) => (
+                  <li key={i} className="text-sm text-gray-600">
+                    <span className="font-medium">{r.label}</span>
+                    {r.type === "other" ? "" : ` — ${r.raw}`}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Requirement badges */}
+          {badges.length > 0 && (
+            <div className="mb-6">
+              <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
+                Requirements Fulfilled
+              </h2>
+              <div className="flex gap-2">
+                {badges.map((b) => (
+                  <span
+                    key={b}
+                    className="inline-flex items-center rounded-full bg-blue-50 text-blue-700 px-3 py-1 text-sm font-medium"
+                  >
+                    {b}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Course Path */}
+          {coursePath && (
+            <div className="mb-6">
+              <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
+                Course Path
+              </h2>
+              <div className="flex items-center gap-1 text-sm overflow-x-auto pb-2">
+                {coursePath.map((code, i) => {
+                  const isCurrent = code === courseKey;
+                  const completed = audit?.completedCourses.some(
+                    (c) => `${c.subject} ${c.courseNumber}` === code
+                  );
+                  return (
+                    <React.Fragment key={`${code}-${i}`}>
+                      {i > 0 && (
+                        <span className="text-gray-300 mx-1">→</span>
+                      )}
+                      <span
+                        className={`px-2.5 py-1 rounded text-xs font-medium whitespace-nowrap ${
+                          isCurrent
+                            ? "bg-[#1B6B3A] text-white"
+                            : completed
+                            ? "bg-green-100 text-green-800"
+                            : "bg-gray-100 text-gray-600"
+                        }`}
+                      >
+                        {completed && !isCurrent ? "✓ " : ""}
+                        {code}
+                      </span>
+                    </React.Fragment>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Guidance */}
+          {guidance && (
+            <div className="mb-6">
+              <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
+                Guidance
+              </h2>
+              <div className="bg-white rounded-lg border border-gray-200 p-4">
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <span className="text-gray-500">Common Pairings</span>
+                    <div className="font-medium text-gray-900 mt-0.5">
+                      {guidance.commonPairings}
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Typical Semester</span>
+                    <div className="font-medium text-gray-900 mt-0.5">
+                      {guidance.typicalSemester}
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Fill Speed</span>
+                    <div className="font-medium text-gray-900 mt-0.5">
+                      {guidance.fillSpeed}
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Major Take Rate</span>
+                    <div className="font-medium text-gray-900 mt-0.5">
+                      {guidance.majorTakeRate}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Sections table */}
+          <div className="mb-6">
+            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
+              Sections
+            </h2>
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-200 bg-gray-50">
+                    <th className="text-left px-4 py-2 font-medium text-gray-600">
+                      Sec
+                    </th>
+                    <th className="text-left px-4 py-2 font-medium text-gray-600">
+                      Time
+                    </th>
+                    <th className="text-left px-4 py-2 font-medium text-gray-600">
+                      Room
+                    </th>
+                    <th className="text-left px-4 py-2 font-medium text-gray-600">
+                      Seats
+                    </th>
+                    <th className="text-right px-4 py-2 font-medium text-gray-600" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {course.sections.map((section) => {
+                    const meeting = section.meetings[0];
+                    const isFull =
+                      section.seatsAvailable !== null &&
+                      section.seatsAvailable <= 0;
+                    const avail = section.seatsAvailable ?? 0;
+                    const max = section.maxEnrollment ?? 0;
+                    const inPlan = isSectionInPlan(section.id);
+                    return (
+                      <tr
+                        key={section.id}
+                        className="border-b border-gray-100 hover:bg-gray-50"
+                      >
+                        <td className="px-4 py-2">
+                          {section.sectionNumber ?? "-"}
+                        </td>
+                        <td className="px-4 py-2">
+                          {meeting ? (
+                            <>
+                              {formatDays(meeting.days)}{" "}
+                              {formatTime(meeting.startTime, meeting.endTime)}
+                            </>
+                          ) : (
+                            "TBA"
+                          )}
+                        </td>
+                        <td className="px-4 py-2 text-gray-500">
+                          {meeting?.room ?? "TBA"}
+                        </td>
+                        <td className="px-4 py-2">
+                          <span
+                            className={`${
+                              isFull
+                                ? "text-red-600 font-medium"
+                                : "text-gray-600"
+                            }`}
+                          >
+                            {avail}/{max}
+                          </span>
+                          {isFull && (
+                            <span className="text-red-500 text-xs ml-2">
+                              Full
                             </span>
-                          </div>
-                        );
-                      })()}
-                    </td>
-                    <td className="px-4 py-2 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        {(["A", "B", "C"] as PlanSlot[]).map((slot) =>
-                          isSectionInPlan(section.id, slot) ? (
-                            <span
-                              key={slot}
-                              className="text-[10px] text-gray-400 px-2 py-1"
-                            >
-                              {slot} ✓
+                          )}
+                        </td>
+                        <td className="px-4 py-2 text-right">
+                          {inPlan ? (
+                            <span className="text-xs text-green-600 font-medium">
+                              In Plan ✓
                             </span>
+                          ) : isFull ? (
+                            <span className="text-xs text-red-500">Full</span>
                           ) : (
                             <button
-                              key={slot}
-                              onClick={() => handleAddToPlan(section.id, slot)}
-                              className="text-[11px] bg-[#1B6B3A] text-white px-2 py-1 rounded font-medium hover:bg-[#155a2f] transition-colors"
+                              onClick={() =>
+                                handleAddToPlan(section.id, "A")
+                              }
+                              className="text-xs bg-[#1B6B3A] text-white px-3 py-1.5 rounded font-medium hover:bg-[#155a2f] transition-colors"
                             >
-                              +{slot}
+                              Select
                             </button>
-                          )
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Info sidebar */}
+        <div>
+          <div className="bg-white rounded-lg border border-gray-200 p-4 sticky top-6">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">
+              Quick Info — {course.subject} {course.courseNumber}
+            </h3>
+            <div className="space-y-2.5 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-500">Seats</span>
+                <span
+                  className={`font-medium ${
+                    totalSeats === 0 ? "text-red-600" : ""
+                  }`}
+                >
+                  {totalSeats}/{totalMax}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Instructor</span>
+                <span className="font-medium text-right max-w-[140px] truncate">
+                  {primaryInstructor}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Credits</span>
+                <span className="font-medium">{credits}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Term</span>
+                <span className="font-medium">Summer 2026</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Sections</span>
+                <span className="font-medium">{course.sections.length}</span>
+              </div>
+              <div className="pt-2 border-t border-gray-100">
+                <EligibilityBadge status={status} size="md" />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

@@ -6,6 +6,8 @@ import { usePlans } from "@/contexts/PlansContext";
 import { useAudit } from "@/contexts/AuditContext";
 import { computeEligibility } from "@/lib/eligibility";
 import EligibilityBadge from "@/components/EligibilityBadge";
+import WeeklyCalendar from "@/components/WeeklyCalendar";
+import type { CalendarEvent } from "@/components/WeeklyCalendar";
 import type { EligibilityStatus } from "@/types";
 
 interface CourseData {
@@ -46,6 +48,47 @@ export default function ExportPage() {
   const [showPreCheck, setShowPreCheck] = useState(false);
 
   const slotEntries = plans.filter((p) => p.planSlot === activeSlot);
+
+  // Build calendar events
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+  useEffect(() => {
+    if (!loaded || slotEntries.length === 0) {
+      setCalendarEvents([]);
+      return;
+    }
+    const courseIds = [...new Set(slotEntries.map((p) => p.courseId))];
+    Promise.all(
+      courseIds.map((id) =>
+        fetch(`/api/course/${id}`)
+          .then((r) => r.json())
+          .catch(() => null)
+      )
+    ).then((results) => {
+      const evts: CalendarEvent[] = [];
+      for (const entry of slotEntries) {
+        const c = results.find((r: { id: number }) => r?.id === entry.courseId);
+        if (!c) continue;
+        const sec = c.sections.find(
+          (s: { id: number }) => s.id === entry.sectionId
+        );
+        if (!sec) continue;
+        for (const m of sec.meetings) {
+          if (!m.days || !m.startTime || !m.endTime) continue;
+          let days: string[];
+          try { days = JSON.parse(m.days); } catch { continue; }
+          evts.push({
+            id: entry.sectionId,
+            label: `${c.subject} ${c.courseNumber}`,
+            days,
+            startTime: m.startTime,
+            endTime: m.endTime,
+            color: PLAN_COLORS[activeSlot],
+          });
+        }
+      }
+      setCalendarEvents(evts);
+    });
+  }, [loaded, plans, activeSlot]);
 
   // Reset state when switching plans
   function switchSlot(slot: Slot) {
@@ -264,11 +307,13 @@ export default function ExportPage() {
 
   // Export results
   return (
-    <div className="max-w-3xl">
+    <div>
       <h1 className="text-xl font-bold text-gray-900 mb-4">
         Export to NOVO — Plan {activeSlot} Results
       </h1>
 
+      <div className="grid grid-cols-[1fr_280px] gap-6">
+      <div>
       {allSuccess ? (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
           <div className="font-semibold text-green-800">
@@ -329,12 +374,26 @@ export default function ExportPage() {
                   {item.result === "transferred" ? (
                     <span className="text-gray-500">Confirm in NOVO</span>
                   ) : (
-                    <Link
-                      href={`/course/${item.course.id}`}
-                      className="text-[#1B6B3A] font-medium hover:underline"
-                    >
-                      View Options
-                    </Link>
+                    <div className="flex gap-1.5 flex-wrap">
+                      <button
+                        onClick={() => alert("Waitlist request submitted via NOVO")}
+                        className="bg-gray-100 text-gray-700 px-2 py-1 rounded font-medium hover:bg-gray-200 transition-colors"
+                      >
+                        Join Waitlist
+                      </button>
+                      <Link
+                        href={`/course/${item.course.id}`}
+                        className="bg-gray-100 text-gray-700 px-2 py-1 rounded font-medium hover:bg-gray-200 transition-colors"
+                      >
+                        Request Override
+                      </Link>
+                      <Link
+                        href={`/search?subject=${item.course.subject}`}
+                        className="bg-gray-100 text-gray-700 px-2 py-1 rounded font-medium hover:bg-gray-200 transition-colors"
+                      >
+                        Find Alternative
+                      </Link>
+                    </div>
                   )}
                 </td>
               </tr>
@@ -356,6 +415,16 @@ export default function ExportPage() {
         >
           Search More Courses
         </Link>
+      </div>
+      </div>
+
+      {/* Weekly Schedule */}
+      <div>
+        <h2 className="text-sm font-semibold text-gray-700 mb-2">
+          Weekly Schedule
+        </h2>
+        <WeeklyCalendar events={calendarEvents} compact />
+      </div>
       </div>
     </div>
   );

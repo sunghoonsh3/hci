@@ -2,8 +2,12 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { usePlans } from "@/contexts/PlansContext";
 import { useAudit } from "@/contexts/AuditContext";
+import { getRequirementBadges } from "@/lib/requirements";
+import { computeEligibility } from "@/lib/eligibility";
+import EligibilityBadge from "@/components/EligibilityBadge";
 import WeeklyCalendar from "@/components/WeeklyCalendar";
 import type { CalendarEvent } from "@/components/WeeklyCalendar";
 import type { PlanSlot } from "@/types";
@@ -83,10 +87,12 @@ interface CourseData {
   courseTitle: string;
   creditHoursMin: number | null;
   creditHoursMax: number | null;
+  registrationRestrictions: string | null;
   sections: {
     id: number;
     sectionNumber: string | null;
     seatsAvailable: number | null;
+    specialApproval: string | null;
     meetings: {
       days: string | null;
       startTime: string | null;
@@ -102,6 +108,7 @@ const PLAN_COLORS: Record<PlanSlot, string> = {
 };
 
 export default function PlanPage() {
+  const router = useRouter();
   const { plans, removeFromPlan, moveToPlan, loaded } = usePlans();
   const { audit } = useAudit();
   const [activeSlot, setActiveSlot] = useState<PlanSlot>("A");
@@ -244,10 +251,13 @@ export default function PlanPage() {
                       Title
                     </th>
                     <th className="text-left px-4 py-3 font-medium text-gray-600">
-                      Section
+                      Credits
                     </th>
                     <th className="text-left px-4 py-3 font-medium text-gray-600">
-                      Credits
+                      Status
+                    </th>
+                    <th className="text-left px-4 py-3 font-medium text-gray-600">
+                      Reqs
                     </th>
                     <th className="text-right px-4 py-3 font-medium text-gray-600">
                       Actions
@@ -292,22 +302,71 @@ export default function PlanPage() {
                           ) : (
                             <span className="text-gray-400">...</span>
                           )}
-                        </td>
-                        <td className="px-4 py-3 text-gray-500 text-xs">
-                          {section
-                            ? `Sec ${section.sectionNumber ?? "-"}`
-                            : "..."}
+                          <span className="text-xs text-gray-400">
+                            {section
+                              ? `Sec ${section.sectionNumber ?? "-"}`
+                              : ""}
+                          </span>
                         </td>
                         <td className="px-4 py-3 text-gray-600">
                           {course?.creditHoursMin ?? "?"}
                         </td>
+                        <td className="px-4 py-3">
+                          {course ? (
+                            <EligibilityBadge
+                              status={computeEligibility(
+                                course.subject,
+                                course.courseNumber,
+                                course.registrationRestrictions,
+                                course.sections,
+                                audit
+                                  ? [
+                                      ...audit.completedCourses,
+                                      ...audit.inProgressCourses,
+                                    ]
+                                  : []
+                              )}
+                            />
+                          ) : null}
+                        </td>
+                        <td className="px-4 py-3">
+                          {course ? (
+                            <div className="flex gap-1 flex-wrap">
+                              {getRequirementBadges(
+                                course.subject,
+                                course.courseNumber
+                              ).map((b) => (
+                                <span
+                                  key={b}
+                                  className="inline-flex items-center rounded-full bg-blue-50 text-blue-700 px-2 py-0.5 text-xs font-medium"
+                                >
+                                  {b}
+                                </span>
+                              ))}
+                            </div>
+                          ) : null}
+                        </td>
                         <td className="px-4 py-3 text-right">
-                          <RowMenu
-                            sectionId={entry.sectionId}
-                            currentSlot={activeSlot}
-                            onMove={moveToPlan}
-                            onRemove={removeFromPlan}
-                          />
+                          <div className="flex items-center justify-end gap-3 text-xs">
+                            <button
+                              onClick={() =>
+                                removeFromPlan(entry.sectionId, activeSlot)
+                              }
+                              className="text-red-600 hover:text-red-800 font-medium hover:underline"
+                            >
+                              Remove
+                            </button>
+                            {course && (
+                              <button
+                                onClick={() =>
+                                  router.push(`/course/${course.id}`)
+                                }
+                                className="text-gray-600 hover:text-gray-800 font-medium hover:underline"
+                              >
+                                Options
+                              </button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     );
@@ -334,6 +393,31 @@ export default function PlanPage() {
               setHighlightedSection((prev) => (prev === id ? null : id))
             }
           />
+          {showAllPlans && (
+            <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+              <div className="flex items-center gap-1">
+                <div
+                  className="w-3 h-3 rounded"
+                  style={{ backgroundColor: "#1B6B3A" }}
+                />
+                <span>Plan A</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div
+                  className="w-3 h-3 rounded"
+                  style={{ backgroundColor: "#2563eb" }}
+                />
+                <span>Plan B</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div
+                  className="w-3 h-3 rounded"
+                  style={{ backgroundColor: "#6b7280" }}
+                />
+                <span>Plan C</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

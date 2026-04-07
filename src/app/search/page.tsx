@@ -23,9 +23,9 @@ export default async function SearchPage({
   if (subject) where.subject = subject;
   if (keyword) {
     where.OR = [
-      { courseTitle: { contains: keyword } },
-      { description: { contains: keyword } },
-      { courseNumber: { contains: keyword } },
+      { courseTitle: { contains: keyword, mode: "insensitive" as const } },
+      { description: { contains: keyword, mode: "insensitive" as const } },
+      { courseNumber: { contains: keyword, mode: "insensitive" as const } },
     ];
   }
 
