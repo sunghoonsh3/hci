@@ -444,14 +444,14 @@ export default function CourseDetailClient({
             </div>
           </div>
 
-          {/* Prerequisites */}
-          {prereqChecks.length > 0 && (
+          {/* Prerequisites — only show courses that exist in DB */}
+          {prereqChecks.filter((c) => c.completed || courseTitleMap[c.courseCode]).length > 0 && (
             <div className="mb-6">
               <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
                 Prerequisites
               </h2>
               <div className="space-y-1">
-                {prereqChecks.map((check) => {
+                {prereqChecks.filter((c) => c.completed || courseTitleMap[c.courseCode]).map((check) => {
                   const title = courseTitleMap[check.courseCode];
                   return (
                     <div
