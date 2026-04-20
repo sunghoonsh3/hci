@@ -175,8 +175,13 @@ export default function PlanPage() {
   const [highlightedSection, setHighlightedSection] = useState<number | null>(
     null,
   );
-  const { show } = useToast();
+  const { show, markRead } = useToast();
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  // Visiting the Plan page clears the unread plan-update badge.
+  useEffect(() => {
+    markRead();
+  }, [markRead]);
 
   function handleTabKey(e: KeyboardEvent<HTMLButtonElement>, idx: number) {
     const next = cycleIndex(idx, e.key, SLOTS.length, "horizontal");
@@ -260,12 +265,20 @@ export default function PlanPage() {
       );
       if (!entry) return;
       const course = courseDataMap[entry.courseId];
-      const label = course
-        ? `${course.subject} ${course.courseNumber}`
-        : "Course";
+      const label =
+        entry.subject && entry.courseNumber
+          ? `${entry.subject} ${entry.courseNumber}`
+          : course
+            ? `${course.subject} ${course.courseNumber}`
+            : "Course";
+      const hint = {
+        subject: entry.subject ?? course?.subject,
+        courseNumber: entry.courseNumber ?? course?.courseNumber,
+        courseTitle: entry.courseTitle ?? course?.courseTitle,
+      };
       removeFromPlan(sectionId, slot);
       show(`Removed ${label} from Plan ${slot}`, {
-        undo: () => addToPlan(entry.courseId, sectionId, slot),
+        undo: () => addToPlan(entry.courseId, sectionId, slot, hint),
       });
     },
     [plans, courseDataMap, removeFromPlan, addToPlan, show],
@@ -387,9 +400,14 @@ export default function PlanPage() {
                     const section = course?.sections.find(
                       (s) => s.id === entry.sectionId,
                     );
-                    const label = course
-                      ? `${course.subject} ${course.courseNumber}`
-                      : `Course #${entry.courseId}`;
+                    const hintSubject = entry.subject ?? course?.subject;
+                    const hintCourseNumber =
+                      entry.courseNumber ?? course?.courseNumber;
+                    const hintTitle = entry.courseTitle ?? course?.courseTitle;
+                    const label =
+                      hintSubject && hintCourseNumber
+                        ? `${hintSubject} ${hintCourseNumber}`
+                        : `Course #${entry.courseId}`;
                     return (
                       <tr
                         key={entry.sectionId}
@@ -400,27 +418,33 @@ export default function PlanPage() {
                         }`}
                       >
                         <td className="px-4 py-3">
-                          {course ? (
+                          {hintSubject && hintCourseNumber ? (
                             <Link
-                              href={`/course/${course.id}`}
+                              href={`/course/${entry.courseId}`}
                               className="font-medium text-[#0C2340] hover:underline block"
                             >
-                              {course.subject} {course.courseNumber}
+                              {hintSubject} {hintCourseNumber}
                             </Link>
                           ) : (
-                            <span className="text-gray-500">Loading…</span>
+                            <div
+                              className="h-4 w-20 bg-gray-200 rounded animate-pulse"
+                              aria-label="Loading course code"
+                            />
                           )}
                         </td>
                         <td className="px-4 py-3">
-                          {course ? (
+                          {hintTitle ? (
                             <Link
-                              href={`/course/${course.id}`}
+                              href={`/course/${entry.courseId}`}
                               className="text-gray-800 hover:underline block"
                             >
-                              {course.courseTitle}
+                              {hintTitle}
                             </Link>
                           ) : (
-                            <span className="text-gray-500">…</span>
+                            <div
+                              className="h-4 w-40 bg-gray-200 rounded animate-pulse"
+                              aria-label="Loading course title"
+                            />
                           )}
                           <span className="text-xs text-gray-500">
                             {section
@@ -429,7 +453,14 @@ export default function PlanPage() {
                           </span>
                         </td>
                         <td className="px-4 py-3 text-gray-700">
-                          {course?.creditHoursMin ?? "?"}
+                          {course ? (
+                            (course.creditHoursMin ?? "?")
+                          ) : (
+                            <div
+                              className="h-4 w-6 bg-gray-200 rounded animate-pulse"
+                              aria-label="Loading credits"
+                            />
+                          )}
                         </td>
                         <td className="px-4 py-3">
                           {course ? (
@@ -447,7 +478,12 @@ export default function PlanPage() {
                                   : [],
                               )}
                             />
-                          ) : null}
+                          ) : (
+                            <div
+                              className="h-5 w-16 bg-gray-200 rounded-full animate-pulse"
+                              aria-label="Loading status"
+                            />
+                          )}
                         </td>
                         <td className="px-4 py-3">
                           {course ? (
@@ -464,7 +500,12 @@ export default function PlanPage() {
                                 </span>
                               ))}
                             </div>
-                          ) : null}
+                          ) : (
+                            <div
+                              className="h-4 w-14 bg-gray-200 rounded animate-pulse"
+                              aria-label="Loading requirements"
+                            />
+                          )}
                         </td>
                         <td className="px-4 py-3 text-right">
                           <div className="flex items-center justify-end gap-3 text-xs">
@@ -520,6 +561,11 @@ export default function PlanPage() {
             highlightedId={highlightedSection}
             onEventClick={(id) =>
               setHighlightedSection((prev) => (prev === id ? null : id))
+            }
+            emptyMessage={
+              showAllPlans
+                ? "No courses planned across any slot yet."
+                : `No courses in Plan ${activeSlot} yet.`
             }
           />
           {showAllPlans && (

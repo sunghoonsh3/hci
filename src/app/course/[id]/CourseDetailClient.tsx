@@ -152,7 +152,11 @@ export default function CourseDetailClient({
 
   function handleAddToPlan(sectionId: number, slot: PlanSlot) {
     const existing = findSlotsForSection(sectionId);
-    const result = addToPlan(course.id, sectionId, slot);
+    const result = addToPlan(course.id, sectionId, slot, {
+      subject: course.subject,
+      courseNumber: course.courseNumber,
+      courseTitle: course.courseTitle,
+    });
     const label = `${course.subject} ${course.courseNumber}`;
     if (!result.added) {
       show(`${label} already in Plan ${slot}`, { variant: "warning" });
@@ -513,11 +517,11 @@ export default function CourseDetailClient({
             </div>
           )}
 
-          {coursePath && (
-            <div className="mb-6">
-              <h2 className="text-sm font-semibold text-gray-800 uppercase tracking-wide mb-2">
-                Course Path
-              </h2>
+          <div className="mb-6">
+            <h2 className="text-sm font-semibold text-gray-800 uppercase tracking-wide mb-2">
+              Course Path
+            </h2>
+            {coursePath ? (
               <div className="flex items-center gap-1 text-sm overflow-x-auto pb-2">
                 {coursePath.map((code, i) => {
                   const isCurrent = code === courseKey;
@@ -547,8 +551,12 @@ export default function CourseDetailClient({
                   );
                 })}
               </div>
-            </div>
-          )}
+            ) : (
+              <p className="text-sm text-gray-600 italic">
+                Course path data not yet available for this course.
+              </p>
+            )}
+          </div>
 
           {guidance ? (
             <div className="mb-6">

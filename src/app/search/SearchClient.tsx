@@ -144,6 +144,9 @@ export default function SearchClient({
   }, [plans, courseMap]);
 
   const applyFilters = useCallback(() => {
+    // Only subject/keyword hit the server (large dataset). openOnly is
+    // client-side so it does not belong in this round trip; it is still
+    // carried along in the URL so a deep-link preserves the checkbox.
     const sp = new URLSearchParams();
     if (subject) sp.set("subject", subject);
     if (keyword) sp.set("keyword", keyword);
@@ -165,20 +168,27 @@ export default function SearchClient({
     );
   }
 
-  function totalSeats(course: Course) {
-    const avail = course.sections.reduce(
-      (sum, s) => sum + (s.seatsAvailable ?? 0),
-      0,
-    );
-    const max = course.sections.reduce(
-      (sum, s) => sum + (s.maxEnrollment ?? 0),
-      0,
-    );
-    return { avail, max };
+  function sectionSummary(course: Course) {
+    let avail = 0;
+    let max = 0;
+    let openSections = 0;
+    for (const s of course.sections) {
+      avail += s.seatsAvailable ?? 0;
+      max += s.maxEnrollment ?? 0;
+      if (s.seatsAvailable === null || s.seatsAvailable > 0) openSections += 1;
+    }
+    return { avail, max, openSections, total: course.sections.length };
   }
 
   const displayCourses = useMemo(() => {
     let result = courses;
+    if (openOnly) {
+      result = result.filter((c) =>
+        c.sections.some(
+          (s) => s.seatsAvailable === null || s.seatsAvailable > 0,
+        ),
+      );
+    }
     if (coreOnly) {
       result = result.filter(
         (c) => getRequirementBadges(c.subject, c.courseNumber).length > 0,
@@ -193,7 +203,7 @@ export default function SearchClient({
       );
     }
     return result;
-  }, [courses, coreOnly, majorOnly]);
+  }, [courses, openOnly, coreOnly, majorOnly]);
 
   const PAGE_SIZE = 50;
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
@@ -218,7 +228,11 @@ export default function SearchClient({
       return;
     }
     const existing = findSlotsForSection(openSection.id);
-    const result = addToPlan(course.id, openSection.id, "A");
+    const result = addToPlan(course.id, openSection.id, "A", {
+      subject: course.subject,
+      courseNumber: course.courseNumber,
+      courseTitle: course.courseTitle,
+    });
     if (!result.added) {
       show(
         `${course.subject} ${course.courseNumber} already in Plan A`,
@@ -350,12 +364,18 @@ export default function SearchClient({
             <tbody>
               {visibleCourses.map((course) => {
                 const status = getStatus(course);
-                const seats = totalSeats(course);
+                const seats = sectionSummary(course);
                 const badges = getRequirementBadges(
                   course.subject,
                   course.courseNumber,
                 );
                 const inPlan = isInPlan(course.id);
+                const sectionsLabel =
+                  seats.openSections === 0
+                    ? "All sections full"
+                    : seats.openSections === seats.total
+                      ? `${seats.total} of ${seats.total} open`
+                      : `${seats.openSections} of ${seats.total} open`;
                 return (
                   <tr
                     key={course.id}
@@ -374,15 +394,26 @@ export default function SearchClient({
                       <EligibilityBadge status={status} />
                     </td>
                     <td className="px-4 py-3">
-                      <span
-                        className={
-                          seats.avail === 0
-                            ? "text-red-700 font-medium"
-                            : "text-gray-700"
-                        }
-                      >
-                        {seats.avail}/{seats.max}
-                      </span>
+                      <div className="flex flex-col leading-tight">
+                        <span
+                          className={
+                            seats.avail === 0
+                              ? "text-red-700 font-medium"
+                              : "text-gray-700"
+                          }
+                        >
+                          {seats.avail}/{seats.max}
+                        </span>
+                        <span
+                          className={`text-[10px] mt-0.5 ${
+                            seats.openSections === 0
+                              ? "text-red-700"
+                              : "text-gray-600"
+                          }`}
+                        >
+                          {sectionsLabel}
+                        </span>
+                      </div>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-1 flex-wrap">
@@ -444,7 +475,11 @@ export default function SearchClient({
               Weekly Schedule
             </h2>
           </div>
-          <WeeklyCalendar events={calendarEvents} compact />
+          <WeeklyCalendar
+            events={calendarEvents}
+            compact
+            emptyMessage="Add courses to your plan to see them on the schedule."
+          />
         </div>
       </div>
     </div>

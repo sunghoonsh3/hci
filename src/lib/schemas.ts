@@ -54,6 +54,9 @@ export const PlanEntrySchema = z.object({
   courseId: z.number(),
   sectionId: z.number(),
   planSlot: PlanSlotSchema,
+  subject: z.string().optional(),
+  courseNumber: z.string().optional(),
+  courseTitle: z.string().optional(),
 });
 
 export const PlanEntriesSchema = z.array(PlanEntrySchema);

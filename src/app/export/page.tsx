@@ -427,6 +427,7 @@ export default function ExportPage() {
                             onClick={() =>
                               show(
                                 "Waitlist request submitted via NOVO (demo)",
+                                { trackUnread: false },
                               )
                             }
                             className="bg-gray-100 text-gray-800 px-2 py-1 rounded font-medium hover:bg-gray-200 transition-colors"
@@ -474,7 +475,11 @@ export default function ExportPage() {
           <h2 className="text-sm font-semibold text-gray-800 mb-2">
             Weekly Schedule
           </h2>
-          <WeeklyCalendar events={calendarEvents} compact />
+          <WeeklyCalendar
+            events={calendarEvents}
+            compact
+            emptyMessage={`No courses in Plan ${activeSlot} yet.`}
+          />
         </div>
       </div>
     </div>

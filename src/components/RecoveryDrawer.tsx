@@ -62,8 +62,14 @@ export default function RecoveryDrawer({
     [],
   );
 
+  const nameHint = {
+    subject: course.subject,
+    courseNumber: course.courseNumber,
+    courseTitle: course.courseTitle,
+  };
+
   function handleSwapSection(sectionId: number) {
-    addToPlan(course.id, sectionId, "A");
+    addToPlan(course.id, sectionId, "A", nameHint);
     onClose();
   }
 
@@ -72,7 +78,7 @@ export default function RecoveryDrawer({
       (s) => s.seatsAvailable === null || (s.seatsAvailable ?? 0) > 0,
     );
     if (open) {
-      addToPlan(course.id, open.id, "B");
+      addToPlan(course.id, open.id, "B", nameHint);
     }
     onClose();
   }

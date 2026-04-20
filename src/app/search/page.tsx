@@ -9,6 +9,8 @@ export default async function SearchPage({
   const params = await searchParams;
   const subject = typeof params.subject === "string" ? params.subject : "";
   const keyword = typeof params.keyword === "string" ? params.keyword : "";
+  // `open` is preserved for deep-link compatibility; the actual filtering
+  // happens in SearchClient so the checkbox toggles without a round trip.
   const openOnly = params.open === "true";
 
   const subjects = await prisma.course.findMany({
@@ -55,17 +57,9 @@ export default async function SearchPage({
     orderBy: [{ subject: "asc" }, { courseNumber: "asc" }],
   });
 
-  const filtered = openOnly
-    ? courses.filter((c) =>
-        c.sections.some(
-          (s) => s.seatsAvailable !== null && s.seatsAvailable > 0,
-        ),
-      )
-    : courses;
-
   return (
     <SearchClient
-      courses={filtered}
+      courses={courses}
       subjects={subjects.map((s) => s.subject)}
       initialSubject={subject}
       initialKeyword={keyword}

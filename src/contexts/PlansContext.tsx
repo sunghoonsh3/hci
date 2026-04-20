@@ -21,6 +21,12 @@ export interface AddToPlanResult {
   alreadyInSlots: PlanSlot[];
 }
 
+export interface CourseNameHint {
+  subject?: string;
+  courseNumber?: string;
+  courseTitle?: string;
+}
+
 interface PlansContextValue {
   plans: PlanEntry[];
   loaded: boolean;
@@ -28,6 +34,7 @@ interface PlansContextValue {
     courseId: number,
     sectionId: number,
     slot: PlanSlot,
+    hint?: CourseNameHint,
   ) => AddToPlanResult;
   removeFromPlan: (sectionId: number, slot: PlanSlot) => void;
   moveToPlan: (
@@ -53,6 +60,7 @@ export function PlansProvider({ children }: { children: ReactNode }) {
       courseId: number,
       sectionId: number,
       slot: PlanSlot,
+      hint?: CourseNameHint,
     ): AddToPlanResult => {
       const current = plansStore.getSnapshot();
       const existingSlots = current
@@ -61,7 +69,17 @@ export function PlansProvider({ children }: { children: ReactNode }) {
       if (existingSlots.includes(slot)) {
         return { added: false, alreadyInSlots: existingSlots };
       }
-      plansStore.set([...current, { courseId, sectionId, planSlot: slot }]);
+      plansStore.set([
+        ...current,
+        {
+          courseId,
+          sectionId,
+          planSlot: slot,
+          subject: hint?.subject,
+          courseNumber: hint?.courseNumber,
+          courseTitle: hint?.courseTitle,
+        },
+      ]);
       return { added: true, alreadyInSlots: existingSlots };
     },
     [],

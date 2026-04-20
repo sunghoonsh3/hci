@@ -5,20 +5,35 @@ import { useAudit } from "@/contexts/AuditContext";
 import { usePlans } from "@/contexts/PlansContext";
 import { fetchCourse } from "@/lib/fetchCourse";
 import { cycleIndex } from "@/hooks/useRovingTabIndex";
-import type { PlanSlot } from "@/types";
-import { useState, useEffect, useRef, type KeyboardEvent } from "react";
+import type { PlanEntry, PlanSlot } from "@/types";
+import {
+  useState,
+  useEffect,
+  useRef,
+  type KeyboardEvent,
+} from "react";
 
 const SLOTS: PlanSlot[] = ["A", "B", "C"];
 
 type CourseName = { subject: string; courseNumber: string };
 
+function hintFromEntry(entry: PlanEntry): CourseName | null {
+  if (entry.subject && entry.courseNumber) {
+    return { subject: entry.subject, courseNumber: entry.courseNumber };
+  }
+  return null;
+}
+
 export default function Sidebar() {
   const { audit } = useAudit();
   const { plans, removeFromPlan } = usePlans();
   const [activeSlot, setActiveSlot] = useState<PlanSlot>("A");
-  const [courseNames, setCourseNames] = useState<Record<number, CourseName>>(
-    {},
-  );
+
+  // Names resolved via API for legacy entries that lack the hint fields.
+  // New entries carry names inline, so this state is typically empty.
+  const [resolvedNames, setResolvedNames] = useState<
+    Record<number, CourseName>
+  >({});
   const inFlight = useRef<Set<number>>(new Set());
 
   const slotEntries = plans.filter((p) => p.planSlot === activeSlot);
@@ -34,44 +49,48 @@ export default function Sidebar() {
 
   useEffect(() => {
     const controller = new AbortController();
-    const uniqueIds = [...new Set(plans.map((p) => p.courseId))];
-    const toFetch = uniqueIds.filter(
-      (id) => !courseNames[id] && !inFlight.current.has(id),
+    const legacyIds = [
+      ...new Set(
+        plans
+          .filter((p) => !hintFromEntry(p))
+          .map((p) => p.courseId),
+      ),
+    ].filter(
+      (id) => !resolvedNames[id] && !inFlight.current.has(id),
     );
-    if (toFetch.length === 0) return;
-
-    for (const id of toFetch) inFlight.current.add(id);
+    if (legacyIds.length === 0) return;
+    for (const id of legacyIds) inFlight.current.add(id);
 
     Promise.all(
-      toFetch.map(async (id) => {
+      legacyIds.map(async (id) => {
         const course = await fetchCourse(id, controller.signal);
         return course
           ? { id, subject: course.subject, courseNumber: course.courseNumber }
           : null;
       }),
     ).then((results) => {
-      setCourseNames((prev) => {
+      setResolvedNames((prev) => {
         const next = { ...prev };
         for (const r of results) {
           if (r) next[r.id] = { subject: r.subject, courseNumber: r.courseNumber };
         }
         return next;
       });
-      for (const id of toFetch) inFlight.current.delete(id);
+      for (const id of legacyIds) inFlight.current.delete(id);
     });
 
     const inFlightRef = inFlight.current;
     return () => {
       controller.abort();
-      for (const id of toFetch) inFlightRef.delete(id);
+      for (const id of legacyIds) inFlightRef.delete(id);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [plans]);
 
-  // Prune cached names that are no longer referenced by any plan entry.
+  // Drop resolved names for entries no longer referenced.
   useEffect(() => {
     const referenced = new Set(plans.map((p) => p.courseId));
-    setCourseNames((prev) => {
+    setResolvedNames((prev) => {
       let changed = false;
       const next: typeof prev = {};
       for (const [key, value] of Object.entries(prev)) {
@@ -140,9 +159,11 @@ export default function Sidebar() {
           ) : (
             <ul className="space-y-1">
               {slotEntries.map((entry) => {
-                const name = courseNames[entry.courseId];
-                const label = name
-                  ? `${name.subject} ${name.courseNumber}`
+                const hint = hintFromEntry(entry);
+                const resolved = resolvedNames[entry.courseId];
+                const display = hint ?? resolved ?? null;
+                const label = display
+                  ? `${display.subject} ${display.courseNumber}`
                   : `Course #${entry.courseId}`;
                 return (
                   <li

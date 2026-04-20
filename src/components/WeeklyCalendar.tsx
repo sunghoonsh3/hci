@@ -97,14 +97,17 @@ export default function WeeklyCalendar({
   compact = false,
   highlightedId,
   onEventClick,
+  emptyMessage,
 }: {
   events?: CalendarEvent[];
   compact?: boolean;
   highlightedId?: number | null;
   onEventClick?: (id: number) => void;
+  emptyMessage?: string;
 }) {
   const hourHeight = compact ? 24 : 40;
   const totalHeight = HOURS.length * hourHeight;
+  const isEmpty = events.length === 0;
 
   const layoutByDay = useMemo(() => {
     const map: Record<string, CalendarEvent[]> = {};
@@ -122,7 +125,18 @@ export default function WeeklyCalendar({
   }, [events]);
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-y-auto max-h-[calc(100vh-200px)] bg-white">
+    <div className="relative border border-gray-200 rounded-lg overflow-y-auto max-h-[calc(100vh-200px)] bg-white">
+      {isEmpty && emptyMessage && (
+        <div
+          role="note"
+          aria-live="polite"
+          className="absolute inset-0 z-10 flex items-center justify-center p-6 pointer-events-none"
+        >
+          <p className="text-sm text-gray-600 text-center max-w-[200px] bg-white/90 rounded-md px-3 py-2 shadow-sm pointer-events-auto">
+            {emptyMessage}
+          </p>
+        </div>
+      )}
       {/* Day headers */}
       <div className="grid grid-cols-[48px_repeat(5,1fr)] border-b border-gray-200">
         <div className="p-1" />

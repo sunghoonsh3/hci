@@ -30,6 +30,11 @@ export interface PlanEntry {
   courseId: number;
   sectionId: number;
   planSlot: "A" | "B" | "C";
+  // Optional name hints captured at add time for optimistic rendering
+  // (Sidebar / Plan table) before the full course payload arrives.
+  subject?: string;
+  courseNumber?: string;
+  courseTitle?: string;
 }
 
 export type EligibilityStatus =

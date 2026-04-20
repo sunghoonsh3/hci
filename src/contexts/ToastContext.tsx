@@ -24,19 +24,28 @@ export interface ShowOptions {
   variant?: ToastVariant;
   undo?: () => void;
   duration?: number;
+  /**
+   * When false, the toast is not counted toward the unread badge. Use for
+   * ephemeral confirmations (e.g. "Waitlist submitted") that do not reflect
+   * a state change the user might want to review on the Plan page.
+   */
+  trackUnread?: boolean;
 }
 
 interface ToastContextValue {
   show: (message: string, opts?: ShowOptions) => void;
   dismiss: () => void;
+  unreadCount: number;
+  markRead: () => void;
 }
 
 const ToastContext = createContext<ToastContextValue | null>(null);
 
-const DEFAULT_DURATION = 4000;
+const DEFAULT_DURATION = 5000;
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toast, setToast] = useState<ToastState | null>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const idRef = useRef(0);
 
@@ -62,6 +71,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         variant: opts.variant ?? "success",
         undo: opts.undo,
       });
+      if (opts.trackUnread !== false) {
+        setUnreadCount((c) => c + 1);
+      }
       const duration = opts.duration ?? DEFAULT_DURATION;
       timerRef.current = setTimeout(() => {
         setToast(null);
@@ -71,6 +83,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     [clearTimer],
   );
 
+  const markRead = useCallback(() => {
+    setUnreadCount(0);
+  }, []);
+
   useEffect(() => () => clearTimer(), [clearTimer]);
 
   const runUndo = useCallback(() => {
@@ -79,7 +95,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, [toast, dismiss]);
 
   return (
-    <ToastContext.Provider value={{ show, dismiss }}>
+    <ToastContext.Provider value={{ show, dismiss, unreadCount, markRead }}>
       {children}
       {toast && (
         <Toast
