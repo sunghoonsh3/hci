@@ -4,8 +4,11 @@ import Link from "next/link";
 import { useAudit } from "@/contexts/AuditContext";
 import { usePlans } from "@/contexts/PlansContext";
 import { fetchCourse } from "@/lib/fetchCourse";
+import { cycleIndex } from "@/hooks/useRovingTabIndex";
 import type { PlanSlot } from "@/types";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type KeyboardEvent } from "react";
+
+const SLOTS: PlanSlot[] = ["A", "B", "C"];
 
 type CourseName = { subject: string; courseNumber: string };
 
@@ -19,6 +22,15 @@ export default function Sidebar() {
   const inFlight = useRef<Set<number>>(new Set());
 
   const slotEntries = plans.filter((p) => p.planSlot === activeSlot);
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  function handleTabKey(e: KeyboardEvent<HTMLButtonElement>, idx: number) {
+    const next = cycleIndex(idx, e.key, SLOTS.length, "horizontal");
+    if (next === null) return;
+    e.preventDefault();
+    setActiveSlot(SLOTS[next]);
+    tabRefs.current[next]?.focus();
+  }
 
   useEffect(() => {
     const controller = new AbortController();
@@ -56,6 +68,21 @@ export default function Sidebar() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [plans]);
 
+  // Prune cached names that are no longer referenced by any plan entry.
+  useEffect(() => {
+    const referenced = new Set(plans.map((p) => p.courseId));
+    setCourseNames((prev) => {
+      let changed = false;
+      const next: typeof prev = {};
+      for (const [key, value] of Object.entries(prev)) {
+        const id = Number(key);
+        if (referenced.has(id)) next[id] = value;
+        else changed = true;
+      }
+      return changed ? next : prev;
+    });
+  }, [plans]);
+
   const majorCredits = audit
     ? audit.completedCourses
         .filter((c) => c.subject === "CSE")
@@ -79,16 +106,21 @@ export default function Sidebar() {
           My Plans
         </div>
         <div className="flex gap-1 mb-2" role="tablist" aria-label="Plan slots">
-          {(["A", "B", "C"] as PlanSlot[]).map((slot) => {
+          {SLOTS.map((slot, idx) => {
             const count = plans.filter((p) => p.planSlot === slot).length;
             const isActive = activeSlot === slot;
             return (
               <button
                 key={slot}
+                ref={(el) => {
+                  tabRefs.current[idx] = el;
+                }}
                 role="tab"
+                tabIndex={isActive ? 0 : -1}
                 aria-selected={isActive}
                 aria-controls={`plan-panel-${slot}`}
                 onClick={() => setActiveSlot(slot)}
+                onKeyDown={(e) => handleTabKey(e, idx)}
                 className={`flex-1 text-xs font-medium py-1.5 rounded transition-colors ${
                   isActive
                     ? "bg-[#0C2340] text-white"

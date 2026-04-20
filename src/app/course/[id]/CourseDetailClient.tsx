@@ -4,14 +4,18 @@ import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import { useAudit } from "@/contexts/AuditContext";
 import { usePlans } from "@/contexts/PlansContext";
-import { computeEligibility } from "@/lib/eligibility";
+import {
+  computeEligibility,
+  isRegisterable,
+  registrationBlockedReason,
+} from "@/lib/eligibility";
 import { parseRestrictions, checkPrerequisites } from "@/lib/restrictions";
 import { getRequirementBadges } from "@/lib/requirements";
-import { useToast } from "@/hooks/useToast";
+import { useToast } from "@/contexts/ToastContext";
+import { getCourseGuidance, getCoursePath } from "@/lib/guidance";
 import EligibilityBadge from "@/components/EligibilityBadge";
 import PreCheckModal from "@/components/PreCheckModal";
 import RecoveryDrawer from "@/components/RecoveryDrawer";
-import Toast from "@/components/Toast";
 import type { PlanSlot } from "@/types";
 
 interface Meeting {
@@ -78,77 +82,6 @@ function formatTime(start: string | null, end: string | null): string {
   return `${start}-${end}`;
 }
 
-const GUIDANCE_DATA: Record<
-  string,
-  {
-    commonPairings: string;
-    typicalSemester: string;
-    fillSpeed: string;
-    majorTakeRate: string;
-  }
-> = {
-  "ACCT 20100": {
-    commonPairings: "FIN 20100, ECON 10010",
-    typicalSemester: "Sophomore Fall",
-    fillSpeed: "Usually fills by Week 1",
-    majorTakeRate: "95% sophomore year",
-  },
-  "CSE 20311": {
-    commonPairings: "MATH 10560, CSE 20110",
-    typicalSemester: "Sophomore Fall",
-    fillSpeed: "Usually fills by Week 2",
-    majorTakeRate: "98% sophomore year",
-  },
-  "CSE 20312": {
-    commonPairings: "CSE 20289, CSE 20311",
-    typicalSemester: "Sophomore Spring",
-    fillSpeed: "Usually fills by Week 2",
-    majorTakeRate: "97% sophomore year",
-  },
-  "CSE 30151": {
-    commonPairings: "CSE 20312, CSE 40113",
-    typicalSemester: "Junior Fall",
-    fillSpeed: "Moderate demand",
-    majorTakeRate: "100% CS majors",
-  },
-  "CSE 20289": {
-    commonPairings: "CSE 20312, CSE 20311",
-    typicalSemester: "Sophomore Spring",
-    fillSpeed: "Usually fills by Week 2",
-    majorTakeRate: "98% CS majors",
-  },
-  "ECON 10010": {
-    commonPairings: "MATH 10250, ECON 10020",
-    typicalSemester: "Freshman Fall or Spring",
-    fillSpeed: "Usually fills by Week 2",
-    majorTakeRate: "92% freshman year",
-  },
-  "FIN 20100": {
-    commonPairings: "ACCT 20100, ECON 10010",
-    typicalSemester: "Sophomore Spring",
-    fillSpeed: "Usually fills by Week 1",
-    majorTakeRate: "88% sophomore year",
-  },
-  "MATH 10550": {
-    commonPairings: "MATH 10560, CSE 20110",
-    typicalSemester: "Freshman Fall",
-    fillSpeed: "Usually available",
-    majorTakeRate: "100% STEM majors",
-  },
-};
-
-const COURSE_PATHS: Record<string, string[]> = {
-  "CSE 20311": ["No prerequisites", "CSE 20311", "CSE 20312", "CSE 30151"],
-  "CSE 20312": ["CSE 20311", "CSE 20312", "CSE 30151", "CSE 40113"],
-  "CSE 20289": ["CSE 20311", "CSE 20289", "CSE 40113"],
-  "CSE 30151": ["CSE 20312", "CSE 30151", "CSE 40175"],
-  "CSE 40113": ["CSE 20312", "CSE 40113"],
-  "CSE 40175": ["CSE 30151", "CSE 40175"],
-  "ACCT 20100": ["No prerequisites", "ACCT 20100", "ACCT 20210", "ACCT 30100"],
-  "FIN 20100": ["ACCT 20100", "FIN 20100", "FIN 30100"],
-  "ECON 10010": ["No prerequisites", "ECON 10010", "ECON 20010", "ECON 30020"],
-  "MATH 10550": ["No prerequisites", "MATH 10550", "MATH 10560", "MATH 20550"],
-};
 
 export default function CourseDetailClient({
   course,
@@ -162,7 +95,7 @@ export default function CourseDetailClient({
     usePlans();
   const [showPreCheck, setShowPreCheck] = useState(false);
   const [showRecovery, setShowRecovery] = useState(false);
-  const { toast, show, dismiss, runUndo } = useToast();
+  const { show } = useToast();
 
   const allCourses = useMemo(
     () =>
@@ -195,8 +128,8 @@ export default function CourseDetailClient({
     [course.registrationRestrictions, audit],
   );
   const badges = getRequirementBadges(course.subject, course.courseNumber);
-  const isBlocked =
-    status === "full" || status === "needs-prereq" || status === "restricted";
+  const isBlocked = !isRegisterable(status);
+  const blockedReason = registrationBlockedReason(status);
   const primaryInstructor =
     course.sections[0]?.instructors[0]?.name ?? "TBA";
   const credits =
@@ -205,8 +138,8 @@ export default function CourseDetailClient({
       : `${course.creditHoursMin}-${course.creditHoursMax}`;
 
   const courseKey = `${course.subject} ${course.courseNumber}`;
-  const guidance = GUIDANCE_DATA[courseKey];
-  const coursePath = COURSE_PATHS[courseKey];
+  const guidance = getCourseGuidance(course.subject, course.courseNumber);
+  const coursePath = getCoursePath(course.subject, course.courseNumber);
 
   const totalSeats = course.sections.reduce(
     (s, sec) => s + (sec.seatsAvailable ?? 0),
@@ -236,15 +169,6 @@ export default function CourseDetailClient({
 
   return (
     <div>
-      {toast && (
-        <Toast
-          message={toast.message}
-          variant={toast.variant}
-          onUndo={toast.undo ? runUndo : undefined}
-          onDismiss={dismiss}
-        />
-      )}
-
       <div className="text-sm text-gray-600 mb-4">
         <Link href="/search" className="hover:text-gray-900">
           Search
@@ -323,9 +247,7 @@ export default function CourseDetailClient({
                   <span className="text-sm text-red-700">
                     {status === "full"
                       ? `This course is full (${totalSeats} seats remaining)`
-                      : status === "needs-prereq"
-                        ? "Missing prerequisite courses"
-                        : "Special approval required"}
+                      : (blockedReason ?? "Not registerable")}
                   </span>
                 </div>
                 <div className="flex items-center gap-3 text-sm shrink-0">
@@ -373,7 +295,11 @@ export default function CourseDetailClient({
                   ? "Full Course"
                   : status === "needs-prereq"
                     ? "Missing Prerequisites"
-                    : "Restricted"}
+                    : status === "restricted"
+                      ? "Restricted"
+                      : status === "already-taken"
+                        ? "Already Taken"
+                        : "Course Data Unavailable"}
                 )
               </h3>
               <ul className="space-y-1 text-sm text-amber-900">
@@ -422,6 +348,30 @@ export default function CourseDetailClient({
                     <li>
                       • <strong>Alternatives:</strong> Look for unrestricted
                       sections or similar courses
+                    </li>
+                  </>
+                )}
+                {status === "already-taken" && (
+                  <>
+                    <li>
+                      • <strong>Repeat Policy:</strong> Contact your advisor if
+                      you need to retake for a higher grade
+                    </li>
+                    <li>
+                      • <strong>Substitute:</strong> Consider a higher-level
+                      course in the same subject
+                    </li>
+                  </>
+                )}
+                {status === "unknown" && (
+                  <>
+                    <li>
+                      • <strong>Course data unavailable:</strong> Section and
+                      seat info could not be loaded
+                    </li>
+                    <li>
+                      • <strong>Try later:</strong> Refresh the page once the
+                      registrar has posted the term
                     </li>
                   </>
                 )}

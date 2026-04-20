@@ -27,6 +27,24 @@ function safeParseStringArray(raw: string | null): string[] {
   }
 }
 
+/**
+ * True only when a line declares prerequisites as the lead clause.
+ * Excludes lines like "Prerequisite OR corequisite: ..." or co-requisite notes.
+ */
+function isPureLeadPrereqLine(raw: string): boolean {
+  const trimmed = raw.trim();
+  if (!/^prerequisites?\s*:/i.test(trimmed)) return false;
+  if (/corequisite/i.test(trimmed)) return false;
+  return true;
+}
+
+function extractPrereqClause(raw: string): string | null {
+  // Everything after "Prerequisites:" until end of line. Parentheses are
+  // preserved so nested/grouped clauses parse correctly through AND/OR split.
+  const m = raw.match(/Prerequisites?:\s*(.+?)\s*$/i);
+  return m ? m[1] : null;
+}
+
 export function parseRestrictions(
   restrictionsJson: string | null,
 ): ParsedRestriction[] {
@@ -47,23 +65,16 @@ export function parseRestrictions(
       return { type: "program-exclusion", raw, label: "Program restriction" };
     }
 
-    if (/prerequisite/i.test(raw)) {
-      const parenMatch = raw.match(/Prerequisites?:\s*\(([^)]+)\)/i);
-      if (parenMatch) {
+    if (isPureLeadPrereqLine(raw)) {
+      const clause = extractPrereqClause(raw);
+      if (clause) {
+        // Strip outer wrapping parens purely for display cleanliness.
+        const display = clause.replace(/^\((.*)\)$/, "$1");
         return {
           type: "prerequisite",
           raw,
           label: "Prerequisites required",
-          details: parenMatch[1],
-        };
-      }
-      const bareMatch = raw.match(/Prerequisites?:\s*(.+?)\s*$/i);
-      if (bareMatch) {
-        return {
-          type: "prerequisite",
-          raw,
-          label: "Prerequisites required",
-          details: bareMatch[1],
+          details: display,
         };
       }
     }
@@ -72,17 +83,67 @@ export function parseRestrictions(
   });
 }
 
-export function extractPrereqCourses(restrictionsJson: string | null): string[] {
+/**
+ * Parse prereqs into groups representing AND-of-OR.
+ * Each inner array is a group whose members are alternatives (OR); any one
+ * satisfies the group. All groups must be satisfied (AND).
+ *
+ * Examples:
+ *   "Prerequisites: (CSE 20312 and CSE 20289)" → [[CSE 20312], [CSE 20289]]
+ *   "Prerequisites: CSE 10550 or MATH 10550"   → [[CSE 10550, MATH 10550]]
+ *   "Prerequisite OR corequisite: ..."          → [] (coreqs are not prereqs)
+ */
+export function extractPrereqGroups(
+  restrictionsJson: string | null,
+): string[][] {
   const restrictions = safeParseStringArray(restrictionsJson);
-  const courses = new Set<string>();
+  const groups: string[][] = [];
 
-  for (const r of restrictions) {
-    if (!/prerequisite/i.test(r)) continue;
-    const codes = r.match(COURSE_CODE_RE);
-    if (codes) for (const c of codes) courses.add(c);
+  for (const raw of restrictions) {
+    if (!isPureLeadPrereqLine(raw)) continue;
+    const clause = extractPrereqClause(raw);
+    if (!clause) continue;
+
+    const andParts = clause.split(/\s+and\s+/i);
+    for (const part of andParts) {
+      const orParts = part.split(/\s+or\s+/i);
+      const alternatives: string[] = [];
+      for (const orPart of orParts) {
+        const codes = orPart.match(COURSE_CODE_RE);
+        if (codes) for (const code of codes) alternatives.push(code);
+      }
+      if (alternatives.length > 0) {
+        groups.push([...new Set(alternatives)]);
+      }
+    }
   }
 
-  return [...courses];
+  return groups;
+}
+
+/**
+ * Flatten prereq groups into a deduped list of all candidate course codes.
+ * Kept for backward compatibility and display purposes.
+ */
+export function extractPrereqCourses(
+  restrictionsJson: string | null,
+): string[] {
+  const groups = extractPrereqGroups(restrictionsJson);
+  const flat = new Set<string>();
+  for (const group of groups) for (const code of group) flat.add(code);
+  return [...flat];
+}
+
+/**
+ * True when each group has at least one completed alternative.
+ */
+export function prereqGroupsSatisfied(
+  groups: string[][],
+  completedCourseCodes: string[],
+): boolean {
+  if (groups.length === 0) return true;
+  const completed = new Set(completedCourseCodes);
+  return groups.every((group) => group.some((code) => completed.has(code)));
 }
 
 export function checkPrerequisites(

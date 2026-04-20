@@ -1,15 +1,22 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { cycleIndex } from "@/hooks/useRovingTabIndex";
 import Link from "next/link";
 import { usePlans } from "@/contexts/PlansContext";
 import { useAudit } from "@/contexts/AuditContext";
-import { computeEligibility } from "@/lib/eligibility";
-import { fetchCourses, toCourseMap } from "@/lib/fetchCourse";
-import { useToast } from "@/hooks/useToast";
+import {
+  computeEligibility,
+  isRegisterable,
+  registrationBlockedReason,
+} from "@/lib/eligibility";
+import {
+  fetchCoursesReport,
+  toCourseMap,
+} from "@/lib/fetchCourse";
+import { useToast } from "@/contexts/ToastContext";
 import type { CourseDTO } from "@/lib/schemas";
 import EligibilityBadge from "@/components/EligibilityBadge";
-import Toast from "@/components/Toast";
 import WeeklyCalendar, {
   type CalendarEvent,
 } from "@/components/WeeklyCalendar";
@@ -31,6 +38,8 @@ const PLAN_COLORS: Record<Slot, string> = {
   C: "#6b7280",
 };
 
+const SLOTS: Slot[] = ["A", "B", "C"];
+
 function parseDays(days: string | null): string[] {
   if (!days) return [];
   try {
@@ -48,7 +57,16 @@ export default function ExportPage() {
   const [exported, setExported] = useState(false);
   const [showPreCheck, setShowPreCheck] = useState(false);
   const [courseMap, setCourseMap] = useState<Record<number, CourseDTO>>({});
-  const { toast, show, dismiss } = useToast();
+  const { show } = useToast();
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  function handleTabKey(e: KeyboardEvent<HTMLButtonElement>, idx: number) {
+    const next = cycleIndex(idx, e.key, SLOTS.length, "horizontal");
+    if (next === null) return;
+    e.preventDefault();
+    switchSlot(SLOTS[next]);
+    tabRefs.current[next]?.focus();
+  }
 
   const slotEntries = useMemo(
     () => plans.filter((p) => p.planSlot === activeSlot),
@@ -68,21 +86,43 @@ export default function ExportPage() {
     const ids = idsKey.split(",").map((n) => parseInt(n, 10));
     const missing = ids.filter((id) => !courseMap[id]);
     if (missing.length === 0) return;
-    fetchCourses(missing, controller.signal)
-      .then((results) => {
-        if (results.length !== missing.length) {
-          show("Could not load all courses. Some may show stale data.", {
-            variant: "warning",
-          });
-        }
-        setCourseMap((prev) => ({ ...prev, ...toCourseMap(results) }));
-      })
-      .catch(() => {
-        show("Failed to load course data", { variant: "error" });
-      });
+    fetchCoursesReport(missing, controller.signal).then((report) => {
+      setCourseMap((prev) => ({
+        ...prev,
+        ...toCourseMap(report.data),
+      }));
+      if (report.failures.length > 0) {
+        const reasons = new Set(report.failures.map((f) => f.reason));
+        const hint = reasons.has("network")
+          ? "Network error while loading course data"
+          : reasons.has("http")
+            ? "Course data server error"
+            : reasons.has("shape")
+              ? "Course data shape changed unexpectedly"
+              : "Could not load all course data";
+        show(`${hint} (${report.failures.length} missing)`, {
+          variant: "warning",
+        });
+      }
+    });
     return () => controller.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loaded, idsKey]);
+
+  // Prune cached course data once plans no longer reference it.
+  useEffect(() => {
+    const referenced = new Set(slotEntries.map((p) => p.courseId));
+    setCourseMap((prev) => {
+      let changed = false;
+      const next: typeof prev = {};
+      for (const [key, value] of Object.entries(prev)) {
+        const id = Number(key);
+        if (referenced.has(id)) next[id] = value;
+        else changed = true;
+      }
+      return changed ? next : prev;
+    });
+  }, [slotEntries]);
 
   const items: ExportItem[] = useMemo(() => {
     const out: ExportItem[] = [];
@@ -100,25 +140,13 @@ export default function ExportPage() {
         allCourses,
         !!audit,
       );
-      const blocked =
-        status === "full" ||
-        status === "needs-prereq" ||
-        status === "restricted" ||
-        status === "already-taken";
+      const blocked = !isRegisterable(status);
       out.push({
         course,
         sectionId: entry.sectionId,
         status,
         result: blocked ? "blocked" : "transferred",
-        reason: blocked
-          ? status === "full"
-            ? "Section full"
-            : status === "needs-prereq"
-              ? "Missing prerequisites"
-              : status === "restricted"
-                ? "Special approval required"
-                : "Already taken"
-          : undefined,
+        reason: registrationBlockedReason(status) ?? undefined,
       });
     }
     return out;
@@ -160,16 +188,21 @@ export default function ExportPage() {
 
   const planTabs = (
     <div className="flex gap-2 mb-6" role="tablist" aria-label="Plan slots">
-      {(["A", "B", "C"] as Slot[]).map((slot) => {
+      {SLOTS.map((slot, idx) => {
         const count = plans.filter((p) => p.planSlot === slot).length;
         const isActive = activeSlot === slot;
         return (
           <button
             key={slot}
+            ref={(el) => {
+              tabRefs.current[idx] = el;
+            }}
             type="button"
             role="tab"
+            tabIndex={isActive ? 0 : -1}
             aria-selected={isActive}
             onClick={() => switchSlot(slot)}
+            onKeyDown={(e) => handleTabKey(e, idx)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               isActive ? "text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
@@ -182,14 +215,9 @@ export default function ExportPage() {
     </div>
   );
 
-  const toastUi = toast ? (
-    <Toast message={toast.message} variant={toast.variant} onDismiss={dismiss} />
-  ) : null;
-
   if (!exported && !showPreCheck) {
     return (
       <div className="max-w-3xl">
-        {toastUi}
         <h1 className="text-xl font-bold text-gray-900 mb-4">Export to NOVO</h1>
         {planTabs}
         {slotEntries.length === 0 ? (
@@ -227,7 +255,6 @@ export default function ExportPage() {
   if (showPreCheck && !exported) {
     return (
       <div className="max-w-3xl">
-        {toastUi}
         <h1 className="text-xl font-bold text-gray-900 mb-4">
           Export Pre-check — Plan {activeSlot}
         </h1>
@@ -322,7 +349,6 @@ export default function ExportPage() {
 
   return (
     <div>
-      {toastUi}
       <h1 className="text-xl font-bold text-gray-900 mb-4">
         Export to NOVO — Plan {activeSlot} Results
       </h1>

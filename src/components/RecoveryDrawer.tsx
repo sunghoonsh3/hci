@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { usePlans } from "@/contexts/PlansContext";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface Course {
   id: number;
@@ -48,19 +49,9 @@ export default function RecoveryDrawer({
   const [showPermission, setShowPermission] = useState(false);
   const [permissionSent, setPermissionSent] = useState(false);
   const sentTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const drawerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    closeBtnRef.current?.focus();
-    function handleKey(e: KeyboardEvent) {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        onClose();
-      }
-    }
-    document.addEventListener("keydown", handleKey);
-    return () => document.removeEventListener("keydown", handleKey);
-  }, [onClose]);
+  useFocusTrap(drawerRef, { onEscape: onClose });
 
   useEffect(
     () => () => {
@@ -126,13 +117,15 @@ export default function RecoveryDrawer({
         aria-hidden="true"
       />
 
-      <div className="relative bg-white rounded-t-xl shadow-2xl max-h-[70vh] overflow-y-auto">
+      <div
+        ref={drawerRef}
+        className="relative bg-white rounded-t-xl shadow-2xl max-h-[70vh] overflow-y-auto"
+      >
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <h2 id="recovery-title" className="text-lg font-bold text-gray-900">
             Recovery Options
           </h2>
           <button
-            ref={closeBtnRef}
             type="button"
             onClick={onClose}
             aria-label="Close recovery options"

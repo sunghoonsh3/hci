@@ -1,6 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { computeEligibility } from "../eligibility";
+import {
+  computeEligibility,
+  isRegisterable,
+  registrationBlockedReason,
+} from "../eligibility";
 import type { CompletedCourse } from "@/types";
 
 const audit: CompletedCourse[] = [
@@ -84,6 +88,31 @@ test("needs-prereq when audit lacks a declared prereq", () => {
   assert.equal(status, "needs-prereq");
 });
 
+test("eligible when prereqs met via OR alternative", () => {
+  const completed: CompletedCourse[] = [
+    {
+      subject: "CSE",
+      courseNumber: "10550",
+      title: "Intro",
+      grade: "A",
+      credits: 4,
+      term: "Fall 2024",
+      status: "completed",
+    },
+  ];
+  const restrictions = JSON.stringify([
+    "Prerequisites: CSE 10550 or MATH 10550",
+  ]);
+  const status = computeEligibility(
+    "MATH",
+    "20550",
+    restrictions,
+    [{ seatsAvailable: 5, specialApproval: null }],
+    completed,
+  );
+  assert.equal(status, "eligible");
+});
+
 test("eligible when prereqs met and seats available", () => {
   const completed: CompletedCourse[] = [
     ...audit,
@@ -132,4 +161,45 @@ test("no prereq check without audit data", () => {
     false,
   );
   assert.equal(status, "eligible");
+});
+
+test("'Prerequisite OR corequisite' is not treated as prereq", () => {
+  const restrictions = JSON.stringify([
+    "Prerequisite OR corequisite: CSE 20311 or ACMS 10100",
+  ]);
+  const status = computeEligibility(
+    "CSE",
+    "20289",
+    restrictions,
+    [{ seatsAvailable: 5, specialApproval: null }],
+    audit,
+  );
+  assert.equal(status, "eligible");
+});
+
+test("isRegisterable: eligible only", () => {
+  assert.equal(isRegisterable("eligible"), true);
+  assert.equal(isRegisterable("full"), false);
+  assert.equal(isRegisterable("needs-prereq"), false);
+  assert.equal(isRegisterable("restricted"), false);
+  assert.equal(isRegisterable("already-taken"), false);
+  assert.equal(isRegisterable("unknown"), false);
+});
+
+test("registrationBlockedReason: covers every status", () => {
+  assert.equal(registrationBlockedReason("eligible"), null);
+  assert.equal(registrationBlockedReason("full"), "Section full");
+  assert.equal(
+    registrationBlockedReason("needs-prereq"),
+    "Missing prerequisites",
+  );
+  assert.equal(
+    registrationBlockedReason("restricted"),
+    "Special approval required",
+  );
+  assert.equal(registrationBlockedReason("already-taken"), "Already taken");
+  assert.equal(
+    registrationBlockedReason("unknown"),
+    "Course data unavailable",
+  );
 });

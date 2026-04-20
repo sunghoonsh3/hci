@@ -9,9 +9,8 @@ import { computeEligibility } from "@/lib/eligibility";
 import { getRequirementBadges } from "@/lib/requirements";
 import { fetchCourses } from "@/lib/fetchCourse";
 import type { CourseDTO } from "@/lib/schemas";
-import { useToast } from "@/hooks/useToast";
+import { useToast } from "@/contexts/ToastContext";
 import EligibilityBadge from "@/components/EligibilityBadge";
-import Toast from "@/components/Toast";
 import WeeklyCalendar, {
   type CalendarEvent,
 } from "@/components/WeeklyCalendar";
@@ -82,7 +81,7 @@ export default function SearchClient({
   const [majorOnly, setMajorOnly] = useState(false);
   const [courseMap, setCourseMap] = useState<Record<number, CourseDTO>>({});
 
-  const { toast, show, dismiss, runUndo } = useToast();
+  const { show } = useToast();
 
   const planIdsKey = useMemo(
     () =>
@@ -98,13 +97,26 @@ export default function SearchClient({
     const controller = new AbortController();
     fetchCourses(ids, controller.signal).then((results) => {
       setCourseMap((prev) => {
-        const next = { ...prev };
+        const next: typeof prev = {};
+        const referenced = new Set(ids);
+        for (const [key, value] of Object.entries(prev)) {
+          const id = Number(key);
+          if (referenced.has(id)) next[id] = value;
+        }
         for (const c of results) next[c.id] = c;
         return next;
       });
     });
     return () => controller.abort();
   }, [planIdsKey]);
+
+  // Drop cached course data when no plan entries reference anything.
+  // Adjust-state-during-render idiom avoids the set-state-in-effect lint.
+  const [lastPlanIdsKey, setLastPlanIdsKey] = useState(planIdsKey);
+  if (lastPlanIdsKey !== planIdsKey) {
+    setLastPlanIdsKey(planIdsKey);
+    if (!planIdsKey) setCourseMap({});
+  }
 
   const calendarEvents = useMemo<CalendarEvent[]>(() => {
     if (plans.length === 0) return [];
@@ -165,18 +177,35 @@ export default function SearchClient({
     return { avail, max };
   }
 
-  let displayCourses = courses;
-  if (coreOnly) {
-    displayCourses = displayCourses.filter(
-      (c) => getRequirementBadges(c.subject, c.courseNumber).length > 0,
-    );
+  const displayCourses = useMemo(() => {
+    let result = courses;
+    if (coreOnly) {
+      result = result.filter(
+        (c) => getRequirementBadges(c.subject, c.courseNumber).length > 0,
+      );
+    }
+    if (majorOnly) {
+      result = result.filter(
+        (c) =>
+          c.subject === "CSE" ||
+          c.subject === "ACMS" ||
+          c.subject === "MATH",
+      );
+    }
+    return result;
+  }, [courses, coreOnly, majorOnly]);
+
+  const PAGE_SIZE = 50;
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  // Reset pagination when the filter output changes.
+  // React docs recommend the "adjust state during render" idiom for prop-derived resets.
+  const [lastDisplayed, setLastDisplayed] = useState(displayCourses);
+  if (lastDisplayed !== displayCourses) {
+    setLastDisplayed(displayCourses);
+    setVisibleCount(PAGE_SIZE);
   }
-  if (majorOnly) {
-    displayCourses = displayCourses.filter(
-      (c) =>
-        c.subject === "CSE" || c.subject === "ACMS" || c.subject === "MATH",
-    );
-  }
+  const visibleCourses = displayCourses.slice(0, visibleCount);
+  const remaining = displayCourses.length - visibleCourses.length;
 
   function handleAddToPlan(course: Course) {
     const openSection = course.sections.find(
@@ -208,15 +237,6 @@ export default function SearchClient({
 
   return (
     <div>
-      {toast && (
-        <Toast
-          message={toast.message}
-          variant={toast.variant}
-          onUndo={toast.undo ? runUndo : undefined}
-          onDismiss={dismiss}
-        />
-      )}
-
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-bold text-gray-900">
           Search Results{" "}
@@ -328,7 +348,7 @@ export default function SearchClient({
               </tr>
             </thead>
             <tbody>
-              {displayCourses.map((course) => {
+              {visibleCourses.map((course) => {
                 const status = getStatus(course);
                 const seats = totalSeats(course);
                 const badges = getRequirementBadges(
@@ -400,6 +420,22 @@ export default function SearchClient({
               })}
             </tbody>
           </table>
+          {remaining > 0 && (
+            <div className="px-4 py-3 border-t border-gray-200 bg-gray-50 flex items-center justify-between text-sm">
+              <span className="text-gray-700">
+                Showing {visibleCourses.length} of {displayCourses.length}
+              </span>
+              <button
+                type="button"
+                onClick={() =>
+                  setVisibleCount((v) => v + PAGE_SIZE)
+                }
+                className="bg-[#0C2340] text-white px-4 py-1.5 rounded-lg text-xs font-medium hover:bg-[#0a1d35] transition-colors"
+              >
+                Load {Math.min(PAGE_SIZE, remaining)} more
+              </button>
+            </div>
+          )}
         </div>
 
         <div>

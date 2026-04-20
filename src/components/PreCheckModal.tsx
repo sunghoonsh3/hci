@@ -3,9 +3,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAudit } from "@/contexts/AuditContext";
 import { usePlans } from "@/contexts/PlansContext";
-import { checkPrerequisites } from "@/lib/restrictions";
+import {
+  checkPrerequisites,
+  extractPrereqGroups,
+  prereqGroupsSatisfied,
+} from "@/lib/restrictions";
 import { sectionsConflict } from "@/lib/conflicts";
 import { fetchCourses } from "@/lib/fetchCourse";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface MeetingTime {
   days: string | null;
@@ -95,17 +100,7 @@ export default function PreCheckModal({
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
-  useEffect(() => {
-    closeButtonRef.current?.focus();
-    function handleKey(e: KeyboardEvent) {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        onClose();
-      }
-    }
-    document.addEventListener("keydown", handleKey);
-    return () => document.removeEventListener("keydown", handleKey);
-  }, [onClose]);
+  useFocusTrap(dialogRef, { onEscape: onClose });
 
   const checks: CheckItem[] = [];
 
@@ -113,8 +108,17 @@ export default function PreCheckModal({
     course.registrationRestrictions,
     audit?.completedCourses ?? [],
   );
-  const allPrereqsMet =
-    prereqs.length === 0 || prereqs.every((p) => p.completed);
+  const prereqGroups = extractPrereqGroups(course.registrationRestrictions);
+  const completedCodes = (audit?.completedCourses ?? []).map(
+    (c) => `${c.subject} ${c.courseNumber}`,
+  );
+  const allPrereqsMet = prereqGroupsSatisfied(prereqGroups, completedCodes);
+  const unmetGroups = prereqGroups.filter(
+    (group) => !group.some((code) => completedCodes.includes(code)),
+  );
+  const unmetLabel = unmetGroups
+    .map((group) => group.join(" or "))
+    .join("; ");
   checks.push({
     label: "Prerequisites",
     passed: allPrereqsMet,
@@ -122,10 +126,7 @@ export default function PreCheckModal({
       ? prereqs.length === 0
         ? "None required"
         : "All prerequisites completed"
-      : `Missing: ${prereqs
-          .filter((p) => !p.completed)
-          .map((p) => p.courseCode)
-          .join(", ")}`,
+      : `Missing: ${unmetLabel}`,
   });
 
   checks.push({

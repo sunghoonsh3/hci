@@ -10,7 +10,22 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const ip = clientIp(request);
-  const rl = rateLimit(`course:${ip}`, LIMIT_PER_WINDOW, WINDOW_MS);
+
+  // In production Vercel always populates `x-forwarded-for`; absence likely
+  // indicates a misconfigured reverse-proxy or a direct invocation. Refuse
+  // rather than silently collapsing all unidentified clients into one bucket.
+  if (ip === null && process.env.NODE_ENV === "production") {
+    return NextResponse.json(
+      { error: "Client IP unavailable" },
+      { status: 400 },
+    );
+  }
+
+  const rl = rateLimit(
+    `course:${ip ?? "unknown"}`,
+    LIMIT_PER_WINDOW,
+    WINDOW_MS,
+  );
   if (!rl.ok) {
     return NextResponse.json(
       { error: "Too many requests" },
@@ -18,6 +33,9 @@ export async function GET(
         status: 429,
         headers: {
           "Retry-After": String(rl.retryAfterSeconds ?? 60),
+          "X-RateLimit-Limit": String(rl.limit),
+          "X-RateLimit-Remaining": "0",
+          "X-RateLimit-Reset": String(Math.floor(rl.resetAt / 1000)),
           "Cache-Control": "no-store",
         },
       },
@@ -49,6 +67,9 @@ export async function GET(
   return NextResponse.json(course, {
     headers: {
       "Cache-Control": "private, max-age=60",
+      "X-RateLimit-Limit": String(rl.limit),
+      "X-RateLimit-Remaining": String(rl.remaining),
+      "X-RateLimit-Reset": String(Math.floor(rl.resetAt / 1000)),
     },
   });
 }

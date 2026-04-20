@@ -9,16 +9,48 @@ export default async function CourseDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const courseId = parseInt(id, 10);
-  if (isNaN(courseId)) notFound();
+  const courseId = Number.parseInt(id, 10);
+  if (!Number.isFinite(courseId) || courseId <= 0) notFound();
 
   const course = await prisma.course.findUnique({
     where: { id: courseId },
-    include: {
+    select: {
+      id: true,
+      subject: true,
+      courseNumber: true,
+      courseTitle: true,
+      description: true,
+      creditHoursMin: true,
+      creditHoursMax: true,
+      registrationRestrictions: true,
+      cannotHaveTaken: true,
+      attributes: true,
       sections: {
-        include: {
-          meetings: true,
-          instructors: true,
+        select: {
+          id: true,
+          sectionNumber: true,
+          crn: true,
+          status: true,
+          maxEnrollment: true,
+          seatsAvailable: true,
+          waitlistCurrent: true,
+          waitlistCapacity: true,
+          specialApproval: true,
+          sectionNotes: true,
+          meetings: {
+            select: {
+              id: true,
+              room: true,
+              startDate: true,
+              endDate: true,
+              days: true,
+              startTime: true,
+              endTime: true,
+            },
+          },
+          instructors: {
+            select: { id: true, name: true },
+          },
         },
       },
     },
@@ -26,12 +58,18 @@ export default async function CourseDetailPage({
 
   if (!course) notFound();
 
-  // Look up titles for prerequisite and cannotHaveTaken courses
   const prereqCodes = extractPrereqCourses(course.registrationRestrictions);
   let cannotCodes: string[] = [];
   try {
-    if (course.cannotHaveTaken) cannotCodes = JSON.parse(course.cannotHaveTaken);
-  } catch { /* ignore */ }
+    if (course.cannotHaveTaken) {
+      const parsed = JSON.parse(course.cannotHaveTaken);
+      if (Array.isArray(parsed)) {
+        cannotCodes = parsed.filter((x): x is string => typeof x === "string");
+      }
+    }
+  } catch {
+    /* ignore malformed JSON */
+  }
 
   const allCodes = [...new Set([...prereqCodes, ...cannotCodes])];
   const titleMap: Record<string, string> = {};
@@ -52,10 +90,5 @@ export default async function CourseDetailPage({
     }
   }
 
-  return (
-    <CourseDetailClient
-      course={JSON.parse(JSON.stringify(course))}
-      courseTitleMap={titleMap}
-    />
-  );
+  return <CourseDetailClient course={course} courseTitleMap={titleMap} />;
 }

@@ -1,6 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from "react";
+import { cycleIndex } from "@/hooks/useRovingTabIndex";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { usePlans } from "@/contexts/PlansContext";
@@ -8,10 +16,9 @@ import { useAudit } from "@/contexts/AuditContext";
 import { getRequirementBadges } from "@/lib/requirements";
 import { computeEligibility } from "@/lib/eligibility";
 import { fetchCourses, toCourseMap } from "@/lib/fetchCourse";
-import { useToast } from "@/hooks/useToast";
+import { useToast } from "@/contexts/ToastContext";
 import type { CourseDTO } from "@/lib/schemas";
 import EligibilityBadge from "@/components/EligibilityBadge";
-import Toast from "@/components/Toast";
 import WeeklyCalendar, {
   type CalendarEvent,
 } from "@/components/WeeklyCalendar";
@@ -33,6 +40,12 @@ function RowMenu({
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  const otherSlots = (["A", "B", "C"] as PlanSlot[]).filter(
+    (s) => s !== currentSlot,
+  );
+  const itemCount = otherSlots.length + 1; // + Remove
 
   useEffect(() => {
     if (!open) return;
@@ -41,7 +54,7 @@ function RowMenu({
         setOpen(false);
       }
     }
-    function handleKey(e: KeyboardEvent) {
+    function handleKey(e: globalThis.KeyboardEvent) {
       if (e.key === "Escape") {
         setOpen(false);
         triggerRef.current?.focus();
@@ -49,15 +62,19 @@ function RowMenu({
     }
     document.addEventListener("mousedown", handleClick);
     document.addEventListener("keydown", handleKey);
+    itemRefs.current[0]?.focus();
     return () => {
       document.removeEventListener("mousedown", handleClick);
       document.removeEventListener("keydown", handleKey);
     };
   }, [open]);
 
-  const otherSlots = (["A", "B", "C"] as PlanSlot[]).filter(
-    (s) => s !== currentSlot,
-  );
+  function handleMenuKey(e: KeyboardEvent<HTMLButtonElement>, idx: number) {
+    const next = cycleIndex(idx, e.key, itemCount, "vertical");
+    if (next === null) return;
+    e.preventDefault();
+    itemRefs.current[next]?.focus();
+  }
 
   return (
     <div ref={ref} className="relative inline-block">
@@ -88,15 +105,19 @@ function RowMenu({
           aria-label={`Actions for ${courseLabel}`}
           className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-20 w-40"
         >
-          {otherSlots.map((slot) => (
+          {otherSlots.map((slot, idx) => (
             <button
               key={slot}
+              ref={(el) => {
+                itemRefs.current[idx] = el;
+              }}
               role="menuitem"
               type="button"
               onClick={() => {
                 onMove(sectionId, currentSlot, slot);
                 setOpen(false);
               }}
+              onKeyDown={(e) => handleMenuKey(e, idx)}
               className="w-full text-left px-3 py-2 text-sm text-gray-800 hover:bg-gray-50 transition-colors"
             >
               Move to Plan {slot}
@@ -104,12 +125,16 @@ function RowMenu({
           ))}
           <div className="border-t border-gray-100 my-1" />
           <button
+            ref={(el) => {
+              itemRefs.current[otherSlots.length] = el;
+            }}
             role="menuitem"
             type="button"
             onClick={() => {
               onRemove(sectionId, currentSlot);
               setOpen(false);
             }}
+            onKeyDown={(e) => handleMenuKey(e, otherSlots.length)}
             className="w-full text-left px-3 py-2 text-sm text-red-700 hover:bg-red-50 transition-colors"
           >
             Remove
@@ -125,6 +150,8 @@ const PLAN_COLORS: Record<PlanSlot, string> = {
   B: "#2563eb",
   C: "#6b7280",
 };
+
+const SLOTS: PlanSlot[] = ["A", "B", "C"];
 
 function parseDays(days: string | null): string[] {
   if (!days) return [];
@@ -148,7 +175,16 @@ export default function PlanPage() {
   const [highlightedSection, setHighlightedSection] = useState<number | null>(
     null,
   );
-  const { toast, show, dismiss, runUndo } = useToast();
+  const { show } = useToast();
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  function handleTabKey(e: KeyboardEvent<HTMLButtonElement>, idx: number) {
+    const next = cycleIndex(idx, e.key, SLOTS.length, "horizontal");
+    if (next === null) return;
+    e.preventDefault();
+    setActiveSlot(SLOTS[next]);
+    tabRefs.current[next]?.focus();
+  }
 
   const planIdsKey = useMemo(
     () => [...new Set(plans.map((p) => p.courseId))].sort((a, b) => a - b).join(","),
@@ -172,6 +208,21 @@ export default function PlanPage() {
     // courseDataMap intentionally excluded; planIdsKey is stable for plans
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loaded, planIdsKey]);
+
+  // Prune cached course data for ids no longer referenced by any plan entry.
+  useEffect(() => {
+    const referenced = new Set(plans.map((p) => p.courseId));
+    setCourseDataMap((prev) => {
+      let changed = false;
+      const next: typeof prev = {};
+      for (const [key, value] of Object.entries(prev)) {
+        const id = Number(key);
+        if (referenced.has(id)) next[id] = value;
+        else changed = true;
+      }
+      return changed ? next : prev;
+    });
+  }, [plans]);
 
   const slotEntries = plans.filter((p) => p.planSlot === activeSlot);
 
@@ -239,15 +290,6 @@ export default function PlanPage() {
 
   return (
     <div>
-      {toast && (
-        <Toast
-          message={toast.message}
-          variant={toast.variant}
-          onUndo={toast.undo ? runUndo : undefined}
-          onDismiss={dismiss}
-        />
-      )}
-
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-bold text-gray-900">My Plan</h1>
         <Link
@@ -263,16 +305,21 @@ export default function PlanPage() {
         role="tablist"
         aria-label="Plan slots"
       >
-        {(["A", "B", "C"] as PlanSlot[]).map((slot) => {
+        {SLOTS.map((slot, idx) => {
           const count = plans.filter((p) => p.planSlot === slot).length;
           const isActive = activeSlot === slot;
           return (
             <button
               key={slot}
+              ref={(el) => {
+                tabRefs.current[idx] = el;
+              }}
               type="button"
               role="tab"
+              tabIndex={isActive ? 0 : -1}
               aria-selected={isActive}
               onClick={() => setActiveSlot(slot)}
+              onKeyDown={(e) => handleTabKey(e, idx)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive
                   ? "text-white"

@@ -2,40 +2,19 @@
 
 import {
   createContext,
-  useContext,
-  useState,
-  useEffect,
   useCallback,
+  useContext,
   type ReactNode,
 } from "react";
 import type { PlanEntry, PlanSlot } from "@/types";
 import { PlanEntriesSchema } from "@/lib/schemas";
+import { createLocalStore, useLocalStoreValue } from "@/lib/localStore";
 
-const STORAGE_KEY = "registration-clarity-plans";
-
-function loadPlans(): PlanEntry[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = PlanEntriesSchema.safeParse(JSON.parse(raw));
-    if (!parsed.success) {
-      if (process.env.NODE_ENV !== "production") {
-        console.warn("Discarding invalid plans in localStorage", parsed.error);
-      }
-      localStorage.removeItem(STORAGE_KEY);
-      return [];
-    }
-    return parsed.data;
-  } catch {
-    return [];
-  }
-}
-
-function savePlans(plans: PlanEntry[]) {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(plans));
-}
+const plansStore = createLocalStore<PlanEntry[]>(
+  "registration-clarity-plans",
+  PlanEntriesSchema,
+  [],
+);
 
 export interface AddToPlanResult {
   added: boolean;
@@ -67,20 +46,7 @@ interface PlansContextValue {
 const PlansContext = createContext<PlansContextValue | null>(null);
 
 export function PlansProvider({ children }: { children: ReactNode }) {
-  const [plans, setPlans] = useState<PlanEntry[]>([]);
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    // Hydrate from localStorage on mount. This is the canonical pattern
-    // for client-only state that is unavailable during SSR.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setPlans(loadPlans());
-    setLoaded(true);
-  }, []);
-
-  useEffect(() => {
-    if (loaded) savePlans(plans);
-  }, [plans, loaded]);
+  const plans = useLocalStoreValue(plansStore);
 
   const addToPlan = useCallback(
     (
@@ -88,28 +54,21 @@ export function PlansProvider({ children }: { children: ReactNode }) {
       sectionId: number,
       slot: PlanSlot,
     ): AddToPlanResult => {
-      let result: AddToPlanResult = { added: false, alreadyInSlots: [] };
-      setPlans((prev) => {
-        const existingSlots = prev
-          .filter((p) => p.sectionId === sectionId)
-          .map((p) => p.planSlot);
-        if (existingSlots.includes(slot)) {
-          result = { added: false, alreadyInSlots: existingSlots };
-          return prev;
-        }
-        result = {
-          added: true,
-          alreadyInSlots: existingSlots,
-        };
-        return [...prev, { courseId, sectionId, planSlot: slot }];
-      });
-      return result;
+      const current = plansStore.getSnapshot();
+      const existingSlots = current
+        .filter((p) => p.sectionId === sectionId)
+        .map((p) => p.planSlot);
+      if (existingSlots.includes(slot)) {
+        return { added: false, alreadyInSlots: existingSlots };
+      }
+      plansStore.set([...current, { courseId, sectionId, planSlot: slot }]);
+      return { added: true, alreadyInSlots: existingSlots };
     },
     [],
   );
 
   const removeFromPlan = useCallback((sectionId: number, slot: PlanSlot) => {
-    setPlans((prev) =>
+    plansStore.update((prev) =>
       prev.filter(
         (p) => !(p.sectionId === sectionId && p.planSlot === slot),
       ),
@@ -118,7 +77,7 @@ export function PlansProvider({ children }: { children: ReactNode }) {
 
   const moveToPlan = useCallback(
     (sectionId: number, fromSlot: PlanSlot, toSlot: PlanSlot) => {
-      setPlans((prev) =>
+      plansStore.update((prev) =>
         prev.map((p) =>
           p.sectionId === sectionId && p.planSlot === fromSlot
             ? { ...p, planSlot: toSlot }
@@ -158,18 +117,18 @@ export function PlansProvider({ children }: { children: ReactNode }) {
   );
 
   const clearPlan = useCallback((slot: PlanSlot) => {
-    setPlans((prev) => prev.filter((p) => p.planSlot !== slot));
+    plansStore.update((prev) => prev.filter((p) => p.planSlot !== slot));
   }, []);
 
   const clearAll = useCallback(() => {
-    setPlans([]);
+    plansStore.set([]);
   }, []);
 
   return (
     <PlansContext.Provider
       value={{
         plans,
-        loaded,
+        loaded: true,
         addToPlan,
         removeFromPlan,
         moveToPlan,

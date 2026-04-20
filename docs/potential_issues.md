@@ -1,252 +1,166 @@
-# 코드 잠재 문제점 분석 보고서
+# 코드 잠재 문제점 분석 보고서 (3차)
 
-> 작성일: 2026-04-19
-> 대상: Registration Clarity (PATH) — Next.js 16 + Prisma + Neon PostgreSQL
-> 범위: `src/`, `prisma/`, e2e 테스트, 배포 설정
-> 기존 문서(`code_analysis.md`, `sprint3_gap_analysis.md`)에 없는 관점 위주로 정리
-
-> **2026-04-19 업데이트**: Critical 4 / High 3 / Medium 12 / Low 7 항목 수정 완료.
-> 변경 내역은 `docs/fixes_applied.md`를 참고.
+> 작성일: 2026-04-20 (2차 이슈 전부 수정 후 재검토)
+> 이전 수정 내역: `docs/fixes_applied.md`
 
 ---
 
-## 심각도 요약
+## 1. 2차 이슈 처리 요약
 
-| 심각도 | 개수 | 대표 문제 |
+직전 리포트의 Medium 6 / Low 11 중 **16건 수정 완료**, 1건(`L6 i18n`)만 제품 결정 대기.
+
+| 이슈 | 상태 | 커밋 증빙 |
 |---|---|---|
-| Critical | 4 | Sidebar 무한 fetch 루프, Promise 예외 누락, setTimeout 누수, localStorage 동기화 우회 |
-| High | 3 | 선수과목 정규식 취약, null section 데이터 오판정, localStorage JSON 스키마 미검증 |
-| Medium | 12 | API 인증/레이트리밋 부재, N+1 직렬화, ErrorBoundary 부재, ARIA 누락, 느슨한 타입 |
-| Low | 8 | 하드코딩 demo 데이터, 한국어 i18n 미적용, `.env.example` 없음, 마이그레이션 미관리 |
+| M1 Export `"unknown"` 오분류 | ✅ 수정 | `isRegisterable(status)` 공유 헬퍼로 전환 |
+| M2 Detail/Export 블로킹 규칙 불일치 | ✅ 수정 | 동일 헬퍼 공유 + `registrationBlockedReason` |
+| M3 `extractPrereqCourses` 과잉 추출 | ✅ 수정 | `extractPrereqGroups`로 AND/OR 구조 보존 + 코어퀴지트 스킵 |
+| M4 인메모리 레이트 리미터 한계 | ✅ 문서화 | `rateLimit.ts` 상단 주석에 Upstash/Firewall 대안 명시 |
+| M5 모달 focus trap 부재 | ✅ 수정 | `useFocusTrap` 훅으로 PreCheckModal/RecoveryDrawer Tab 사이클 + 원 포커스 복원 |
+| M6 tab/menu 화살표 키 | ✅ 수정 | `cycleIndex` 유틸 + Sidebar/Plan/Export tablist + RowMenu roving tabindex |
+| L1 토스트 컴포넌트별 독립 상태 | ✅ 수정 | `ToastProvider`로 전역화, 단일 `<Toast>` 렌더 |
+| L2 `course/[id]/page.tsx` JSON.parse 직렬화 | ✅ 수정 | Prisma `select`로 필드 명시, 직렬화 hack 제거 |
+| L3 하드코딩 guidance/paths | ✅ 수정 | `src/lib/guidance.ts`로 이관 (DB 이관 TODO 명시) |
+| L4 `clientIp` "unknown" 버킷 공유 | ✅ 수정 | 다중 헤더 fallback + production에선 null 시 400 |
+| L5 `set-state-in-effect` suppress | ✅ 수정 | `useSyncExternalStore` + `createLocalStore` 유틸 |
+| L6 한국어 i18n | ⏸️ 보류 | 제품 결정 필요 |
+| L7 검색 569행 전량 렌더 | ✅ 수정 | 페이지네이션(50건) + Load more |
+| L8 클라이언트 캐시 누적 | ✅ 수정 | 모든 courseMap/courseNames를 plans 기반 prune |
+| L9 루트 세그먼트만 error/loading | ✅ 수정 | `/search`, `/plan`, `/export`, `/course/[id]`, `/onboarding`에 각각 추가 |
+| L10 `fetchCourse` 에러 구분 불가 | ✅ 수정 | `fetchCourseResult` discriminated union + Export에서 원인별 토스트 |
+| L11 tsconfig `target: ES2017` | ✅ 수정 | ES2022로 상향 |
+
+검증:
+```bash
+npm run typecheck    # ✅ no errors
+npm run lint         # ✅ 0 errors (기존 e2e unused-var 경고 2건만 잔존)
+npm run test:unit    # ✅ 36/36 통과
+```
 
 ---
 
-## 🔴 Critical
+## 2. 이번 라운드 검토에서 확인한 남은/새 이슈
 
-### 1. Sidebar의 `courseNames` 무한 fetch 루프
-**파일:** `src/components/Sidebar.tsx:45`
+### 🟡 Medium
 
-```ts
-useEffect(() => {
-  const missing = ids.filter((id) => !courseNames[id]);
-  // ... setCourseNames(...)
-}, [plans, courseNames]); // ← courseNames가 deps에 들어가 자기참조
-```
+#### M1. ToastProvider의 단일 슬롯 정책 — 빠른 연속 액션 시 정보 손실
+**파일:** `src/contexts/ToastContext.tsx:55-70`
 
-- `setCourseNames`가 호출되면 `courseNames` 참조가 바뀌고, 같은 effect가 재실행되어 추가 fetch를 트리거할 수 있음.
-- 플랜을 빠르게 편집하면 동일 코스에 대한 GET 요청이 여러 번 나감.
-- **수정안:** `courseNames`를 deps에서 제거하거나 이미 요청 중인 id를 `Set<number>` ref로 추적.
+- `show()` 호출 시 이전 토스트를 즉시 대체. 사용자가 빠르게 여러 과목을 추가하면 마지막 토스트만 보임.
+- Undo가 중첩되면 직전 작업만 복구 가능 → 사용자가 여러 작업을 연쇄 취소할 수 없음.
+- **수정안:** 큐 방식(최대 3개 스택 렌더) 또는 "3개 일괄 추가됨" 형태로 메시지 묶기.
 
-### 2. Promise 체인에 조용한 `null` 반환
-**파일:** `src/app/plan/page.tsx:128`, `src/app/export/page.tsx:108`, `src/components/PreCheckModal.tsx:67`
+#### M2. `computeEligibility`의 `hasAudit` 기본값이 오해 소지
+**파일:** `src/lib/eligibility.ts:10-16`
 
 ```ts
-fetch(`/api/course/${id}`).then((r) => r.json()).catch(() => null)
+hasAudit: boolean = completedCourses.length > 0,
 ```
 
-- `Promise.all` 결과에 `null`이 섞여도 이후 매핑에서 필터링/검증 없이 사용.
-- 네트워크 오류 시 사용자에게 toast 등 피드백이 없음 → “추가했는데 안 보인다” 유형 이슈.
-- **수정안:** 응답 `res.ok` 체크, 실패한 id 모아 재시도 or 토스트 표시.
+- `audit`가 있지만 `completedCourses`가 빈 배열인 신입생 시나리오에서 `hasAudit=false`로 간주되어 선수과목/이미수강 체크가 스킵됨.
+- 현재 모든 callers가 `!!audit` 또는 별도 플래그를 명시적으로 넘기므로 실무 영향은 제한적이지만, 기본값 로직이 트랩이 될 수 있음.
+- **수정안:** 기본값 제거 후 필수 인자로 변경.
 
-### 3. `setTimeout` 클린업 누락 (토스트 누수)
-**파일:** `src/app/course/[id]/CourseDetailClient.tsx:204,259,321`, `src/app/search/SearchClient.tsx:170`
+#### M3. Prereq 파서가 여전히 문장 구조에 취약
+**파일:** `src/lib/restrictions.ts:92-114`
 
-```ts
-setToast("...");
-setTimeout(() => setToast(""), 3000); // cleanup 없음
-```
+- `extractPrereqGroups`는 단순 split("and")/split("or") 기반. "A and (B or C and D)" 같은 복합 중첩, "at least 6 credits of CSE" 같은 자연어, "sophomore standing" 같은 비과목 조건은 놓침.
+- 대부분의 실제 데이터엔 충분하지만, 프로덕션 전에 데이터 샘플 10~20건 수동 검증 필요.
+- **수정안:** 실제 데이터 샘플로 회귀 테스트 확장, 필요 시 PEG/ANTLR 기반 파서로 교체.
 
-- 연속 클릭 또는 언마운트 시 타이머가 누적되어 state 경합/메모리 누수 가능.
-- **수정안:** `useEffect`로 이동하거나 ref에 timeout id 저장 후 재설정 전에 `clearTimeout`.
+#### M4. `clientIp`가 spoofable 헤더에 의존
+**파일:** `src/lib/rateLimit.ts:65-81`
 
-### 4. Onboarding 리셋이 `window.location.reload()` 사용
-**파일:** `src/app/onboarding/page.tsx:62-63`
-
-```ts
-window.localStorage.removeItem("registration-clarity-audit");
-window.location.reload();
-```
-
-- `AuditContext`와 `PlansContext`가 동시에 리셋되지 않고 강제 새로고침으로 처리.
-- 사용자가 저장하지 않은 플랜이 경고 없이 사라짐.
-- **수정안:** Context의 `clear*` 액션 호출 후 `router.push`로 이동.
+- `x-forwarded-for`는 클라이언트가 위조 가능. Vercel 배포 시엔 Vercel이 마지막 홉으로 세팅하므로 **마지막** 값이 신뢰 가능 IP. 현재는 첫 번째 값(`split(",")[0]`)을 사용 → 쉬운 우회.
+- Vercel 환경에서는 정확히 하나의 IP만 xff에 들어가는 경우가 많지만, 다중 프록시 시나리오에서는 취약.
+- **수정안:** Vercel은 `x-vercel-forwarded-for` 또는 `request.geo`/`request.ip` 사용 권장. 헤더 체인 마지막 신뢰 홉 IP 추출 로직 추가.
 
 ---
 
-## 🟠 High
+### 🟢 Low
 
-### 5. 선수과목 정규식이 괄호 안만 파싱
-**파일:** `src/lib/restrictions.ts:74-79`
+#### L1. `useFocusTrap`이 초기 포커스를 "가장 첫 focusable"로 고정
+**파일:** `src/hooks/useFocusTrap.ts:40-44`
 
-```ts
-const match = r.match(/Prerequisites?:\s*\(([^)]+)\)/i);
-```
+- 모달이 열릴 때 Close 버튼(첫 focusable)에 포커스 → 사용자가 바로 Enter 치면 모달이 닫힘.
+- WAI-ARIA는 "주된 액션에 포커스"를 권장하는 경우도 있음.
+- **수정안:** `initialFocusRef` 옵션을 추가해 primary 액션(예: "Add to Plan") 버튼을 우선.
 
-- `"Prerequisites: CSE 20312"`처럼 괄호 없는 케이스는 통과 → 사실상 수강 불가 과목이 "Eligible"로 표시될 위험.
-- `code_analysis.md`에 이미 "~5 패턴이 90% 커버"라고 명시 → 10% 사일런트 폴스 네거티브.
-- **수정안:** 괄호 없는 변형 패턴 추가 + 실패 시 "검증 필요" 상태 반환.
+#### L2. `useRovingTabIndex`는 헬퍼 함수일 뿐 — 각 tablist가 직접 refs 관리
+- 중복 로직이 Sidebar/Plan/Export에 복제됨. 향후 네 번째 tablist가 생기면 다시 복붙.
+- **수정안:** `useRovingTabIndex(items)` 훅으로 승격하거나 Radix/Headless UI 도입.
 
-### 6. 섹션 데이터가 `null`일 때 eligibility 오판정
-**파일:** `src/lib/eligibility.ts:30-35`
+#### L3. `localStore`가 모듈 로드 시점에 `window.addEventListener` 호출
+**파일:** `src/lib/localStore.ts:75-81`
 
-```ts
-if (sections.length > 0 && sections.every((s) => s.seatsAvailable !== null && s.seatsAvailable <= 0)) {
-  return "full";
-}
-```
+- `createLocalStore`는 모듈 import만으로 "storage"/custom 이벤트 리스너를 등록. 테스트 환경(JSDOM)이나 SSR 핫-리로드에서 리스너가 누적될 수 있음.
+- **수정안:** 구독자가 처음 생길 때 등록, 마지막이 해제될 때 정리 (subscribe lazy init).
 
-- 모든 `seatsAvailable`이 `null`(로딩 중/데이터 없음)이면 조건이 false로 떨어져 `"eligible"` 반환.
-- 학생이 “자리 있음”이라고 믿는 동안 실제로는 상태 미확정.
-- **수정안:** `null` 비율이 일정 이상이면 `"unknown"` 분기 추가.
+#### L4. Toast z-index/레이아웃 책임을 `Toast.tsx`가 직접 고정
+**파일:** `src/components/Toast.tsx:22`
 
-### 7. localStorage JSON 런타임 스키마 미검증
-**파일:** `src/contexts/PlansContext.tsx:12`, `src/contexts/AuditContext.tsx:13`, `src/lib/conflicts.ts:12`, `src/lib/restrictions.ts:22,66`
+- `fixed top-16 right-6` 하드코딩. 다른 fixed 요소(모달 스피너 등)와 겹침 가능성.
+- **수정안:** Provider가 Portal로 body 말단에 렌더, 스태킹 컨텍스트 분리.
 
-```ts
-return raw ? JSON.parse(raw) : [];
-```
+#### L5. RecoveryDrawer의 "Sent!" 타이머 이중 안전장치
+**파일:** `src/components/RecoveryDrawer.tsx:260-270`
 
-- 파싱 성공 ≠ 구조 올바름. 사용자가 devtools에서 수정하거나 구버전 데이터가 남아있으면 TS 타입이 무너진 채 실행.
-- **수정안:** Zod 등 런타임 검증. 실패 시 `[]`로 fallback + 콘솔 경고.
+- `sentTimerRef` 클린업은 있지만 "Send Request" 빠르게 두 번 누르면 첫 타이머를 취소하고 새로 시작 → 올바르지만, 실제로는 sending 상태를 disabled로 묶는 편이 UX 상 명확.
+- **수정안:** 전송 중 버튼 `disabled`.
 
----
+#### L6. 한국어 i18n 미적용 (유지)
+- 2차 리포트 `L6`. 제품 결정 대기.
 
-## 🟡 Medium
+#### L7. 검색 페이지네이션 상태가 URL에 반영되지 않음
+**파일:** `src/app/search/SearchClient.tsx`
 
-### 8. `/api/course/[id]`에 인증/레이트 리밋 부재
-**파일:** `src/app/api/course/[id]/route.ts`
+- 새로고침/공유 시 "Load More" 상태가 초기화됨.
+- **수정안:** `?page=` 쿼리 파라미터 + `router.replace` 또는 Intersection Observer 기반 infinite scroll.
 
-- 공개 엔드포인트라 569개 id 전체 긁기가 가능, Neon 쿼리가 직접 발생 → 남용 시 비용/속도 문제.
-- 프로토타입 한정이라면 Vercel `middleware`에서 간단한 토큰 체크라도 고려.
+#### L8. `fetchCoursesReport` 실패는 배치 전체에 대해 한 번만 토스트
+**파일:** `src/app/export/page.tsx:87-103`
 
-### 9. Search page의 과도한 include 직렬화 (N+1 대체)
-**파일:** `src/app/search/page.tsx:32-43`
+- 부분 실패 시 어떤 코스가 누락됐는지 알 수 없음 (숫자만 표시).
+- **수정안:** 실패한 ID → 코스 코드 매핑해 "CSE 20311 could not be loaded" 형태로 나열.
 
-```ts
-const courses = await prisma.course.findMany({
-  where,
-  include: { sections: { include: { meetings: true, instructors: true } } },
-});
-```
+#### L9. `attributes` JSON 파싱 안 함
+**파일:** `src/app/course/[id]/page.tsx:10`, `src/app/course/[id]/CourseDetailClient.tsx:54`
 
-- 569 × 섹션/미팅/강사 join → JSON payload가 수십 KB. 첫 페인트 지연.
-- **수정안:** 리스트용 `select` 분리, 상세는 드릴다운 시 fetch.
+- `course.attributes`는 DB에 `JSON array of {code, description}`으로 저장되지만 현재 UI는 참조하지 않음. 죽은 필드.
+- **수정안:** 사용하지 않으면 `select`에서 빼기, 혹은 UI에 표시.
 
-### 10. 루트 레이아웃에 ErrorBoundary 없음
-**파일:** `src/app/layout.tsx`
+#### L10. E2E 테스트가 새 ToastProvider 기반 흐름과 호환되는지 미검증
+**파일:** `e2e/*.spec.ts`
 
-- 어느 컴포넌트라도 throw하면 전체 페이지가 깨짐 + 복구 UI 없음.
-- **수정안:** App Router의 `error.tsx` 파일 추가(각 세그먼트별).
+- 테스트 실행은 이번 작업에서 하지 않음. Toast 렌더링 위치/텍스트가 바뀌지는 않았지만 확인 필요.
+- **수정안:** `playwright test` 실행하여 회귀 유무 확인.
 
-### 11. 아이콘 버튼 대부분 `aria-label` 누락
-**파일:** `src/components/PreCheckModal.tsx`, `RecoveryDrawer.tsx`, `Navbar.tsx`, `Sidebar.tsx` 등
-
-- `title` 속성만으로는 스크린리더 대응 불충분. HCI 프로젝트에서 접근성은 평가 포인트.
-- **수정안:** `aria-label`, `role`, 포커스 가능한 요소는 `tabIndex` 검토.
-
-### 12. 키보드 내비게이션 결함
-**파일:** `src/app/plan/page.tsx:30-36`
-
-- 드롭다운이 click에만 의존, `aria-expanded`/`aria-haspopup` 없음, ESC로 닫히지 않음.
-- **수정안:** Radix/Headless UI 채택 또는 직접 handler 추가.
-
-### 13. 페치된 데이터에 인라인 구조 타입
-**파일:** `src/app/export/page.tsx:69`, `src/components/PreCheckModal.tsx:75`
-
-```ts
-results.find((r: { id: number }) => r?.id === entry.courseId)
-```
-
-- 실제 API 응답과 괴리가 생겨도 타입 에러가 안 남. 런타임 크래시의 온상.
-- **수정안:** 공유 타입/Zod 스키마를 `src/types/`에 정의해 fetch 헬퍼에서 파싱.
-
-### 14. 같은 섹션이 여러 플랜(A/B/C)에 중복 가능
-**파일:** `src/contexts/PlansContext.tsx:49-57`
-
-- 같은 슬롯 중복만 차단. A,B,C에 같은 섹션을 올리면 실제 등록 시 충돌.
-- **수정안:** 추가 시 "이미 Plan X에 있음" 경고 토스트.
-
-### 15. `useEffect` deps에 배열 참조 직결
-**파일:** `src/app/export/page.tsx:91`, `src/components/PreCheckModal.tsx:89`
-
-- `plans` 배열은 매 업데이트 새 참조. 불필요한 재fetch 유발.
-- **수정안:** `plans.map(p => p.sectionId).join(",")` 같은 안정 키로 비교.
-
-### 16. DB 마이그레이션 디렉토리 미사용
-**파일:** `prisma/` (migrations 폴더 없음)
-
-- `prisma db push` 모드로 운용 중으로 추정 → 스키마 이력 유실, 롤백 불가.
-- **수정안:** `prisma migrate dev` 전환, CI에 `migrate deploy` 추가.
-
-### 17. 빌드에 seed 단계 없음
-**파일:** `package.json`
-
-- Vercel 배포 시 DB가 비어 있으면 기능이 깨짐. README에 수동 seed 절차만 있을 가능성.
-- **수정안:** `postbuild` 또는 별도 수동 job으로 seed 명시.
-
-### 18. 로드 상태·에러 상태 UI 일관성 부족
-- 여러 페이지에서 skeleton/loader 없이 빈 화면 → 사용자에 "멈춘 듯한" UX.
-
-### 19. HTTP 상태 미확인
-- 모든 `fetch().then(r => r.json())`이 404/500을 무시.
+#### L11. `next-env.d.ts` 누락 (TS target 변경 영향 가능)
+- `next-env.d.ts`는 Next이 자동 생성하지만 커밋에서 제외됨. `target: ES2022`로 바꾼 뒤 처음 `next dev`/`next build` 실행 시 재생성됨.
 
 ---
 
-## 🟢 Low
+## 3. 우선순위 추천
 
-### 20. 데모용 하드코딩 (`GUIDANCE_DATA`, `COURSE_PATHS`)
-**파일:** `src/app/course/[id]/CourseDetailClient.tsx:74-146`
-- 9개 샘플 과목만 커버. 나머지 과목은 안내가 비어 사용자 혼선.
+1. **프로덕션 전 (권장)**
+   - M4: `x-forwarded-for` 마지막 홉 처리 / Vercel 전용 헤더 사용
+   - M3: 실제 데이터 기반 prereq 파서 회귀 테스트
+   - L10: E2E 회귀 확인
 
-### 21. 한국어 로컬라이제이션 미적용
-- 한국인 대상 HCI임에도 UI 전체 영어. 필요 시 `next-intl` 등 검토.
+2. **Nice-to-have**
+   - M1: 토스트 큐
+   - L1: 모달 initial-focus 지정
+   - L7: 페이지네이션 URL 동기화
+   - L8: 실패 코스 라벨 표시
 
-### 22. `.env.example` 부재
-- DATABASE_URL 포맷을 새 개발자가 추측해야 함.
-
-### 23. JSON.parse가 렌더마다 반복
-**파일:** `src/app/search/SearchClient.tsx:97`, `src/components/RecoveryDrawer.tsx:120`
-- `meetings.days`를 렌더마다 파싱. `useMemo` 또는 서버 응답 시점에 한 번 파싱.
-
-### 24. 색 대비 취약 가능성
-**파일:** `src/components/Sidebar.tsx:79` 등
-- `text-gray-400/500` on light bg → WCAG AA 미달 우려.
-
-### 25. 토스트에 Undo 액션 없음
-- 추가/삭제 모두 3초 후 사라짐, 실수 복구 불가.
-
-### 26. 이모지 로고가 의미론적이지 않음
-**파일:** `src/components/Navbar.tsx:18-19`
-- `☘️` 텍스트 노드. 스크린리더 음성이 예상 외일 수 있음.
-
-### 27. 유닛 테스트 커버리지 낮음
-- `eligibility.ts`, `conflicts.ts`, `restrictions.ts`, `auditParser.ts` 전부 e2e에만 의존.
-- 로직 버그(선수과목 정규식 등)는 유닛 테스트로 방어하는 게 효율적.
+3. **장기 / 제품 결정 의존**
+   - L6: i18n
+   - L2: 탭 로직 훅 승격 (또는 Radix 도입)
+   - L3: CourseGuidance DB 모델
 
 ---
 
-## 우선순위 추천
+## 4. 참고
 
-1. **다음 데모 전**
-   - Sidebar 무한 fetch 루프(#1) 수정
-   - setTimeout 클린업(#3)
-   - ErrorBoundary/`error.tsx`(#10)
-   - 아이콘 버튼 `aria-label`(#11)
-
-2. **프로덕션 전**
-   - 선수과목 파서 확장(#5) + null-aware eligibility(#6)
-   - localStorage/페치 응답 Zod 검증(#7, #13)
-   - 중복 섹션 경고(#14)
-   - Prisma 마이그레이션 전환(#16)
-
-3. **장기 개선**
-   - 검색 payload 최적화(#9)
-   - i18n(#21), undo 토스트(#25)
-   - `eligibility/conflicts/restrictions/auditParser` 유닛 테스트 추가(#27)
-
----
-
-## 참고
-- 기존 분석 문서: `docs/code_analysis.md`, `docs/sprint3_gap_analysis.md`
+- 1차/2차 수정 내역: `docs/fixes_applied.md`
 - 아키텍처: `ARCHITECTURE.md`
-- AGENTS.md 경고: Next.js 16은 breaking change가 있으니 수정 전 `node_modules/next/dist/docs/`의 관련 가이드 확인 필요 (특히 async params, caching 기본값).
+- AGENTS.md 경고: Next.js 16 breaking changes. 수정 전 `node_modules/next/dist/docs/`의 관련 가이드 확인.

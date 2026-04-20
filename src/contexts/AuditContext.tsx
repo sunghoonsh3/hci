@@ -2,45 +2,20 @@
 
 import {
   createContext,
-  useContext,
-  useState,
-  useEffect,
   useCallback,
+  useContext,
   type ReactNode,
 } from "react";
 import type { ParsedAudit } from "@/types";
 import { parseAuditText, isValidAudit } from "@/lib/auditParser";
 import { ParsedAuditSchema } from "@/lib/schemas";
+import { createLocalStore, useLocalStoreValue } from "@/lib/localStore";
 
-const STORAGE_KEY = "registration-clarity-audit";
-
-function loadAudit(): ParsedAudit | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = ParsedAuditSchema.safeParse(JSON.parse(raw));
-    if (!parsed.success) {
-      if (process.env.NODE_ENV !== "production") {
-        console.warn("Discarding invalid audit in localStorage", parsed.error);
-      }
-      localStorage.removeItem(STORAGE_KEY);
-      return null;
-    }
-    return parsed.data;
-  } catch {
-    return null;
-  }
-}
-
-function saveAudit(audit: ParsedAudit | null) {
-  if (typeof window === "undefined") return;
-  if (audit) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(audit));
-  } else {
-    localStorage.removeItem(STORAGE_KEY);
-  }
-}
+const auditStore = createLocalStore<ParsedAudit | null>(
+  "registration-clarity-audit",
+  ParsedAuditSchema.nullable(),
+  null,
+);
 
 interface AuditContextValue {
   audit: ParsedAudit | null;
@@ -54,30 +29,19 @@ interface AuditContextValue {
 const AuditContext = createContext<AuditContextValue | null>(null);
 
 export function AuditProvider({ children }: { children: ReactNode }) {
-  const [audit, setAudit] = useState<ParsedAudit | null>(null);
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    // Hydrate from localStorage on mount. This is the canonical pattern
-    // for client-only state that is unavailable during SSR.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setAudit(loadAudit());
-    setLoaded(true);
-  }, []);
+  const audit = useLocalStoreValue(auditStore);
 
   const setAuditText = useCallback((rawText: string): ParsedAudit | null => {
     const parsed = parseAuditText(rawText);
     if (isValidAudit(parsed)) {
-      setAudit(parsed);
-      saveAudit(parsed);
+      auditStore.set(parsed);
       return parsed;
     }
     return null;
   }, []);
 
   const clearAudit = useCallback(() => {
-    setAudit(null);
-    saveAudit(null);
+    auditStore.set(null);
   }, []);
 
   const isCourseTaken = useCallback(
@@ -104,7 +68,7 @@ export function AuditProvider({ children }: { children: ReactNode }) {
     <AuditContext.Provider
       value={{
         audit,
-        loaded,
+        loaded: true,
         setAuditText,
         clearAudit,
         isCourseTaken,
