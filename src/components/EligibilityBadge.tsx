@@ -19,7 +19,12 @@ const CONFIG: Record<
   "already-taken": {
     label: "Taken",
     bg: "bg-gray-100",
-    text: "text-gray-600",
+    text: "text-gray-700",
+  },
+  unknown: {
+    label: "Unknown",
+    bg: "bg-gray-100",
+    text: "text-gray-700",
   },
 };
 
@@ -33,6 +38,8 @@ export default function EligibilityBadge({
   const { label, bg, text } = CONFIG[status];
   return (
     <span
+      role="status"
+      aria-label={`Eligibility: ${label}`}
       className={`inline-flex items-center rounded-full font-medium ${bg} ${text} ${
         size === "sm" ? "px-2 py-0.5 text-xs" : "px-3 py-1 text-sm"
       }`}

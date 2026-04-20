@@ -3,14 +3,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAudit } from "@/contexts/AuditContext";
+import { usePlans } from "@/contexts/PlansContext";
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { audit, setAuditText } = useAudit();
+  const { audit, setAuditText, clearAudit } = useAudit();
+  const { clearAll } = usePlans();
   const [rawText, setRawText] = useState("");
   const [error, setError] = useState("");
 
-  // If audit already loaded, offer to continue
   if (audit) {
     return (
       <div className="max-w-2xl mx-auto py-12">
@@ -20,49 +21,60 @@ export default function OnboardingPage() {
         <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="text-gray-500">Major:</span>{" "}
+              <span className="text-gray-600">Major:</span>{" "}
               <span className="font-medium">{audit.major}</span>
             </div>
             <div>
-              <span className="text-gray-500">Classification:</span>{" "}
+              <span className="text-gray-600">Classification:</span>{" "}
               <span className="font-medium">{audit.classification}</span>
             </div>
             <div>
-              <span className="text-gray-500">Credits:</span>{" "}
+              <span className="text-gray-600">Credits:</span>{" "}
               <span className="font-medium">
                 {audit.creditsApplied}/{audit.creditsRequired}
               </span>
             </div>
             <div>
-              <span className="text-gray-500">GPA:</span>{" "}
+              <span className="text-gray-600">GPA:</span>{" "}
               <span className="font-medium">{audit.gpa.toFixed(3)}</span>
             </div>
             <div>
-              <span className="text-gray-500">Courses completed:</span>{" "}
-              <span className="font-medium">{audit.completedCourses.length}</span>
+              <span className="text-gray-600">Courses completed:</span>{" "}
+              <span className="font-medium">
+                {audit.completedCourses.length}
+              </span>
             </div>
             <div>
-              <span className="text-gray-500">In progress:</span>{" "}
-              <span className="font-medium">{audit.inProgressCourses.length}</span>
+              <span className="text-gray-600">In progress:</span>{" "}
+              <span className="font-medium">
+                {audit.inProgressCourses.length}
+              </span>
             </div>
           </div>
         </div>
         <div className="flex gap-3">
           <button
+            type="button"
             onClick={() => router.push("/search")}
             className="bg-[#1B6B3A] text-white px-6 py-2.5 rounded-lg font-medium hover:bg-[#155a2f] transition-colors"
           >
             Continue to Search
           </button>
           <button
+            type="button"
             onClick={() => {
+              const proceed =
+                typeof window === "undefined" ||
+                window.confirm(
+                  "This will clear your saved audit and remove any plans you added. Continue?",
+                );
+              if (!proceed) return;
+              clearAudit();
+              clearAll();
               setRawText("");
               setError("");
-              // Force re-render without audit
-              window.localStorage.removeItem("registration-clarity-audit");
-              window.location.reload();
             }}
-            className="bg-gray-100 text-gray-700 px-6 py-2.5 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+            className="bg-gray-100 text-gray-800 px-6 py-2.5 rounded-lg font-medium hover:bg-gray-200 transition-colors"
           >
             Re-paste Audit
           </button>
@@ -80,7 +92,7 @@ export default function OnboardingPage() {
     const parsed = setAuditText(rawText);
     if (!parsed) {
       setError(
-        "Could not parse any courses from the text. Make sure you copied the full degree audit from GPS/Degree Works."
+        "Could not parse any courses from the text. Make sure you copied the full degree audit from GPS/Degree Works.",
       );
       return;
     }
@@ -91,13 +103,17 @@ export default function OnboardingPage() {
       <h1 className="text-2xl font-bold text-gray-900 mb-2">
         Welcome to PATH
       </h1>
-      <p className="text-gray-600 mb-6">
+      <p className="text-gray-700 mb-6">
         Paste your Degree Audit from GPS (Degree Works) below to get started.
         We&apos;ll parse your completed courses to check eligibility and
         prerequisites automatically.
       </p>
 
+      <label htmlFor="audit-text" className="sr-only">
+        Degree audit text
+      </label>
       <textarea
+        id="audit-text"
         value={rawText}
         onChange={(e) => setRawText(e.target.value)}
         placeholder="Paste your full degree audit text here..."
@@ -105,10 +121,13 @@ export default function OnboardingPage() {
       />
 
       {error && (
-        <p className="mt-2 text-sm text-red-600">{error}</p>
+        <p role="alert" className="mt-2 text-sm text-red-700">
+          {error}
+        </p>
       )}
 
       <button
+        type="button"
         onClick={handleParse}
         className="mt-4 bg-[#1B6B3A] text-white px-6 py-2.5 rounded-lg font-medium hover:bg-[#155a2f] transition-colors"
       >

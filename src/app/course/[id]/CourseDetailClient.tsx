@@ -1,15 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import { useAudit } from "@/contexts/AuditContext";
 import { usePlans } from "@/contexts/PlansContext";
 import { computeEligibility } from "@/lib/eligibility";
 import { parseRestrictions, checkPrerequisites } from "@/lib/restrictions";
 import { getRequirementBadges } from "@/lib/requirements";
+import { useToast } from "@/hooks/useToast";
 import EligibilityBadge from "@/components/EligibilityBadge";
 import PreCheckModal from "@/components/PreCheckModal";
 import RecoveryDrawer from "@/components/RecoveryDrawer";
+import Toast from "@/components/Toast";
 import type { PlanSlot } from "@/types";
 
 interface Meeting {
@@ -56,14 +58,19 @@ interface Course {
   sections: Section[];
 }
 
-function formatDays(daysJson: string | null): string {
-  if (!daysJson) return "TBA";
+function parseDays(daysJson: string | null): string[] {
+  if (!daysJson) return [];
   try {
-    const days: string[] = JSON.parse(daysJson);
-    return days.join("");
+    const parsed = JSON.parse(daysJson);
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
-    return "TBA";
+    return [];
   }
+}
+
+function formatDays(daysJson: string | null): string {
+  const days = parseDays(daysJson);
+  return days.length ? days.join("") : "TBA";
 }
 
 function formatTime(start: string | null, end: string | null): string {
@@ -71,7 +78,6 @@ function formatTime(start: string | null, end: string | null): string {
   return `${start}-${end}`;
 }
 
-// Hardcoded guidance data for demo courses
 const GUIDANCE_DATA: Record<
   string,
   {
@@ -131,7 +137,6 @@ const GUIDANCE_DATA: Record<
   },
 };
 
-// Hardcoded course path chains for demo
 const COURSE_PATHS: Record<string, string[]> = {
   "CSE 20311": ["No prerequisites", "CSE 20311", "CSE 20312", "CSE 30151"],
   "CSE 20312": ["CSE 20311", "CSE 20312", "CSE 30151", "CSE 40113"],
@@ -153,25 +158,41 @@ export default function CourseDetailClient({
   courseTitleMap?: Record<string, string>;
 }) {
   const { audit } = useAudit();
-  const { addToPlan, isSectionInPlan } = usePlans();
+  const { addToPlan, removeFromPlan, isSectionInPlan, findSlotsForSection } =
+    usePlans();
   const [showPreCheck, setShowPreCheck] = useState(false);
   const [showRecovery, setShowRecovery] = useState(false);
-  const [toast, setToast] = useState("");
+  const { toast, show, dismiss, runUndo } = useToast();
 
-  const allCourses = audit
-    ? [...audit.completedCourses, ...audit.inProgressCourses]
-    : [];
-  const status = computeEligibility(
-    course.subject,
-    course.courseNumber,
-    course.registrationRestrictions,
-    course.sections,
-    allCourses
+  const allCourses = useMemo(
+    () =>
+      audit
+        ? [...audit.completedCourses, ...audit.inProgressCourses]
+        : [],
+    [audit],
   );
-  const restrictions = parseRestrictions(course.registrationRestrictions);
-  const prereqChecks = checkPrerequisites(
-    course.registrationRestrictions,
-    audit?.completedCourses ?? []
+  const status = useMemo(
+    () =>
+      computeEligibility(
+        course.subject,
+        course.courseNumber,
+        course.registrationRestrictions,
+        course.sections,
+        allCourses,
+      ),
+    [course, allCourses],
+  );
+  const restrictions = useMemo(
+    () => parseRestrictions(course.registrationRestrictions),
+    [course.registrationRestrictions],
+  );
+  const prereqChecks = useMemo(
+    () =>
+      checkPrerequisites(
+        course.registrationRestrictions,
+        audit?.completedCourses ?? [],
+      ),
+    [course.registrationRestrictions, audit],
   );
   const badges = getRequirementBadges(course.subject, course.courseNumber);
   const isBlocked =
@@ -189,62 +210,70 @@ export default function CourseDetailClient({
 
   const totalSeats = course.sections.reduce(
     (s, sec) => s + (sec.seatsAvailable ?? 0),
-    0
+    0,
   );
   const totalMax = course.sections.reduce(
     (s, sec) => s + (sec.maxEnrollment ?? 0),
-    0
+    0,
   );
 
   function handleAddToPlan(sectionId: number, slot: PlanSlot) {
-    addToPlan(course.id, sectionId, slot);
-    setToast(
-      `${course.subject} ${course.courseNumber} Sec added to Plan ${slot}`
-    );
-    setTimeout(() => setToast(""), 3000);
+    const existing = findSlotsForSection(sectionId);
+    const result = addToPlan(course.id, sectionId, slot);
+    const label = `${course.subject} ${course.courseNumber}`;
+    if (!result.added) {
+      show(`${label} already in Plan ${slot}`, { variant: "warning" });
+      return;
+    }
+    const alsoIn = existing.filter((s) => s !== slot);
+    const extra = alsoIn.length
+      ? ` (also in Plan ${alsoIn.join(", ")})`
+      : "";
+    show(`${label} added to Plan ${slot}${extra}`, {
+      undo: () => removeFromPlan(sectionId, slot),
+    });
   }
 
   return (
     <div>
-      {/* Toast */}
       {toast && (
-        <div className="fixed top-16 right-6 bg-[#1B6B3A] text-white px-4 py-2 rounded-lg shadow-lg text-sm z-50">
-          {toast}
-        </div>
+        <Toast
+          message={toast.message}
+          variant={toast.variant}
+          onUndo={toast.undo ? runUndo : undefined}
+          onDismiss={dismiss}
+        />
       )}
 
-      {/* Breadcrumb */}
-      <div className="text-sm text-gray-500 mb-4">
-        <Link href="/search" className="hover:text-gray-700">
+      <div className="text-sm text-gray-600 mb-4">
+        <Link href="/search" className="hover:text-gray-900">
           Search
         </Link>{" "}
         / {course.subject} {course.courseNumber}
       </div>
 
       <div className="grid grid-cols-[1fr_280px] gap-6">
-        {/* Main content */}
         <div>
-          {/* Header */}
           <div className="flex items-start justify-between mb-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
                 {course.subject} {course.courseNumber}: {course.courseTitle}
               </h1>
-              <div className="flex items-center gap-3 mt-2 text-sm text-gray-600">
+              <div className="flex items-center gap-3 mt-2 text-sm text-gray-700">
                 <span>{primaryInstructor}</span>
-                <span>·</span>
+                <span aria-hidden="true">·</span>
                 <span>{credits} credits</span>
-                <span>·</span>
+                <span aria-hidden="true">·</span>
                 <span>Summer 2026</span>
                 <EligibilityBadge status={status} size="md" />
               </div>
             </div>
           </div>
 
-          {/* Action buttons */}
           <div className="flex gap-3 mb-6">
             {isBlocked ? (
               <button
+                type="button"
                 disabled
                 className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium opacity-75 cursor-not-allowed"
               >
@@ -252,75 +281,82 @@ export default function CourseDetailClient({
               </button>
             ) : (
               <button
-                onClick={() => {
-                  setToast(
-                    "Registration would be executed in NOVO. This is a prototype."
-                  );
-                  setTimeout(() => setToast(""), 3000);
-                }}
+                type="button"
+                onClick={() =>
+                  show(
+                    "Registration would be executed in NOVO. This is a prototype.",
+                  )
+                }
                 className="bg-[#1B6B3A] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#155a2f] transition-colors"
               >
                 Register
               </button>
             )}
             <button
+              type="button"
               onClick={() => setShowPreCheck(true)}
-              className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+              className="bg-white border border-gray-300 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
             >
               Pre-check
             </button>
             {isBlocked && (
               <button
+                type="button"
                 onClick={() => setShowRecovery(true)}
-                className="bg-white border border-orange-300 text-orange-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-orange-50 transition-colors"
+                className="bg-white border border-orange-300 text-orange-800 px-4 py-2 rounded-lg text-sm font-medium hover:bg-orange-50 transition-colors"
               >
                 Recovery Options
               </button>
             )}
           </div>
 
-          {/* Blocked banner with inline actions */}
           {isBlocked && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+            <div
+              className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4"
+              role="status"
+            >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-red-600 font-medium">
+                  <span className="text-red-700 font-medium">
                     Registration Blocked
                   </span>
-                  <span className="text-sm text-red-500">
+                  <span className="text-sm text-red-700">
                     {status === "full"
                       ? `This course is full (${totalSeats} seats remaining)`
                       : status === "needs-prereq"
-                      ? "Missing prerequisite courses"
-                      : "Special approval required"}
+                        ? "Missing prerequisite courses"
+                        : "Special approval required"}
                   </span>
                 </div>
                 <div className="flex items-center gap-3 text-sm shrink-0">
                   <button
+                    type="button"
                     onClick={() => setShowPreCheck(true)}
-                    className="text-red-600 hover:text-red-800 font-medium hover:underline"
+                    className="text-red-700 hover:text-red-900 font-medium hover:underline"
                   >
                     Why?
                   </button>
                   <Link
                     href={`/search?subject=${course.subject}`}
-                    className="text-red-600 hover:text-red-800 font-medium hover:underline"
+                    className="text-red-700 hover:text-red-900 font-medium hover:underline"
                   >
                     Find Alternatives
                   </Link>
                   <button
+                    type="button"
                     onClick={() => {
                       const open = course.sections.find(
                         (s) =>
-                          s.seatsAvailable === null || s.seatsAvailable! > 0
+                          s.seatsAvailable === null ||
+                          (s.seatsAvailable ?? 0) > 0,
                       );
-                      if (open) addToPlan(course.id, open.id, "B");
-                      setToast(
-                        `${course.subject} ${course.courseNumber} moved to Plan B`
-                      );
-                      setTimeout(() => setToast(""), 3000);
+                      if (open) handleAddToPlan(open.id, "B");
+                      else
+                        show("No open sections to move to Plan B", {
+                          variant: "warning",
+                        });
                     }}
-                    className="text-red-600 hover:text-red-800 font-medium hover:underline"
+                    className="text-red-700 hover:text-red-900 font-medium hover:underline"
                   >
                     Move to Plan B
                   </button>
@@ -329,7 +365,6 @@ export default function CourseDetailClient({
             </div>
           )}
 
-          {/* Official Next Steps (blocked courses) */}
           {isBlocked && (
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
               <h3 className="text-sm font-semibold text-amber-900 mb-2">
@@ -337,11 +372,11 @@ export default function CourseDetailClient({
                 {status === "full"
                   ? "Full Course"
                   : status === "needs-prereq"
-                  ? "Missing Prerequisites"
-                  : "Restricted"}
+                    ? "Missing Prerequisites"
+                    : "Restricted"}
                 )
               </h3>
-              <ul className="space-y-1 text-sm text-amber-800">
+              <ul className="space-y-1 text-sm text-amber-900">
                 {status === "full" && (
                   <>
                     <li>
@@ -394,36 +429,41 @@ export default function CourseDetailClient({
             </div>
           )}
 
-          {/* Description */}
           {course.description && (
             <div className="mb-6">
-              <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
+              <h2 className="text-sm font-semibold text-gray-800 uppercase tracking-wide mb-2">
                 Description
               </h2>
-              <p className="text-sm text-gray-600 leading-relaxed">
+              <p className="text-sm text-gray-700 leading-relaxed">
                 {course.description}
               </p>
             </div>
           )}
 
-          {/* Availability bar */}
           <div className="mb-6">
-            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
+            <h2 className="text-sm font-semibold text-gray-800 uppercase tracking-wide mb-2">
               Availability
             </h2>
             <div className="flex items-center gap-3">
               <span className="text-sm font-medium">
                 {totalSeats}/{totalMax} seats
               </span>
-              <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden max-w-xs">
+              <div
+                className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden max-w-xs"
+                role="progressbar"
+                aria-label="Seat availability"
+                aria-valuemin={0}
+                aria-valuemax={totalMax}
+                aria-valuenow={totalMax - totalSeats}
+              >
                 <div
                   className={`h-full rounded-full ${
                     totalSeats === 0
                       ? "bg-red-500"
                       : totalMax > 0 &&
-                        (totalMax - totalSeats) / totalMax > 0.8
-                      ? "bg-yellow-500"
-                      : "bg-green-500"
+                          (totalMax - totalSeats) / totalMax > 0.8
+                        ? "bg-yellow-500"
+                        : "bg-green-500"
                   }`}
                   style={{
                     width: `${
@@ -436,7 +476,7 @@ export default function CourseDetailClient({
               </div>
               <span
                 className={`text-xs font-medium ${
-                  totalSeats === 0 ? "text-red-600" : "text-green-600"
+                  totalSeats === 0 ? "text-red-700" : "text-green-800"
                 }`}
               >
                 {totalSeats === 0 ? "Filled" : "Available"}
@@ -444,54 +484,59 @@ export default function CourseDetailClient({
             </div>
           </div>
 
-          {/* Prerequisites — only show courses that exist in DB */}
-          {prereqChecks.filter((c) => c.completed || courseTitleMap[c.courseCode]).length > 0 && (
+          {prereqChecks.filter(
+            (c) => c.completed || courseTitleMap[c.courseCode],
+          ).length > 0 && (
             <div className="mb-6">
-              <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
+              <h2 className="text-sm font-semibold text-gray-800 uppercase tracking-wide mb-2">
                 Prerequisites
               </h2>
               <div className="space-y-1">
-                {prereqChecks.filter((c) => c.completed || courseTitleMap[c.courseCode]).map((check) => {
-                  const title = courseTitleMap[check.courseCode];
-                  return (
-                    <div
-                      key={check.courseCode}
-                      className="flex items-center gap-2 text-sm"
-                    >
-                      <span
-                        className={
-                          check.completed ? "text-green-600" : "text-red-600"
-                        }
+                {prereqChecks
+                  .filter(
+                    (c) => c.completed || courseTitleMap[c.courseCode],
+                  )
+                  .map((check) => {
+                    const title = courseTitleMap[check.courseCode];
+                    return (
+                      <div
+                        key={check.courseCode}
+                        className="flex items-center gap-2 text-sm"
                       >
-                        {check.completed ? "✓" : "✗"}
-                      </span>
-                      <span className="font-medium">
-                        {check.courseCode}
-                        {title ? `: ${title}` : ""}
-                      </span>
-                      {check.completed ? (
-                        <span className="text-green-600">
-                          — completed {check.term} ({check.grade})
+                        <span
+                          className={
+                            check.completed ? "text-green-700" : "text-red-700"
+                          }
+                          aria-hidden="true"
+                        >
+                          {check.completed ? "✓" : "✗"}
                         </span>
-                      ) : (
-                        <span className="text-red-600">— not completed</span>
-                      )}
-                    </div>
-                  );
-                })}
+                        <span className="font-medium">
+                          {check.courseCode}
+                          {title ? `: ${title}` : ""}
+                        </span>
+                        {check.completed ? (
+                          <span className="text-green-800">
+                            — completed {check.term} ({check.grade})
+                          </span>
+                        ) : (
+                          <span className="text-red-700">— not completed</span>
+                        )}
+                      </div>
+                    );
+                  })}
               </div>
             </div>
           )}
 
-          {/* Restrictions */}
           {restrictions.length > 0 && (
             <div className="mb-6">
-              <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
+              <h2 className="text-sm font-semibold text-gray-800 uppercase tracking-wide mb-2">
                 Restrictions
               </h2>
               <ul className="space-y-1">
                 {restrictions.map((r, i) => (
-                  <li key={i} className="text-sm text-gray-600">
+                  <li key={i} className="text-sm text-gray-700">
                     <span className="font-medium">{r.label}</span>
                     {r.type === "other" ? "" : ` — ${r.raw}`}
                   </li>
@@ -500,17 +545,16 @@ export default function CourseDetailClient({
             </div>
           )}
 
-          {/* Requirement badges */}
           {badges.length > 0 && (
             <div className="mb-6">
-              <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
+              <h2 className="text-sm font-semibold text-gray-800 uppercase tracking-wide mb-2">
                 Requirements Fulfilled
               </h2>
               <div className="flex gap-2">
                 {badges.map((b) => (
                   <span
                     key={b}
-                    className="inline-flex items-center rounded-full bg-blue-50 text-blue-700 px-3 py-1 text-sm font-medium"
+                    className="inline-flex items-center rounded-full bg-blue-50 text-blue-800 px-3 py-1 text-sm font-medium"
                   >
                     {b}
                   </span>
@@ -519,30 +563,31 @@ export default function CourseDetailClient({
             </div>
           )}
 
-          {/* Course Path */}
           {coursePath && (
             <div className="mb-6">
-              <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
+              <h2 className="text-sm font-semibold text-gray-800 uppercase tracking-wide mb-2">
                 Course Path
               </h2>
               <div className="flex items-center gap-1 text-sm overflow-x-auto pb-2">
                 {coursePath.map((code, i) => {
                   const isCurrent = code === courseKey;
                   const completed = audit?.completedCourses.some(
-                    (c) => `${c.subject} ${c.courseNumber}` === code
+                    (c) => `${c.subject} ${c.courseNumber}` === code,
                   );
                   return (
                     <React.Fragment key={`${code}-${i}`}>
                       {i > 0 && (
-                        <span className="text-gray-300 mx-1">→</span>
+                        <span className="text-gray-400 mx-1" aria-hidden="true">
+                          →
+                        </span>
                       )}
                       <span
                         className={`px-2.5 py-1 rounded text-xs font-medium whitespace-nowrap ${
                           isCurrent
                             ? "bg-[#1B6B3A] text-white"
                             : completed
-                            ? "bg-green-100 text-green-800"
-                            : "bg-gray-100 text-gray-600"
+                              ? "bg-green-100 text-green-900"
+                              : "bg-gray-100 text-gray-700"
                         }`}
                       >
                         {completed && !isCurrent ? "✓ " : ""}
@@ -555,34 +600,33 @@ export default function CourseDetailClient({
             </div>
           )}
 
-          {/* Guidance */}
-          {guidance && (
+          {guidance ? (
             <div className="mb-6">
-              <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
+              <h2 className="text-sm font-semibold text-gray-800 uppercase tracking-wide mb-2">
                 Guidance
               </h2>
               <div className="bg-white rounded-lg border border-gray-200 p-4">
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div>
-                    <span className="text-gray-500">Common Pairings</span>
+                    <span className="text-gray-600">Common Pairings</span>
                     <div className="font-medium text-gray-900 mt-0.5">
                       {guidance.commonPairings}
                     </div>
                   </div>
                   <div>
-                    <span className="text-gray-500">Typical Semester</span>
+                    <span className="text-gray-600">Typical Semester</span>
                     <div className="font-medium text-gray-900 mt-0.5">
                       {guidance.typicalSemester}
                     </div>
                   </div>
                   <div>
-                    <span className="text-gray-500">Fill Speed</span>
+                    <span className="text-gray-600">Fill Speed</span>
                     <div className="font-medium text-gray-900 mt-0.5">
                       {guidance.fillSpeed}
                     </div>
                   </div>
                   <div>
-                    <span className="text-gray-500">Major Take Rate</span>
+                    <span className="text-gray-600">Major Take Rate</span>
                     <div className="font-medium text-gray-900 mt-0.5">
                       {guidance.majorTakeRate}
                     </div>
@@ -590,30 +634,38 @@ export default function CourseDetailClient({
                 </div>
               </div>
             </div>
+          ) : (
+            <div className="mb-6">
+              <h2 className="text-sm font-semibold text-gray-800 uppercase tracking-wide mb-2">
+                Guidance
+              </h2>
+              <p className="text-sm text-gray-600 italic">
+                No advisor guidance available for this course yet.
+              </p>
+            </div>
           )}
 
-          {/* Sections table */}
           <div className="mb-6">
-            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
+            <h2 className="text-sm font-semibold text-gray-800 uppercase tracking-wide mb-2">
               Sections
             </h2>
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 bg-gray-50">
-                    <th className="text-left px-4 py-2 font-medium text-gray-600">
+                    <th className="text-left px-4 py-2 font-medium text-gray-700">
                       Sec
                     </th>
-                    <th className="text-left px-4 py-2 font-medium text-gray-600">
+                    <th className="text-left px-4 py-2 font-medium text-gray-700">
                       Time
                     </th>
-                    <th className="text-left px-4 py-2 font-medium text-gray-600">
+                    <th className="text-left px-4 py-2 font-medium text-gray-700">
                       Room
                     </th>
-                    <th className="text-left px-4 py-2 font-medium text-gray-600">
+                    <th className="text-left px-4 py-2 font-medium text-gray-700">
                       Seats
                     </th>
-                    <th className="text-right px-4 py-2 font-medium text-gray-600" />
+                    <th className="text-right px-4 py-2 font-medium text-gray-700" />
                   </tr>
                 </thead>
                 <tbody>
@@ -643,37 +695,37 @@ export default function CourseDetailClient({
                             "TBA"
                           )}
                         </td>
-                        <td className="px-4 py-2 text-gray-500">
+                        <td className="px-4 py-2 text-gray-700">
                           {meeting?.room ?? "TBA"}
                         </td>
                         <td className="px-4 py-2">
                           <span
-                            className={`${
+                            className={
                               isFull
-                                ? "text-red-600 font-medium"
-                                : "text-gray-600"
-                            }`}
+                                ? "text-red-700 font-medium"
+                                : "text-gray-700"
+                            }
                           >
                             {avail}/{max}
                           </span>
                           {isFull && (
-                            <span className="text-red-500 text-xs ml-2">
+                            <span className="text-red-700 text-xs ml-2">
                               Full
                             </span>
                           )}
                         </td>
                         <td className="px-4 py-2 text-right">
                           {inPlan ? (
-                            <span className="text-xs text-green-600 font-medium">
+                            <span className="text-xs text-green-800 font-medium">
                               In Plan ✓
                             </span>
                           ) : isFull ? (
-                            <span className="text-xs text-red-500">Full</span>
+                            <span className="text-xs text-red-700">Full</span>
                           ) : (
                             <button
-                              onClick={() =>
-                                handleAddToPlan(section.id, "A")
-                              }
+                              type="button"
+                              onClick={() => handleAddToPlan(section.id, "A")}
+                              aria-label={`Add section ${section.sectionNumber ?? section.id} to Plan A`}
                               className="text-xs bg-[#1B6B3A] text-white px-3 py-1.5 rounded font-medium hover:bg-[#155a2f] transition-colors"
                             >
                               Select
@@ -689,39 +741,38 @@ export default function CourseDetailClient({
           </div>
         </div>
 
-        {/* Quick Info sidebar */}
         <div>
           <div className="bg-white rounded-lg border border-gray-200 p-4 sticky top-6">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">
+            <h3 className="text-sm font-semibold text-gray-800 mb-3">
               Quick Info — {course.subject} {course.courseNumber}
             </h3>
             <div className="space-y-2.5 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-500">Seats</span>
+                <span className="text-gray-600">Seats</span>
                 <span
                   className={`font-medium ${
-                    totalSeats === 0 ? "text-red-600" : ""
+                    totalSeats === 0 ? "text-red-700" : ""
                   }`}
                 >
                   {totalSeats}/{totalMax}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Instructor</span>
+                <span className="text-gray-600">Instructor</span>
                 <span className="font-medium text-right max-w-[140px] truncate">
                   {primaryInstructor}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Credits</span>
+                <span className="text-gray-600">Credits</span>
                 <span className="font-medium">{credits}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Term</span>
+                <span className="text-gray-600">Term</span>
                 <span className="font-medium">Summer 2026</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Sections</span>
+                <span className="text-gray-600">Sections</span>
                 <span className="font-medium">{course.sections.length}</span>
               </div>
               <div className="pt-2 border-t border-gray-100">
@@ -732,14 +783,14 @@ export default function CourseDetailClient({
         </div>
       </div>
 
-      {/* Pre-check modal */}
       {showPreCheck && (
         <PreCheckModal
           course={course}
           onClose={() => setShowPreCheck(false)}
           onAddToPlan={() => {
             const open = course.sections.find(
-              (s) => s.seatsAvailable === null || s.seatsAvailable! > 0
+              (s) =>
+                s.seatsAvailable === null || (s.seatsAvailable ?? 0) > 0,
             );
             if (open) handleAddToPlan(open.id, "A");
             setShowPreCheck(false);
@@ -747,7 +798,6 @@ export default function CourseDetailClient({
         />
       )}
 
-      {/* Recovery drawer */}
       {showRecovery && (
         <RecoveryDrawer
           course={course}

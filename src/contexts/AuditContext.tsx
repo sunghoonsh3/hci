@@ -1,8 +1,16 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  type ReactNode,
+} from "react";
 import type { ParsedAudit } from "@/types";
 import { parseAuditText, isValidAudit } from "@/lib/auditParser";
+import { ParsedAuditSchema } from "@/lib/schemas";
 
 const STORAGE_KEY = "registration-clarity-audit";
 
@@ -10,13 +18,23 @@ function loadAudit(): ParsedAudit | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
+    if (!raw) return null;
+    const parsed = ParsedAuditSchema.safeParse(JSON.parse(raw));
+    if (!parsed.success) {
+      if (process.env.NODE_ENV !== "production") {
+        console.warn("Discarding invalid audit in localStorage", parsed.error);
+      }
+      localStorage.removeItem(STORAGE_KEY);
+      return null;
+    }
+    return parsed.data;
   } catch {
     return null;
   }
 }
 
 function saveAudit(audit: ParsedAudit | null) {
+  if (typeof window === "undefined") return;
   if (audit) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(audit));
   } else {
@@ -40,6 +58,9 @@ export function AuditProvider({ children }: { children: ReactNode }) {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
+    // Hydrate from localStorage on mount. This is the canonical pattern
+    // for client-only state that is unavailable during SSR.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAudit(loadAudit());
     setLoaded(true);
   }, []);
@@ -63,25 +84,32 @@ export function AuditProvider({ children }: { children: ReactNode }) {
     (subject: string, courseNumber: string): boolean => {
       if (!audit) return false;
       return audit.completedCourses.some(
-        (c) => c.subject === subject && c.courseNumber === courseNumber
+        (c) => c.subject === subject && c.courseNumber === courseNumber,
       );
     },
-    [audit]
+    [audit],
   );
 
   const isCourseInProgress = useCallback(
     (subject: string, courseNumber: string): boolean => {
       if (!audit) return false;
       return audit.inProgressCourses.some(
-        (c) => c.subject === subject && c.courseNumber === courseNumber
+        (c) => c.subject === subject && c.courseNumber === courseNumber,
       );
     },
-    [audit]
+    [audit],
   );
 
   return (
     <AuditContext.Provider
-      value={{ audit, loaded, setAuditText, clearAudit, isCourseTaken, isCourseInProgress }}
+      value={{
+        audit,
+        loaded,
+        setAuditText,
+        clearAudit,
+        isCourseTaken,
+        isCourseInProgress,
+      }}
     >
       {children}
     </AuditContext.Provider>

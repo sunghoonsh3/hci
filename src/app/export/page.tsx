@@ -1,30 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePlans } from "@/contexts/PlansContext";
 import { useAudit } from "@/contexts/AuditContext";
 import { computeEligibility } from "@/lib/eligibility";
+import { fetchCourses, toCourseMap } from "@/lib/fetchCourse";
+import { useToast } from "@/hooks/useToast";
+import type { CourseDTO } from "@/lib/schemas";
 import EligibilityBadge from "@/components/EligibilityBadge";
-import WeeklyCalendar from "@/components/WeeklyCalendar";
-import type { CalendarEvent } from "@/components/WeeklyCalendar";
+import Toast from "@/components/Toast";
+import WeeklyCalendar, {
+  type CalendarEvent,
+} from "@/components/WeeklyCalendar";
 import type { EligibilityStatus } from "@/types";
 
-interface CourseData {
-  id: number;
-  subject: string;
-  courseNumber: string;
-  courseTitle: string;
-  registrationRestrictions: string | null;
-  sections: {
-    id: number;
-    seatsAvailable: number | null;
-    specialApproval: string | null;
-  }[];
-}
-
 interface ExportItem {
-  course: CourseData;
+  course: CourseDTO;
   sectionId: number;
   status: EligibilityStatus;
   result: "transferred" | "blocked";
@@ -39,138 +31,149 @@ const PLAN_COLORS: Record<Slot, string> = {
   C: "#6b7280",
 };
 
+function parseDays(days: string | null): string[] {
+  if (!days) return [];
+  try {
+    const parsed = JSON.parse(days);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 export default function ExportPage() {
   const { plans, loaded } = usePlans();
   const { audit } = useAudit();
   const [activeSlot, setActiveSlot] = useState<Slot>("A");
-  const [items, setItems] = useState<ExportItem[]>([]);
   const [exported, setExported] = useState(false);
   const [showPreCheck, setShowPreCheck] = useState(false);
+  const [courseMap, setCourseMap] = useState<Record<number, CourseDTO>>({});
+  const { toast, show, dismiss } = useToast();
 
-  const slotEntries = plans.filter((p) => p.planSlot === activeSlot);
+  const slotEntries = useMemo(
+    () => plans.filter((p) => p.planSlot === activeSlot),
+    [plans, activeSlot],
+  );
 
-  // Build calendar events
-  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+  const idsKey = useMemo(
+    () => [...new Set(slotEntries.map((p) => p.courseId))]
+      .sort((a, b) => a - b)
+      .join(","),
+    [slotEntries],
+  );
+
   useEffect(() => {
-    if (!loaded || slotEntries.length === 0) {
-      setCalendarEvents([]);
-      return;
-    }
-    const courseIds = [...new Set(slotEntries.map((p) => p.courseId))];
-    Promise.all(
-      courseIds.map((id) =>
-        fetch(`/api/course/${id}`)
-          .then((r) => r.json())
-          .catch(() => null)
-      )
-    ).then((results) => {
-      const evts: CalendarEvent[] = [];
-      for (const entry of slotEntries) {
-        const c = results.find((r: { id: number }) => r?.id === entry.courseId);
-        if (!c) continue;
-        const sec = c.sections.find(
-          (s: { id: number }) => s.id === entry.sectionId
-        );
-        if (!sec) continue;
-        for (const m of sec.meetings) {
-          if (!m.days || !m.startTime || !m.endTime) continue;
-          let days: string[];
-          try { days = JSON.parse(m.days); } catch { continue; }
-          evts.push({
-            id: entry.sectionId,
-            label: `${c.subject} ${c.courseNumber}`,
-            days,
-            startTime: m.startTime,
-            endTime: m.endTime,
-            color: PLAN_COLORS[activeSlot],
+    if (!loaded || !idsKey) return;
+    const controller = new AbortController();
+    const ids = idsKey.split(",").map((n) => parseInt(n, 10));
+    const missing = ids.filter((id) => !courseMap[id]);
+    if (missing.length === 0) return;
+    fetchCourses(missing, controller.signal)
+      .then((results) => {
+        if (results.length !== missing.length) {
+          show("Could not load all courses. Some may show stale data.", {
+            variant: "warning",
           });
         }
-      }
-      setCalendarEvents(evts);
-    });
-  }, [loaded, plans, activeSlot]);
+        setCourseMap((prev) => ({ ...prev, ...toCourseMap(results) }));
+      })
+      .catch(() => {
+        show("Failed to load course data", { variant: "error" });
+      });
+    return () => controller.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loaded, idsKey]);
 
-  // Reset state when switching plans
+  const items: ExportItem[] = useMemo(() => {
+    const out: ExportItem[] = [];
+    const allCourses = audit
+      ? [...audit.completedCourses, ...audit.inProgressCourses]
+      : [];
+    for (const entry of slotEntries) {
+      const course = courseMap[entry.courseId];
+      if (!course) continue;
+      const status = computeEligibility(
+        course.subject,
+        course.courseNumber,
+        course.registrationRestrictions,
+        course.sections,
+        allCourses,
+        !!audit,
+      );
+      const blocked =
+        status === "full" ||
+        status === "needs-prereq" ||
+        status === "restricted" ||
+        status === "already-taken";
+      out.push({
+        course,
+        sectionId: entry.sectionId,
+        status,
+        result: blocked ? "blocked" : "transferred",
+        reason: blocked
+          ? status === "full"
+            ? "Section full"
+            : status === "needs-prereq"
+              ? "Missing prerequisites"
+              : status === "restricted"
+                ? "Special approval required"
+                : "Already taken"
+          : undefined,
+      });
+    }
+    return out;
+  }, [slotEntries, courseMap, audit]);
+
+  const calendarEvents: CalendarEvent[] = useMemo(() => {
+    const events: CalendarEvent[] = [];
+    for (const entry of slotEntries) {
+      const course = courseMap[entry.courseId];
+      if (!course) continue;
+      const section = course.sections.find((s) => s.id === entry.sectionId);
+      if (!section) continue;
+      for (const m of section.meetings) {
+        if (!m.startTime || !m.endTime) continue;
+        const days = parseDays(m.days);
+        if (days.length === 0) continue;
+        events.push({
+          id: entry.sectionId,
+          label: `${course.subject} ${course.courseNumber}`,
+          days,
+          startTime: m.startTime,
+          endTime: m.endTime,
+          color: PLAN_COLORS[activeSlot],
+        });
+      }
+    }
+    return events;
+  }, [slotEntries, courseMap, activeSlot]);
+
   function switchSlot(slot: Slot) {
     setActiveSlot(slot);
-    setItems([]);
     setExported(false);
     setShowPreCheck(false);
   }
-
-  // Fetch course data and run diagnostics
-  useEffect(() => {
-    if (!loaded || slotEntries.length === 0) {
-      setItems([]);
-      return;
-    }
-
-    Promise.all(
-      slotEntries.map((entry) =>
-        fetch(`/api/course/${entry.courseId}`)
-          .then((r) => r.json())
-          .then((course: CourseData) => {
-            const allCourses = audit
-              ? [...audit.completedCourses, ...audit.inProgressCourses]
-              : [];
-            const status = computeEligibility(
-              course.subject,
-              course.courseNumber,
-              course.registrationRestrictions,
-              course.sections,
-              allCourses
-            );
-            const blocked =
-              status === "full" ||
-              status === "needs-prereq" ||
-              status === "restricted" ||
-              status === "already-taken";
-            return {
-              course,
-              sectionId: entry.sectionId,
-              status,
-              result: blocked ? "blocked" : "transferred",
-              reason: blocked
-                ? status === "full"
-                  ? "Section full"
-                  : status === "needs-prereq"
-                  ? "Missing prerequisites"
-                  : status === "restricted"
-                  ? "Special approval required"
-                  : "Already taken"
-                : undefined,
-            } as ExportItem;
-          })
-          .catch(() => null)
-      )
-    ).then((results) => {
-      setItems(results.filter(Boolean) as ExportItem[]);
-    });
-  }, [loaded, plans, audit, activeSlot]);
 
   const transferred = items.filter((i) => i.result === "transferred");
   const blocked = items.filter((i) => i.result === "blocked");
   const allSuccess = blocked.length === 0 && transferred.length > 0;
 
-  // Plan tabs — shared across all views
   const planTabs = (
-    <div className="flex gap-2 mb-6">
+    <div className="flex gap-2 mb-6" role="tablist" aria-label="Plan slots">
       {(["A", "B", "C"] as Slot[]).map((slot) => {
         const count = plans.filter((p) => p.planSlot === slot).length;
+        const isActive = activeSlot === slot;
         return (
           <button
             key={slot}
+            type="button"
+            role="tab"
+            aria-selected={isActive}
             onClick={() => switchSlot(slot)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              activeSlot === slot
-                ? "text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              isActive ? "text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
-            style={
-              activeSlot === slot
-                ? { backgroundColor: PLAN_COLORS[slot] }
-                : undefined
-            }
+            style={isActive ? { backgroundColor: PLAN_COLORS[slot] } : undefined}
           >
             Plan {slot} ({count})
           </button>
@@ -179,18 +182,21 @@ export default function ExportPage() {
     </div>
   );
 
+  const toastUi = toast ? (
+    <Toast message={toast.message} variant={toast.variant} onDismiss={dismiss} />
+  ) : null;
+
   if (!exported && !showPreCheck) {
     return (
       <div className="max-w-3xl">
-        <h1 className="text-xl font-bold text-gray-900 mb-4">
-          Export to NOVO
-        </h1>
-
+        {toastUi}
+        <h1 className="text-xl font-bold text-gray-900 mb-4">Export to NOVO</h1>
         {planTabs}
-
         {slotEntries.length === 0 ? (
           <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
-            <p className="text-gray-500">No courses in Plan {activeSlot} to export.</p>
+            <p className="text-gray-700">
+              No courses in Plan {activeSlot} to export.
+            </p>
             <Link
               href="/search"
               className="text-[#1B6B3A] font-medium text-sm hover:underline mt-2 inline-block"
@@ -200,15 +206,17 @@ export default function ExportPage() {
           </div>
         ) : (
           <>
-            <p className="text-sm text-gray-600 mb-6">
-              Review your Plan {activeSlot} courses before exporting to NOVO registration.
+            <p className="text-sm text-gray-700 mb-6">
+              Review your Plan {activeSlot} courses before exporting to NOVO
+              registration.
             </p>
             <button
+              type="button"
               onClick={() => setShowPreCheck(true)}
               className="text-white px-6 py-2.5 rounded-lg font-medium transition-colors"
               style={{ backgroundColor: PLAN_COLORS[activeSlot] }}
             >
-              Run Pre-check & Export
+              Run Pre-check &amp; Export
             </button>
           </>
         )}
@@ -219,6 +227,7 @@ export default function ExportPage() {
   if (showPreCheck && !exported) {
     return (
       <div className="max-w-3xl">
+        {toastUi}
         <h1 className="text-xl font-bold text-gray-900 mb-4">
           Export Pre-check — Plan {activeSlot}
         </h1>
@@ -227,33 +236,30 @@ export default function ExportPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="text-left px-4 py-3 font-medium text-gray-600">
+                <th className="text-left px-4 py-3 font-medium text-gray-700">
                   Course
                 </th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">
+                <th className="text-left px-4 py-3 font-medium text-gray-700">
                   Status
                 </th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">
+                <th className="text-left px-4 py-3 font-medium text-gray-700">
                   Diagnosis
                 </th>
               </tr>
             </thead>
             <tbody>
               {items.map((item) => (
-                <tr
-                  key={item.sectionId}
-                  className="border-b border-gray-100"
-                >
+                <tr key={item.sectionId} className="border-b border-gray-100">
                   <td className="px-4 py-3 font-medium">
                     {item.course.subject} {item.course.courseNumber}
-                    <div className="text-xs text-gray-400 font-normal">
+                    <div className="text-xs text-gray-500 font-normal">
                       {item.course.courseTitle}
                     </div>
                   </td>
                   <td className="px-4 py-3">
                     <EligibilityBadge status={item.status} />
                   </td>
-                  <td className="px-4 py-3 text-xs text-gray-500">
+                  <td className="px-4 py-3 text-xs text-gray-700">
                     {item.result === "transferred"
                       ? "Ready to export"
                       : item.reason}
@@ -264,13 +270,19 @@ export default function ExportPage() {
           </table>
         </div>
 
-        {/* Summary */}
-        <div className={`rounded-lg p-4 mb-6 ${
-          allSuccess
-            ? "bg-green-50 border border-green-200"
-            : "bg-yellow-50 border border-yellow-200"
-        }`}>
-          <div className={`text-sm font-semibold ${allSuccess ? "text-green-800" : "text-yellow-800"}`}>
+        <div
+          className={`rounded-lg p-4 mb-6 ${
+            allSuccess
+              ? "bg-green-50 border border-green-200"
+              : "bg-yellow-50 border border-yellow-200"
+          }`}
+          role="status"
+        >
+          <div
+            className={`text-sm font-semibold ${
+              allSuccess ? "text-green-900" : "text-yellow-900"
+            }`}
+          >
             {allSuccess
               ? `All ${transferred.length} courses eligible`
               : `${transferred.length} of ${items.length} eligible — ${blocked.length} blocked`}
@@ -280,6 +292,7 @@ export default function ExportPage() {
         <div className="flex gap-3">
           {allSuccess ? (
             <button
+              type="button"
               onClick={() => setExported(true)}
               className="text-white px-6 py-2.5 rounded-lg font-medium transition-colors"
               style={{ backgroundColor: PLAN_COLORS[activeSlot] }}
@@ -288,6 +301,7 @@ export default function ExportPage() {
             </button>
           ) : (
             <button
+              type="button"
               onClick={() => setExported(true)}
               className="bg-yellow-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-yellow-700 transition-colors"
             >
@@ -295,8 +309,9 @@ export default function ExportPage() {
             </button>
           )}
           <button
+            type="button"
             onClick={() => setShowPreCheck(false)}
-            className="bg-gray-100 text-gray-700 px-6 py-2.5 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+            className="bg-gray-100 text-gray-800 px-6 py-2.5 rounded-lg font-medium hover:bg-gray-200 transition-colors"
           >
             Back
           </button>
@@ -305,126 +320,136 @@ export default function ExportPage() {
     );
   }
 
-  // Export results
   return (
     <div>
+      {toastUi}
       <h1 className="text-xl font-bold text-gray-900 mb-4">
         Export to NOVO — Plan {activeSlot} Results
       </h1>
 
       <div className="grid grid-cols-[1fr_280px] gap-6">
-      <div>
-      {allSuccess ? (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-          <div className="font-semibold text-green-800">
-            All courses transferred successfully
+        <div>
+          {allSuccess ? (
+            <div
+              className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6"
+              role="status"
+            >
+              <div className="font-semibold text-green-900">
+                All courses transferred successfully
+              </div>
+              <p className="text-sm text-green-800 mt-1">
+                Confirm your schedule in NOVO to complete registration.
+              </p>
+            </div>
+          ) : (
+            <div
+              className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6"
+              role="status"
+            >
+              <div className="font-semibold text-yellow-900">
+                Partial export: {transferred.length} of {items.length} courses
+                transferred
+              </div>
+              <p className="text-sm text-yellow-800 mt-1">
+                Some courses could not be transferred. See details below.
+              </p>
+            </div>
+          )}
+
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden mb-6">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-200 bg-gray-50">
+                  <th className="text-left px-4 py-3 font-medium text-gray-700">
+                    Course
+                  </th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-700">
+                    Result
+                  </th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-700">
+                    Next Steps
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((item) => (
+                  <tr key={item.sectionId} className="border-b border-gray-100">
+                    <td className="px-4 py-3 font-medium">
+                      {item.course.subject} {item.course.courseNumber}
+                      <div className="text-xs text-gray-500 font-normal">
+                        {item.course.courseTitle}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      {item.result === "transferred" ? (
+                        <span className="inline-flex items-center gap-1 text-green-800 font-medium">
+                          <span aria-hidden="true">✓</span> Transferred
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-red-700 font-medium">
+                          <span aria-hidden="true">✗</span> Not Transferred
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-xs">
+                      {item.result === "transferred" ? (
+                        <span className="text-gray-700">Confirm in NOVO</span>
+                      ) : (
+                        <div className="flex gap-1.5 flex-wrap">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              show(
+                                "Waitlist request submitted via NOVO (demo)",
+                              )
+                            }
+                            className="bg-gray-100 text-gray-800 px-2 py-1 rounded font-medium hover:bg-gray-200 transition-colors"
+                          >
+                            Join Waitlist
+                          </button>
+                          <Link
+                            href={`/course/${item.course.id}`}
+                            className="bg-gray-100 text-gray-800 px-2 py-1 rounded font-medium hover:bg-gray-200 transition-colors"
+                          >
+                            Request Override
+                          </Link>
+                          <Link
+                            href={`/search?subject=${item.course.subject}`}
+                            className="bg-gray-100 text-gray-800 px-2 py-1 rounded font-medium hover:bg-gray-200 transition-colors"
+                          >
+                            Find Alternative
+                          </Link>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-          <p className="text-sm text-green-600 mt-1">
-            Confirm your schedule in NOVO to complete registration.
-          </p>
-        </div>
-      ) : (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-          <div className="font-semibold text-yellow-800">
-            Partial export: {transferred.length} of {items.length} courses
-            transferred
+
+          <div className="flex gap-3">
+            <Link
+              href="/plan"
+              className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
+            >
+              Back to Plan
+            </Link>
+            <Link
+              href="/search"
+              className="bg-white border border-gray-300 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+            >
+              Search More Courses
+            </Link>
           </div>
-          <p className="text-sm text-yellow-600 mt-1">
-            Some courses could not be transferred. See details below.
-          </p>
         </div>
-      )}
 
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden mb-6">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-gray-200 bg-gray-50">
-              <th className="text-left px-4 py-3 font-medium text-gray-600">
-                Course
-              </th>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">
-                Result
-              </th>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">
-                Next Steps
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((item) => (
-              <tr key={item.sectionId} className="border-b border-gray-100">
-                <td className="px-4 py-3 font-medium">
-                  {item.course.subject} {item.course.courseNumber}
-                  <div className="text-xs text-gray-400 font-normal">
-                    {item.course.courseTitle}
-                  </div>
-                </td>
-                <td className="px-4 py-3">
-                  {item.result === "transferred" ? (
-                    <span className="inline-flex items-center gap-1 text-green-700 font-medium">
-                      <span>✓</span> Transferred
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 text-red-600 font-medium">
-                      <span>✗</span> Not Transferred
-                    </span>
-                  )}
-                </td>
-                <td className="px-4 py-3 text-xs">
-                  {item.result === "transferred" ? (
-                    <span className="text-gray-500">Confirm in NOVO</span>
-                  ) : (
-                    <div className="flex gap-1.5 flex-wrap">
-                      <button
-                        onClick={() => alert("Waitlist request submitted via NOVO")}
-                        className="bg-gray-100 text-gray-700 px-2 py-1 rounded font-medium hover:bg-gray-200 transition-colors"
-                      >
-                        Join Waitlist
-                      </button>
-                      <Link
-                        href={`/course/${item.course.id}`}
-                        className="bg-gray-100 text-gray-700 px-2 py-1 rounded font-medium hover:bg-gray-200 transition-colors"
-                      >
-                        Request Override
-                      </Link>
-                      <Link
-                        href={`/search?subject=${item.course.subject}`}
-                        className="bg-gray-100 text-gray-700 px-2 py-1 rounded font-medium hover:bg-gray-200 transition-colors"
-                      >
-                        Find Alternative
-                      </Link>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="flex gap-3">
-        <Link
-          href="/plan"
-          className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
-        >
-          Back to Plan
-        </Link>
-        <Link
-          href="/search"
-          className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
-        >
-          Search More Courses
-        </Link>
-      </div>
-      </div>
-
-      {/* Weekly Schedule */}
-      <div>
-        <h2 className="text-sm font-semibold text-gray-700 mb-2">
-          Weekly Schedule
-        </h2>
-        <WeeklyCalendar events={calendarEvents} compact />
-      </div>
+        <div>
+          <h2 className="text-sm font-semibold text-gray-800 mb-2">
+            Weekly Schedule
+          </h2>
+          <WeeklyCalendar events={calendarEvents} compact />
+        </div>
       </div>
     </div>
   );

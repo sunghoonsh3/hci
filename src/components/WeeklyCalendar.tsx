@@ -156,7 +156,7 @@ export default function WeeklyCalendar({
         </div>
 
         {/* Day columns */}
-        {DAYS.map((day, dayIdx) => (
+        {DAYS.map((day) => (
           <div key={day} className="relative border-l border-gray-100">
             {/* Hour lines */}
             {HOURS.map((h) => (

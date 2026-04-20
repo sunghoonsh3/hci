@@ -1,4 +1,3 @@
-// Parse registration restriction text into plain language
 import type { CompletedCourse } from "@/types";
 
 export interface ParsedRestriction {
@@ -9,87 +8,92 @@ export interface ParsedRestriction {
 }
 
 export interface PrereqCheck {
-  courseCode: string;       // "CSE 20312"
+  courseCode: string;
   completed: boolean;
   grade?: string;
   term?: string;
 }
 
-export function parseRestrictions(restrictionsJson: string | null): ParsedRestriction[] {
-  if (!restrictionsJson) return [];
+const COURSE_CODE_RE = /[A-Z]{2,5}\s+\d{4,5}/g;
 
-  let restrictions: string[];
+function safeParseStringArray(raw: string | null): string[] {
+  if (!raw) return [];
   try {
-    restrictions = JSON.parse(restrictionsJson);
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((x): x is string => typeof x === "string");
   } catch {
     return [];
   }
+}
 
-  return restrictions.map((raw) => {
-    // Level restriction
+export function parseRestrictions(
+  restrictionsJson: string | null,
+): ParsedRestriction[] {
+  const restrictions = safeParseStringArray(restrictionsJson);
+
+  return restrictions.map((raw): ParsedRestriction => {
     const levelMatch = raw.match(/limited to (.+ level) students/i);
     if (levelMatch) {
       return { type: "level", raw, label: `${levelMatch[1]} only` };
     }
 
-    // Campus restriction
     const campusMatch = raw.match(/limited to students in the (.+) campus/i);
     if (campusMatch) {
       return { type: "campus", raw, label: `${campusMatch[1]} campus only` };
     }
 
-    // Program exclusion
     if (/cannot enroll.+program in/i.test(raw)) {
       return { type: "program-exclusion", raw, label: "Program restriction" };
     }
 
-    // Prerequisites
-    const prereqMatch = raw.match(/Prerequisites?:\s*\(([^)]+)\)/i);
-    if (prereqMatch) {
-      return {
-        type: "prerequisite",
-        raw,
-        label: "Prerequisites required",
-        details: prereqMatch[1],
-      };
+    if (/prerequisite/i.test(raw)) {
+      const parenMatch = raw.match(/Prerequisites?:\s*\(([^)]+)\)/i);
+      if (parenMatch) {
+        return {
+          type: "prerequisite",
+          raw,
+          label: "Prerequisites required",
+          details: parenMatch[1],
+        };
+      }
+      const bareMatch = raw.match(/Prerequisites?:\s*(.+?)\s*$/i);
+      if (bareMatch) {
+        return {
+          type: "prerequisite",
+          raw,
+          label: "Prerequisites required",
+          details: bareMatch[1],
+        };
+      }
     }
 
-    // Fallback
     return { type: "other", raw, label: raw };
   });
 }
 
 export function extractPrereqCourses(restrictionsJson: string | null): string[] {
-  if (!restrictionsJson) return [];
+  const restrictions = safeParseStringArray(restrictionsJson);
+  const courses = new Set<string>();
 
-  let restrictions: string[];
-  try {
-    restrictions = JSON.parse(restrictionsJson);
-  } catch {
-    return [];
-  }
-
-  const courses: string[] = [];
   for (const r of restrictions) {
-    const match = r.match(/Prerequisites?:\s*\(([^)]+)\)/i);
-    if (match) {
-      // Extract course codes like "CSE 20312" from the prereq string
-      const codes = match[1].match(/[A-Z]{2,5}\s+\d{4,5}/g);
-      if (codes) courses.push(...codes);
-    }
+    if (!/prerequisite/i.test(r)) continue;
+    const codes = r.match(COURSE_CODE_RE);
+    if (codes) for (const c of codes) courses.add(c);
   }
-  return courses;
+
+  return [...courses];
 }
 
 export function checkPrerequisites(
   restrictionsJson: string | null,
-  completedCourses: CompletedCourse[]
+  completedCourses: CompletedCourse[],
 ): PrereqCheck[] {
   const prereqCodes = extractPrereqCourses(restrictionsJson);
   return prereqCodes.map((code) => {
     const [subject, number] = code.split(/\s+/);
     const completed = completedCourses.find(
-      (c) => c.subject === subject && c.courseNumber === number
+      (c) => c.subject === subject && c.courseNumber === number,
     );
     return {
       courseCode: code,

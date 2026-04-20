@@ -3,36 +3,40 @@
 import Link from "next/link";
 import { useAudit } from "@/contexts/AuditContext";
 import { usePlans } from "@/contexts/PlansContext";
+import { fetchCourse } from "@/lib/fetchCourse";
 import type { PlanSlot } from "@/types";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+
+type CourseName = { subject: string; courseNumber: string };
 
 export default function Sidebar() {
   const { audit } = useAudit();
   const { plans, removeFromPlan } = usePlans();
   const [activeSlot, setActiveSlot] = useState<PlanSlot>("A");
-  const [courseNames, setCourseNames] = useState<
-    Record<number, { subject: string; courseNumber: string }>
-  >({});
+  const [courseNames, setCourseNames] = useState<Record<number, CourseName>>(
+    {},
+  );
+  const inFlight = useRef<Set<number>>(new Set());
 
   const slotEntries = plans.filter((p) => p.planSlot === activeSlot);
 
-  // Fetch course names for plan entries
   useEffect(() => {
-    const ids = [...new Set(plans.map((p) => p.courseId))];
-    const missing = ids.filter((id) => !courseNames[id]);
-    if (missing.length === 0) return;
+    const controller = new AbortController();
+    const uniqueIds = [...new Set(plans.map((p) => p.courseId))];
+    const toFetch = uniqueIds.filter(
+      (id) => !courseNames[id] && !inFlight.current.has(id),
+    );
+    if (toFetch.length === 0) return;
+
+    for (const id of toFetch) inFlight.current.add(id);
 
     Promise.all(
-      missing.map((id) =>
-        fetch(`/api/course/${id}`)
-          .then((r) => r.json())
-          .then((c) => ({
-            id,
-            subject: c.subject as string,
-            courseNumber: c.courseNumber as string,
-          }))
-          .catch(() => null)
-      )
+      toFetch.map(async (id) => {
+        const course = await fetchCourse(id, controller.signal);
+        return course
+          ? { id, subject: course.subject, courseNumber: course.courseNumber }
+          : null;
+      }),
     ).then((results) => {
       setCourseNames((prev) => {
         const next = { ...prev };
@@ -41,10 +45,17 @@ export default function Sidebar() {
         }
         return next;
       });
+      for (const id of toFetch) inFlight.current.delete(id);
     });
-  }, [plans, courseNames]);
 
-  // Compute major credits for progress
+    const inFlightRef = inFlight.current;
+    return () => {
+      controller.abort();
+      for (const id of toFetch) inFlightRef.delete(id);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [plans]);
+
   const majorCredits = audit
     ? audit.completedCourses
         .filter((c) => c.subject === "CSE")
@@ -52,31 +63,36 @@ export default function Sidebar() {
     : 0;
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 flex flex-col overflow-y-auto shrink-0">
-      {/* Term */}
+    <aside
+      aria-label="Plans and progress"
+      className="w-64 bg-white border-r border-gray-200 flex flex-col overflow-y-auto shrink-0"
+    >
       <div className="px-4 py-3 border-b border-gray-100">
-        <div className="text-xs text-gray-500 uppercase tracking-wide font-medium">
+        <div className="text-xs text-gray-600 uppercase tracking-wide font-medium">
           Term
         </div>
         <div className="text-sm font-semibold mt-1">Summer 2026</div>
       </div>
 
-      {/* My Plans */}
       <div className="px-4 py-3 border-b border-gray-100">
-        <div className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-2">
+        <div className="text-xs text-gray-600 uppercase tracking-wide font-medium mb-2">
           My Plans
         </div>
-        <div className="flex gap-1 mb-2">
+        <div className="flex gap-1 mb-2" role="tablist" aria-label="Plan slots">
           {(["A", "B", "C"] as PlanSlot[]).map((slot) => {
             const count = plans.filter((p) => p.planSlot === slot).length;
+            const isActive = activeSlot === slot;
             return (
               <button
                 key={slot}
+                role="tab"
+                aria-selected={isActive}
+                aria-controls={`plan-panel-${slot}`}
                 onClick={() => setActiveSlot(slot)}
                 className={`flex-1 text-xs font-medium py-1.5 rounded transition-colors ${
-                  activeSlot === slot
+                  isActive
                     ? "bg-[#0C2340] text-white"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
                 Plan {slot} ({count})
@@ -84,80 +100,99 @@ export default function Sidebar() {
             );
           })}
         </div>
-        {slotEntries.length === 0 ? (
-          <p className="text-xs text-gray-400 italic">
-            No courses in Plan {activeSlot}
-          </p>
-        ) : (
-          <ul className="space-y-1">
-            {slotEntries.map((entry) => {
-              const name = courseNames[entry.courseId];
-              return (
-                <li
-                  key={entry.sectionId}
-                  className="text-xs bg-gray-50 rounded px-2 py-1.5 flex justify-between items-center"
-                >
-                  <Link
-                    href={`/course/${entry.courseId}`}
-                    className="text-[#0C2340] font-medium hover:underline truncate"
+        <div id={`plan-panel-${activeSlot}`} role="tabpanel">
+          {slotEntries.length === 0 ? (
+            <p className="text-xs text-gray-500 italic">
+              No courses in Plan {activeSlot}
+            </p>
+          ) : (
+            <ul className="space-y-1">
+              {slotEntries.map((entry) => {
+                const name = courseNames[entry.courseId];
+                const label = name
+                  ? `${name.subject} ${name.courseNumber}`
+                  : `Course #${entry.courseId}`;
+                return (
+                  <li
+                    key={`${entry.sectionId}-${entry.planSlot}`}
+                    className="text-xs bg-gray-50 rounded px-2 py-1.5 flex justify-between items-center"
                   >
-                    {name
-                      ? `${name.subject} ${name.courseNumber}`
-                      : `Course #${entry.courseId}`}
-                  </Link>
-                  <button
-                    onClick={() => removeFromPlan(entry.sectionId, activeSlot)}
-                    className="text-gray-400 hover:text-red-500 ml-2 shrink-0"
-                    title="Remove"
-                  >
-                    ×
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        )}
+                    <Link
+                      href={`/course/${entry.courseId}`}
+                      className="text-[#0C2340] font-medium hover:underline truncate"
+                    >
+                      {label}
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        removeFromPlan(entry.sectionId, activeSlot)
+                      }
+                      aria-label={`Remove ${label} from Plan ${activeSlot}`}
+                      className="text-gray-500 hover:text-red-600 ml-2 shrink-0"
+                    >
+                      ×
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
       </div>
 
-      {/* Progress */}
       {audit && (
         <div className="px-4 py-3 border-b border-gray-100">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-gray-500 uppercase tracking-wide font-medium">
+            <span className="text-xs text-gray-600 uppercase tracking-wide font-medium">
               Progress
             </span>
-            <span className="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full font-medium">
+            <span className="text-[10px] bg-green-100 text-green-800 px-1.5 py-0.5 rounded-full font-medium">
               On Track
             </span>
           </div>
           <div className="space-y-2">
             <div>
-              <div className="flex justify-between text-xs text-gray-600 mb-1">
+              <div className="flex justify-between text-xs text-gray-700 mb-1">
                 <span>Credits</span>
                 <span>
                   {audit.creditsApplied}/{audit.creditsRequired}
                 </span>
               </div>
-              <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div
+                className="h-2 bg-gray-100 rounded-full overflow-hidden"
+                role="progressbar"
+                aria-label="Credits progress"
+                aria-valuemin={0}
+                aria-valuemax={audit.creditsRequired}
+                aria-valuenow={audit.creditsApplied}
+              >
                 <div
                   className="h-full bg-[#1B6B3A] rounded-full"
                   style={{
                     width: `${Math.min(
                       100,
-                      (audit.creditsApplied / audit.creditsRequired) * 100
+                      (audit.creditsApplied / audit.creditsRequired) * 100,
                     )}%`,
                   }}
                 />
               </div>
             </div>
             <div>
-              <div className="flex justify-between text-xs text-gray-600 mb-1">
+              <div className="flex justify-between text-xs text-gray-700 mb-1">
                 <span>Major (CS)</span>
                 <span>{majorCredits}/42</span>
               </div>
-              <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div
+                className="h-2 bg-gray-100 rounded-full overflow-hidden"
+                role="progressbar"
+                aria-label="Major credits progress"
+                aria-valuemin={0}
+                aria-valuemax={42}
+                aria-valuenow={majorCredits}
+              >
                 <div
-                  className="h-full bg-blue-500 rounded-full"
+                  className="h-full bg-blue-600 rounded-full"
                   style={{
                     width: `${Math.min(100, (majorCredits / 42) * 100)}%`,
                   }}
@@ -165,33 +200,39 @@ export default function Sidebar() {
               </div>
             </div>
             <div>
-              <div className="flex justify-between text-xs text-gray-600 mb-1">
+              <div className="flex justify-between text-xs text-gray-700 mb-1">
                 <span>Degree</span>
                 <span>{audit.degreeProgress}%</span>
               </div>
-              <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div
+                className="h-2 bg-gray-100 rounded-full overflow-hidden"
+                role="progressbar"
+                aria-label="Degree progress"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={audit.degreeProgress}
+              >
                 <div
                   className="h-full bg-[#1B6B3A] rounded-full"
                   style={{ width: `${audit.degreeProgress}%` }}
                 />
               </div>
             </div>
-            <div className="text-xs text-gray-500">
+            <div className="text-xs text-gray-600">
               GPA: {audit.gpa.toFixed(3)} | {audit.classification}
             </div>
           </div>
         </div>
       )}
 
-      {/* GPS Widget */}
       <div className="px-4 py-3">
-        <div className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-2">
+        <div className="text-xs text-gray-600 uppercase tracking-wide font-medium mb-2">
           My GPS
         </div>
         {audit ? (
-          <div className="text-xs text-gray-600">
+          <div className="text-xs text-gray-700">
             <div className="font-medium">{audit.major}</div>
-            <div className="text-gray-400 mt-0.5">{audit.college}</div>
+            <div className="text-gray-500 mt-0.5">{audit.college}</div>
             <Link
               href="/onboarding"
               className="text-[#1B6B3A] hover:underline mt-1 inline-block"

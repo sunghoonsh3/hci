@@ -1,76 +1,116 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { usePlans } from "@/contexts/PlansContext";
 import { useAudit } from "@/contexts/AuditContext";
 import { getRequirementBadges } from "@/lib/requirements";
 import { computeEligibility } from "@/lib/eligibility";
+import { fetchCourses, toCourseMap } from "@/lib/fetchCourse";
+import { useToast } from "@/hooks/useToast";
+import type { CourseDTO } from "@/lib/schemas";
 import EligibilityBadge from "@/components/EligibilityBadge";
-import WeeklyCalendar from "@/components/WeeklyCalendar";
-import type { CalendarEvent } from "@/components/WeeklyCalendar";
+import Toast from "@/components/Toast";
+import WeeklyCalendar, {
+  type CalendarEvent,
+} from "@/components/WeeklyCalendar";
 import type { PlanSlot } from "@/types";
 
 function RowMenu({
   sectionId,
+  courseLabel,
   currentSlot,
   onMove,
   onRemove,
 }: {
   sectionId: number;
+  courseLabel: string;
   currentSlot: PlanSlot;
   onMove: (sectionId: number, from: PlanSlot, to: PlanSlot) => void;
   onRemove: (sectionId: number, slot: PlanSlot) => void;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!open) return;
     function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setOpen(false);
+        triggerRef.current?.focus();
+      }
     }
     document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("keydown", handleKey);
+    };
   }, [open]);
 
-  const otherSlots = (["A", "B", "C"] as PlanSlot[]).filter((s) => s !== currentSlot);
+  const otherSlots = (["A", "B", "C"] as PlanSlot[]).filter(
+    (s) => s !== currentSlot,
+  );
 
   return (
     <div ref={ref} className="relative inline-block">
       <button
+        ref={triggerRef}
+        type="button"
         onClick={() => setOpen((p) => !p)}
-        className="text-gray-400 hover:text-gray-600 p-1.5 rounded hover:bg-gray-100 transition-colors"
-        title="Actions"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label={`Actions for ${courseLabel}`}
+        className="text-gray-500 hover:text-gray-800 p-1.5 rounded hover:bg-gray-100 transition-colors"
       >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="currentColor"
+          aria-hidden="true"
+        >
           <circle cx="8" cy="3" r="1.5" />
           <circle cx="8" cy="8" r="1.5" />
           <circle cx="8" cy="13" r="1.5" />
         </svg>
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-20 w-40">
+        <div
+          role="menu"
+          aria-label={`Actions for ${courseLabel}`}
+          className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-20 w-40"
+        >
           {otherSlots.map((slot) => (
             <button
               key={slot}
+              role="menuitem"
+              type="button"
               onClick={() => {
                 onMove(sectionId, currentSlot, slot);
                 setOpen(false);
               }}
-              className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              className="w-full text-left px-3 py-2 text-sm text-gray-800 hover:bg-gray-50 transition-colors"
             >
               Move to Plan {slot}
             </button>
           ))}
           <div className="border-t border-gray-100 my-1" />
           <button
+            role="menuitem"
+            type="button"
             onClick={() => {
               onRemove(sectionId, currentSlot);
               setOpen(false);
             }}
-            className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+            className="w-full text-left px-3 py-2 text-sm text-red-700 hover:bg-red-50 transition-colors"
           >
             Remove
           </button>
@@ -80,74 +120,61 @@ function RowMenu({
   );
 }
 
-interface CourseData {
-  id: number;
-  subject: string;
-  courseNumber: string;
-  courseTitle: string;
-  creditHoursMin: number | null;
-  creditHoursMax: number | null;
-  registrationRestrictions: string | null;
-  sections: {
-    id: number;
-    sectionNumber: string | null;
-    seatsAvailable: number | null;
-    specialApproval: string | null;
-    meetings: {
-      days: string | null;
-      startTime: string | null;
-      endTime: string | null;
-    }[];
-  }[];
-}
-
 const PLAN_COLORS: Record<PlanSlot, string> = {
   A: "#1B6B3A",
   B: "#2563eb",
   C: "#6b7280",
 };
 
+function parseDays(days: string | null): string[] {
+  if (!days) return [];
+  try {
+    const parsed = JSON.parse(days);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 export default function PlanPage() {
   const router = useRouter();
-  const { plans, removeFromPlan, moveToPlan, loaded } = usePlans();
+  const { plans, removeFromPlan, moveToPlan, addToPlan, loaded } = usePlans();
   const { audit } = useAudit();
   const [activeSlot, setActiveSlot] = useState<PlanSlot>("A");
   const [showAllPlans, setShowAllPlans] = useState(false);
-  const [courseDataMap, setCourseDataMap] = useState<Record<number, CourseData>>({});
-  const [highlightedSection, setHighlightedSection] = useState<number | null>(null);
+  const [courseDataMap, setCourseDataMap] = useState<
+    Record<number, CourseDTO>
+  >({});
+  const [highlightedSection, setHighlightedSection] = useState<number | null>(
+    null,
+  );
+  const { toast, show, dismiss, runUndo } = useToast();
 
-  // Fetch course data for all plan entries
+  const planIdsKey = useMemo(
+    () => [...new Set(plans.map((p) => p.courseId))].sort((a, b) => a - b).join(","),
+    [plans],
+  );
+
   useEffect(() => {
     if (!loaded) return;
-    const courseIds = [...new Set(plans.map((p) => p.courseId))];
-
-    setCourseDataMap((prev) => {
-      const missing = courseIds.filter((id) => !prev[id]);
-      if (missing.length === 0) return prev;
-
-      Promise.all(
-        missing.map((id) =>
-          fetch(`/api/course/${id}`)
-            .then((r) => r.json())
-            .catch(() => null)
-        )
-      ).then((results) => {
-        setCourseDataMap((curr) => {
-          const updated = { ...curr };
-          for (const course of results) {
-            if (course) updated[course.id] = course;
-          }
-          return updated;
-        });
-      });
-
-      return prev;
+    if (!planIdsKey) {
+      setCourseDataMap({});
+      return;
+    }
+    const ids = planIdsKey.split(",").map((n) => parseInt(n, 10));
+    const controller = new AbortController();
+    const missing = ids.filter((id) => !courseDataMap[id]);
+    if (missing.length === 0) return;
+    fetchCourses(missing, controller.signal).then((results) => {
+      setCourseDataMap((prev) => ({ ...prev, ...toCourseMap(results) }));
     });
-  }, [plans, loaded]);
+    return () => controller.abort();
+    // courseDataMap intentionally excluded; planIdsKey is stable for plans
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loaded, planIdsKey]);
 
   const slotEntries = plans.filter((p) => p.planSlot === activeSlot);
 
-  // Build calendar events
   const calendarEntries = showAllPlans ? plans : slotEntries;
   const events: CalendarEvent[] = [];
   for (const entry of calendarEntries) {
@@ -156,13 +183,9 @@ export default function PlanPage() {
     const section = course.sections.find((s) => s.id === entry.sectionId);
     if (!section) continue;
     for (const meeting of section.meetings) {
-      if (!meeting.days || !meeting.startTime || !meeting.endTime) continue;
-      let days: string[];
-      try {
-        days = JSON.parse(meeting.days);
-      } catch {
-        continue;
-      }
+      if (!meeting.startTime || !meeting.endTime) continue;
+      const days = parseDays(meeting.days);
+      if (days.length === 0) continue;
       events.push({
         id: entry.sectionId,
         label: `${course.subject} ${course.courseNumber}`,
@@ -174,14 +197,57 @@ export default function PlanPage() {
     }
   }
 
-  // Calculate total credits
   const totalCredits = slotEntries.reduce((sum, entry) => {
     const c = courseDataMap[entry.courseId];
     return sum + (c?.creditHoursMin ?? 0);
   }, 0);
 
+  const handleRemove = useCallback(
+    (sectionId: number, slot: PlanSlot) => {
+      const entry = plans.find(
+        (p) => p.sectionId === sectionId && p.planSlot === slot,
+      );
+      if (!entry) return;
+      const course = courseDataMap[entry.courseId];
+      const label = course
+        ? `${course.subject} ${course.courseNumber}`
+        : "Course";
+      removeFromPlan(sectionId, slot);
+      show(`Removed ${label} from Plan ${slot}`, {
+        undo: () => addToPlan(entry.courseId, sectionId, slot),
+      });
+    },
+    [plans, courseDataMap, removeFromPlan, addToPlan, show],
+  );
+
+  const handleMove = useCallback(
+    (sectionId: number, from: PlanSlot, to: PlanSlot) => {
+      moveToPlan(sectionId, from, to);
+      const entry = plans.find(
+        (p) => p.sectionId === sectionId && p.planSlot === from,
+      );
+      const course = entry ? courseDataMap[entry.courseId] : null;
+      const label = course
+        ? `${course.subject} ${course.courseNumber}`
+        : "Course";
+      show(`Moved ${label} to Plan ${to}`, {
+        undo: () => moveToPlan(sectionId, to, from),
+      });
+    },
+    [plans, courseDataMap, moveToPlan, show],
+  );
+
   return (
     <div>
+      {toast && (
+        <Toast
+          message={toast.message}
+          variant={toast.variant}
+          onUndo={toast.undo ? runUndo : undefined}
+          onDismiss={dismiss}
+        />
+      )}
+
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-bold text-gray-900">My Plan</h1>
         <Link
@@ -192,30 +258,33 @@ export default function PlanPage() {
         </Link>
       </div>
 
-      {/* Plan tabs */}
-      <div className="flex gap-2 mb-4">
+      <div
+        className="flex gap-2 mb-4"
+        role="tablist"
+        aria-label="Plan slots"
+      >
         {(["A", "B", "C"] as PlanSlot[]).map((slot) => {
           const count = plans.filter((p) => p.planSlot === slot).length;
+          const isActive = activeSlot === slot;
           return (
             <button
               key={slot}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
               onClick={() => setActiveSlot(slot)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                activeSlot === slot
+                isActive
                   ? "text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
-              style={
-                activeSlot === slot
-                  ? { backgroundColor: PLAN_COLORS[slot] }
-                  : undefined
-              }
+              style={isActive ? { backgroundColor: PLAN_COLORS[slot] } : undefined}
             >
               Plan {slot} ({count})
             </button>
           );
         })}
-        <label className="flex items-center gap-2 ml-4 text-sm text-gray-600">
+        <label className="flex items-center gap-2 ml-4 text-sm text-gray-700">
           <input
             type="checkbox"
             checked={showAllPlans}
@@ -227,11 +296,12 @@ export default function PlanPage() {
       </div>
 
       <div className="grid grid-cols-[1fr_320px] gap-6">
-        {/* Course table */}
         <div>
           {slotEntries.length === 0 ? (
             <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
-              <p className="text-gray-500">No courses in Plan {activeSlot}.</p>
+              <p className="text-gray-700">
+                No courses in Plan {activeSlot}.
+              </p>
               <Link
                 href="/search"
                 className="text-[#1B6B3A] font-medium text-sm hover:underline mt-2 inline-block"
@@ -244,22 +314,22 @@ export default function PlanPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 bg-gray-50">
-                    <th className="text-left px-4 py-3 font-medium text-gray-600">
+                    <th className="text-left px-4 py-3 font-medium text-gray-700">
                       Course
                     </th>
-                    <th className="text-left px-4 py-3 font-medium text-gray-600">
+                    <th className="text-left px-4 py-3 font-medium text-gray-700">
                       Title
                     </th>
-                    <th className="text-left px-4 py-3 font-medium text-gray-600">
+                    <th className="text-left px-4 py-3 font-medium text-gray-700">
                       Credits
                     </th>
-                    <th className="text-left px-4 py-3 font-medium text-gray-600">
+                    <th className="text-left px-4 py-3 font-medium text-gray-700">
                       Status
                     </th>
-                    <th className="text-left px-4 py-3 font-medium text-gray-600">
+                    <th className="text-left px-4 py-3 font-medium text-gray-700">
                       Reqs
                     </th>
-                    <th className="text-right px-4 py-3 font-medium text-gray-600">
+                    <th className="text-right px-4 py-3 font-medium text-gray-700">
                       Actions
                     </th>
                   </tr>
@@ -268,8 +338,11 @@ export default function PlanPage() {
                   {slotEntries.map((entry) => {
                     const course = courseDataMap[entry.courseId];
                     const section = course?.sections.find(
-                      (s) => s.id === entry.sectionId
+                      (s) => s.id === entry.sectionId,
                     );
+                    const label = course
+                      ? `${course.subject} ${course.courseNumber}`
+                      : `Course #${entry.courseId}`;
                     return (
                       <tr
                         key={entry.sectionId}
@@ -288,27 +361,27 @@ export default function PlanPage() {
                               {course.subject} {course.courseNumber}
                             </Link>
                           ) : (
-                            <span className="text-gray-400">Loading...</span>
+                            <span className="text-gray-500">Loading…</span>
                           )}
                         </td>
                         <td className="px-4 py-3">
                           {course ? (
                             <Link
                               href={`/course/${course.id}`}
-                              className="text-gray-700 hover:underline block"
+                              className="text-gray-800 hover:underline block"
                             >
                               {course.courseTitle}
                             </Link>
                           ) : (
-                            <span className="text-gray-400">...</span>
+                            <span className="text-gray-500">…</span>
                           )}
-                          <span className="text-xs text-gray-400">
+                          <span className="text-xs text-gray-500">
                             {section
                               ? `Sec ${section.sectionNumber ?? "-"}`
                               : ""}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-gray-600">
+                        <td className="px-4 py-3 text-gray-700">
                           {course?.creditHoursMin ?? "?"}
                         </td>
                         <td className="px-4 py-3">
@@ -324,7 +397,7 @@ export default function PlanPage() {
                                       ...audit.completedCourses,
                                       ...audit.inProgressCourses,
                                     ]
-                                  : []
+                                  : [],
                               )}
                             />
                           ) : null}
@@ -334,11 +407,11 @@ export default function PlanPage() {
                             <div className="flex gap-1 flex-wrap">
                               {getRequirementBadges(
                                 course.subject,
-                                course.courseNumber
+                                course.courseNumber,
                               ).map((b) => (
                                 <span
                                   key={b}
-                                  className="inline-flex items-center rounded-full bg-blue-50 text-blue-700 px-2 py-0.5 text-xs font-medium"
+                                  className="inline-flex items-center rounded-full bg-blue-50 text-blue-800 px-2 py-0.5 text-xs font-medium"
                                 >
                                   {b}
                                 </span>
@@ -349,23 +422,33 @@ export default function PlanPage() {
                         <td className="px-4 py-3 text-right">
                           <div className="flex items-center justify-end gap-3 text-xs">
                             <button
+                              type="button"
                               onClick={() =>
-                                removeFromPlan(entry.sectionId, activeSlot)
+                                handleRemove(entry.sectionId, activeSlot)
                               }
-                              className="text-red-600 hover:text-red-800 font-medium hover:underline"
+                              aria-label={`Remove ${label} from Plan ${activeSlot}`}
+                              className="text-red-700 hover:text-red-900 font-medium hover:underline"
                             >
                               Remove
                             </button>
                             {course && (
                               <button
+                                type="button"
                                 onClick={() =>
                                   router.push(`/course/${course.id}`)
                                 }
-                                className="text-gray-600 hover:text-gray-800 font-medium hover:underline"
+                                className="text-gray-700 hover:text-gray-900 font-medium hover:underline"
                               >
                                 Options
                               </button>
                             )}
+                            <RowMenu
+                              sectionId={entry.sectionId}
+                              courseLabel={label}
+                              currentSlot={activeSlot}
+                              onMove={handleMove}
+                              onRemove={handleRemove}
+                            />
                           </div>
                         </td>
                       </tr>
@@ -373,7 +456,7 @@ export default function PlanPage() {
                   })}
                 </tbody>
               </table>
-              <div className="px-4 py-2 bg-gray-50 text-sm text-gray-600 border-t border-gray-200">
+              <div className="px-4 py-2 bg-gray-50 text-sm text-gray-700 border-t border-gray-200">
                 Total: {totalCredits} credits · {slotEntries.length} course
                 {slotEntries.length !== 1 ? "s" : ""}
               </div>
@@ -381,9 +464,8 @@ export default function PlanPage() {
           )}
         </div>
 
-        {/* Weekly calendar */}
         <div>
-          <h2 className="text-sm font-semibold text-gray-700 mb-2">
+          <h2 className="text-sm font-semibold text-gray-800 mb-2">
             Weekly Schedule
           </h2>
           <WeeklyCalendar
@@ -394,11 +476,12 @@ export default function PlanPage() {
             }
           />
           {showAllPlans && (
-            <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+            <div className="flex items-center gap-4 mt-2 text-xs text-gray-600">
               <div className="flex items-center gap-1">
                 <div
                   className="w-3 h-3 rounded"
                   style={{ backgroundColor: "#1B6B3A" }}
+                  aria-hidden="true"
                 />
                 <span>Plan A</span>
               </div>
@@ -406,6 +489,7 @@ export default function PlanPage() {
                 <div
                   className="w-3 h-3 rounded"
                   style={{ backgroundColor: "#2563eb" }}
+                  aria-hidden="true"
                 />
                 <span>Plan B</span>
               </div>
@@ -413,6 +497,7 @@ export default function PlanPage() {
                 <div
                   className="w-3 h-3 rounded"
                   style={{ backgroundColor: "#6b7280" }}
+                  aria-hidden="true"
                 />
                 <span>Plan C</span>
               </div>

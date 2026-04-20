@@ -11,14 +11,12 @@ export default async function SearchPage({
   const keyword = typeof params.keyword === "string" ? params.keyword : "";
   const openOnly = params.open === "true";
 
-  // Get all subjects for the filter dropdown
   const subjects = await prisma.course.findMany({
     select: { subject: true },
     distinct: ["subject"],
     orderBy: { subject: "asc" },
   });
 
-  // Build where clause
   const where: Record<string, unknown> = {};
   if (subject) where.subject = subject;
   if (keyword) {
@@ -31,29 +29,43 @@ export default async function SearchPage({
 
   const courses = await prisma.course.findMany({
     where,
-    include: {
+    select: {
+      id: true,
+      subject: true,
+      courseNumber: true,
+      courseTitle: true,
+      creditHoursMin: true,
+      creditHoursMax: true,
+      registrationRestrictions: true,
       sections: {
-        include: {
-          meetings: true,
-          instructors: true,
+        select: {
+          id: true,
+          seatsAvailable: true,
+          maxEnrollment: true,
+          specialApproval: true,
+          meetings: {
+            select: { days: true, startTime: true, endTime: true },
+          },
+          instructors: {
+            select: { name: true },
+          },
         },
       },
     },
     orderBy: [{ subject: "asc" }, { courseNumber: "asc" }],
   });
 
-  // If openOnly, filter to courses with at least one open section
   const filtered = openOnly
     ? courses.filter((c) =>
         c.sections.some(
-          (s) => s.seatsAvailable !== null && s.seatsAvailable > 0
-        )
+          (s) => s.seatsAvailable !== null && s.seatsAvailable > 0,
+        ),
       )
     : courses;
 
   return (
     <SearchClient
-      courses={JSON.parse(JSON.stringify(filtered))}
+      courses={filtered}
       subjects={subjects.map((s) => s.subject)}
       initialSubject={subject}
       initialKeyword={keyword}

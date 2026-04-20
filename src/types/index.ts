@@ -37,7 +37,8 @@ export type EligibilityStatus =
   | "full"
   | "restricted"
   | "needs-prereq"
-  | "already-taken";
+  | "already-taken"
+  | "unknown";
 
 export interface PreCheckItem {
   label: string;

@@ -13,9 +13,18 @@ export default function Navbar() {
   const pathname = usePathname();
 
   return (
-    <nav className="bg-[#0C2340] text-white h-14 flex items-center px-6 shrink-0">
-      <Link href="/search" className="flex items-center gap-2 mr-8">
-        <span className="text-xl">☘️</span>
+    <nav
+      aria-label="Main navigation"
+      className="bg-[#0C2340] text-white h-14 flex items-center px-6 shrink-0"
+    >
+      <Link
+        href="/search"
+        aria-label="PATH — Registration Clarity home"
+        className="flex items-center gap-2 mr-8"
+      >
+        <span className="text-xl" aria-hidden="true">
+          ☘️
+        </span>
         <span className="text-lg font-bold tracking-wide">PATH</span>
       </Link>
 
