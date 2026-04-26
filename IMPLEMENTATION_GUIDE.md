@@ -48,7 +48,7 @@ All steps (1–10) are now implemented and functional. See details below.
   - Functions: `addToPlan`, `removeFromPlan(sectionId, slot)`, `moveToPlan(sectionId, from, to)`, `isInPlan`, `isSectionInPlan`
 - `src/contexts/AuditContext.tsx` — shared audit state, localStorage-backed
 - `src/components/Providers.tsx` — wraps both providers, used in layout.tsx
-- `src/hooks/usePlans.ts` and `useAudit.ts` exist but are **DEPRECATED** — all components import from contexts
+- `src/hooks/usePlans.ts` and `useAudit.ts` have been **deleted** — all components import from contexts directly
 
 ### 6. App Shell ✅
 - `src/app/layout.tsx` — root layout wraps body with `<Providers>`, includes Navbar + Sidebar + main
@@ -57,8 +57,8 @@ All steps (1–10) are now implemented and functional. See details below.
 
 ### 7. All Pages ✅
 - **Onboarding** (`/onboarding`) — paste audit, parse, "welcome back" if audit exists
-- **Search** (`/search`) — server component queries Prisma, client component renders scrollable table with sticky header. Entire rows are clickable (navigate to course detail). No quick-add buttons — section selection happens on course detail page.
-- **Course Detail** (`/course/[id]`) — server component uses `await params` (Next.js 16 async params). Client component shows: header with eligibility badge, description, prereq checks, restrictions, requirement badges, sections table with **+A/+B/+C buttons per section row** and **inline seat progress bars**. Pre-check modal and recovery drawer.
+- **Search** (`/search`) — server component queries Prisma, client component renders scrollable table with sticky header. Entire rows are clickable (navigate to course detail). Has a "+ Plan A" quick-add button in the Actions column (with `stopPropagation` to not trigger row click).
+- **Course Detail** (`/course/[id]`) — server component uses `await params` (Next.js 16 async params). Client component shows: header with eligibility badge, description, prereq checks, restrictions, requirement badges, sections table with **"Select" button per section row** (adds to Plan A) and **inline seat progress bars**. Pre-check modal and recovery drawer.
 - **Plan** (`/plan`) — Plan A/B/C tabs, course table with section column, kebab dropdown menu (move to other plans, remove). Weekly calendar with **side-by-side conflict layout** and **red conflict borders**. Click calendar event to highlight corresponding table row (uses `onPointerDown` for Safari compatibility). "Show all plans on calendar" checkbox.
 - **Export** (`/export`) — **Plan A/B/C tabs** (not just Plan A), per-plan diagnostics table with eligibility status and diagnosis column, summary banner, export eligible or all.
 
@@ -70,6 +70,13 @@ All steps (1–10) are now implemented and functional. See details below.
 
 ### 9. API Routes ✅
 - `src/app/api/course/[id]/route.ts` — returns course data with sections/meetings/instructors for client-side fetching (used by plan and export pages)
+
+### 10. E2E Tests ✅
+- Playwright e2e tests in `e2e/` directory, configured via `playwright.config.ts`
+- Tests run against deployed Vercel URL (`https://hci-opal-sigma.vercel.app`)
+- 4 spec files: `registration-flow.spec.ts`, `sprint2-screens.spec.ts`, `capture-screenshots.spec.ts`, `capture-fig5-fig6.spec.ts`
+- Chromium-only, headless, screenshots on failure
+- Dev dependency: `@playwright/test@^1.59.1`
 
 ---
 
@@ -107,9 +114,8 @@ All steps (1–10) are now implemented and functional. See details below.
 
 These are not yet built. Prioritize based on demo needs.
 
-- **Time conflict check in pre-check modal** — currently always shows "No conflicts detected". Wire up `conflicts.ts` to compare planned section meetings.
-- **Sidebar course names** — sidebar currently shows "Course #123 · Sec 456" (IDs). Could fetch course data to show "CSE 20311 Sec 01" instead.
-- **Delete deprecated hook files** — `src/hooks/usePlans.ts` and `src/hooks/useAudit.ts` are no longer imported but still exist in the repo.
+- ~~**Time conflict check in pre-check modal**~~ — now wired up: `conflicts.ts` checks against planned section meetings, shows "Conflicts with {course}" or "No conflicts with current plan".
+- ~~**Sidebar course names**~~ — now fetches course data and shows "CSE 20311" instead of IDs (falls back to "Course #123" while loading).
 - **Responsive design** — currently desktop-only (1440x900 reference). Could add mobile breakpoints.
 - **"Find Alternatives" in recovery drawer** — navigates to search filtered by subject. Could be smarter (same requirement badge, similar level).
 - **Real time conflict detection on add** — warn when adding a section that conflicts with existing plan entries.
@@ -167,7 +173,7 @@ Key screens by page number:
 8. **Semester:** Summer 2026 (that's what the scraped data covers)
 9. **Demo persona:** real audit data from Tristan Shin (CS BA senior, 134.5 credits, 3.419 GPA), displayed as "Alex Murphy"
 10. **Shared state via React Context** — PlansContext + AuditContext (not standalone hooks). All components read from context for real-time updates across sidebar, search, plan, export.
-11. **Search has no quick-add** — entire row is clickable, navigates to course detail for section-level selection
+11. **Search has quick-add** — entire row is clickable (navigates to course detail), plus a "+ Plan A" button in the Actions column for fast adds
 12. **Calendar uses onPointerDown** — not onClick, for Safari compatibility
 13. **Calendar conflicts shown side-by-side** — Google Calendar-style column layout + red borders, not overlapping
 

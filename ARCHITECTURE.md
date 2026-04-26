@@ -14,9 +14,9 @@
 
 | Layer | Choice | Rationale |
 |-------|--------|-----------|
-| **Framework** | Next.js 14+ (App Router) | Full-stack in one project, server components for fast data loading, great DX |
+| **Framework** | Next.js 16+ (App Router) | Full-stack in one project, server components for fast data loading, great DX |
 | **Language** | TypeScript | Type-safe queries, better refactoring, Prisma integration |
-| **Styling** | Tailwind CSS | Matches Sprint 2 design system, rapid iteration |
+| **Styling** | Tailwind CSS v4 | Matches Sprint 2 design system, rapid iteration |
 | **Database** | Neon PostgreSQL | Hosted Postgres, free tier, supports Vercel deployment with DB writes |
 | **ORM** | Prisma | Type-safe client, auto-generated types, schema migrations |
 | **Search/Filter** | SQL queries with LIKE + indexed columns | Dataset is small (569 courses, 1179 sections) — no search engine needed |
@@ -41,7 +41,7 @@
 ### 1. Scraped course data (`courses_2026_summer.json`)
 - 569 courses, 1179 sections, 92 subjects
 - Rich structured data: restrictions, prerequisites, seat counts, meetings, instructors
-- Seeded into SQLite via Prisma seed script
+- Seeded into Neon PostgreSQL via seed script (uses `pg` driver directly)
 
 ### 2. Student degree audit (pasted raw text from GPS/Degree Works)
 - Parsed client-side with deterministic regex parser
@@ -76,6 +76,7 @@ model Course {
 
   @@index([subject])
   @@index([courseNumber])
+  @@index([subject, courseNumber])
 }
 
 model Section {
@@ -83,7 +84,7 @@ model Section {
   course           Course       @relation(fields: [courseId], references: [id])
   courseId          Int
   sectionNumber    String?      // "01"
-  crn              Int?         @unique
+  crn              Int?
   status           String?      // "Active"
   maxEnrollment    Int?
   seatsAvailable   Int?
@@ -132,7 +133,7 @@ model Instructor {
 /                       → redirects to /search
 /onboarding             → paste audit text, parse, store
 /search                 → search/filter courses, clickable rows → course detail
-/course/[id]            → course detail with eligibility, sections (+A/+B/+C per section), restrictions
+/course/[id]            → course detail with eligibility, sections (Select button per section), restrictions
 /plan                   → Plan A/B/C table + weekly calendar with conflict detection + click-to-highlight
 /export                 → Plan A/B/C tabs, per-plan pre-check diagnostics + export
 /api/course/[id]        → API route for client-side course data fetching (used by plan + export pages)
@@ -148,7 +149,7 @@ For each course, given the student's audit data:
 
 | Status | Condition |
 |--------|-----------|
-| **Already Taken** | `subject + courseNumber` found in `completedCourses` with grade != IP |
+| **Already Taken** | `subject + courseNumber` found in `completedCourses` with `status === "completed"` |
 | **Full** | All sections have `seatsAvailable == 0` |
 | **Restricted** | `specialApproval != null` on selected/all sections |
 | **Needs Prereq** | Restriction text matches prerequisite regex AND prereq not in `completedCourses` |
@@ -224,6 +225,7 @@ interface CompletedCourse {
   credits: number;            // 4
   term: string;               // "Fall 2024"
   requirementBlock?: string;  // "Major in Computer Science"
+  status: "completed" | "in-progress";
 }
 ```
 
@@ -235,8 +237,8 @@ The parser uses line-by-line regex matching on the consistent Degree Works forma
 
 ### Built fully (data-backed, interactive):
 1. **Audit paste onboarding** — text box → parse → localStorage, "welcome back" flow if audit exists
-2. **Search page** — SQL queries, subject/keyword/availability filters, eligibility badges, clickable rows navigate to course detail
-3. **Course Detail** — sections table with +A/+B/+C per section row, inline seat progress bars, prereq checks, restrictions, pre-check modal, recovery drawer
+2. **Search page** — SQL queries, subject/keyword/availability filters, eligibility badges, clickable rows navigate to course detail, "+ Plan A" quick-add button per row
+3. **Course Detail** — sections table with "Select" button per section row (adds to Plan A), inline seat progress bars, prereq checks, restrictions, pre-check modal, recovery drawer
 4. **Plan view** — Plan A/B/C tabs, course table with kebab dropdown (move between plans, remove), weekly calendar with side-by-side conflict layout + red conflict borders, click calendar event to highlight table row
 5. **Pre-check modal** — 6-item deterministic checklist (prerequisites, class standing, seats, conflicts, repeat, permission)
 6. **Export page** — Plan A/B/C tabs, per-plan diagnostics with eligibility checks, export eligible only or all
@@ -280,7 +282,7 @@ The parser uses line-by-line regex matching on the consistent Degree Works forma
 ## Sprint Plan
 
 ### Sprint 3 (current — class demo)
-1. Project setup: Next.js + Prisma + SQLite + Tailwind
+1. Project setup: Next.js + Prisma + Neon PostgreSQL + Tailwind
 2. Prisma schema + seed script from `courses_2026_summer.json`
 3. Audit text parser (client-side TypeScript)
 4. Onboarding page (paste audit)
@@ -326,9 +328,14 @@ The parser uses line-by-line regex matching on the consistent Degree Works forma
 registration-clarity/
 ├── prisma/
 │   ├── schema.prisma
-│   ├── seed.js              (seed script — uses better-sqlite3 directly)
+│   ├── seed.js              (seed script — uses pg driver against Neon)
 │   ├── courses_2026_summer.json (source data)
 │   └── migrations/
+├── e2e/                         (Playwright end-to-end tests)
+│   ├── capture-fig5-fig6.spec.ts
+│   ├── capture-screenshots.spec.ts
+│   ├── registration-flow.spec.ts
+│   └── sprint2-screens.spec.ts
 ├── src/
 │   ├── app/
 │   │   ├── layout.tsx       (shell: Providers + nav + sidebar + main content)
@@ -361,9 +368,6 @@ registration-clarity/
 │   ├── contexts/
 │   │   ├── PlansContext.tsx  (shared plan state via React Context)
 │   │   └── AuditContext.tsx  (shared audit state via React Context)
-│   ├── hooks/
-│   │   ├── usePlans.ts      (DEPRECATED — superseded by PlansContext)
-│   │   └── useAudit.ts      (DEPRECATED — superseded by AuditContext)
 │   ├── lib/
 │   │   ├── db.ts            (Prisma client singleton with adapter)
 │   │   ├── auditParser.ts   (parse degree audit text)
@@ -376,11 +380,13 @@ registration-clarity/
 │       └── index.ts
 ├── .env                     (DATABASE_URL for Neon — gitignored)
 ├── prisma.config.ts
+├── playwright.config.ts     (Playwright e2e test config)
+├── postcss.config.mjs       (Tailwind CSS v4 PostCSS plugin)
+├── eslint.config.mjs        (ESLint v9 flat config)
 ├── ARCHITECTURE.md          (this file)
 ├── IMPLEMENTATION_GUIDE.md
 ├── CLAUDE.md
 ├── AGENTS.md
 ├── package.json
-├── tailwind.config.ts
 └── tsconfig.json
 ```

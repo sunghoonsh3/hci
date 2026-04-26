@@ -48720,6 +48720,120 @@
                     "section_notes": null
                 }
             ]
+        },
+        {
+            "subject": "CSE",
+            "course_number": "20312",
+            "course_title": "Programming Paradigms",
+            "course_description": "An introduction to multiple programming paradigms (imperative, object-oriented, functional, and logic) and the trade-offs each makes. Students implement small projects in three or more languages, study type systems and memory models, and learn to recognize when a paradigm fits a problem. Required for the BACS major.",
+            "cannot_have_taken": null,
+            "registration_restrictions": [
+                "Enrollment is limited to Employee Non-Degree, Holy Cross College, St. Mary's College, Undergraduate or Undergraduate Non-Degree level students.",
+                "Enrollment limited to students in the Main campus."
+            ],
+            "crosslisted_with": null,
+            "attributes": [
+                {
+                    "code": "CSEL",
+                    "description": "CSE Lower Division Required"
+                },
+                {
+                    "code": "ZRSS",
+                    "description": "Summer Session Course"
+                }
+            ],
+            "credit_hours_min": 3,
+            "credit_hours_max": 3,
+            "sections": [
+                {
+                    "section": "01",
+                    "crn": 2401,
+                    "status": "Active",
+                    "max_enrollment": 30,
+                    "seats_available": 18,
+                    "waitlist_current": null,
+                    "waitlist_capacity": null,
+                    "campus": "M",
+                    "grade_mode": "Standard Letter",
+                    "special_approval": null,
+                    "meetings": [
+                        {
+                            "room": "DeBartolo Hall 138",
+                            "start_date": "2026-06-15",
+                            "end_date": "2026-07-26",
+                            "days": [
+                                "M",
+                                "W",
+                                "F"
+                            ],
+                            "start_time": "10:30",
+                            "end_time": "11:20"
+                        }
+                    ],
+                    "instructors": [
+                        "Patrick Lam"
+                    ],
+                    "section_notes": null
+                }
+            ]
+        },
+        {
+            "subject": "CSE",
+            "course_number": "30151",
+            "course_title": "Theory of Computing",
+            "course_description": "An introduction to the foundations of computer science, focusing on the kinds of problems that can and cannot be solved by computers. Topics include finite automata, regular expressions, context-free grammars, Turing machines, decidability, and complexity. Required for the BACS major.",
+            "cannot_have_taken": null,
+            "registration_restrictions": [
+                "Prerequisites: CSE 20312.",
+                "Enrollment limited to students with a semester level of Junior or Senior.",
+                "Enrollment is limited to students with a program in Computer Science or Computer Science & Engineering.",
+                "Enrollment is limited to Employee Non-Degree, Holy Cross College, St. Mary's College, Undergraduate or Undergraduate Non-Degree level students.",
+                "Enrollment limited to students in the Main campus."
+            ],
+            "crosslisted_with": null,
+            "attributes": [
+                {
+                    "code": "CSEU",
+                    "description": "CSE Upper Division Required"
+                },
+                {
+                    "code": "ZRSS",
+                    "description": "Summer Session Course"
+                }
+            ],
+            "credit_hours_min": 3,
+            "credit_hours_max": 3,
+            "sections": [
+                {
+                    "section": "01",
+                    "crn": 2402,
+                    "status": "Active",
+                    "max_enrollment": 30,
+                    "seats_available": 12,
+                    "waitlist_current": null,
+                    "waitlist_capacity": null,
+                    "campus": "M",
+                    "grade_mode": "Standard Letter",
+                    "special_approval": null,
+                    "meetings": [
+                        {
+                            "room": "Fitzpatrick Hall 356",
+                            "start_date": "2026-06-15",
+                            "end_date": "2026-07-26",
+                            "days": [
+                                "T",
+                                "Th"
+                            ],
+                            "start_time": "11:00",
+                            "end_time": "12:15"
+                        }
+                    ],
+                    "instructors": [
+                        "Jean-Christophe Nave"
+                    ],
+                    "section_notes": null
+                }
+            ]
         }
     ]
 }

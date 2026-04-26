@@ -243,8 +243,8 @@ export default function CourseDetailClient({
               className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4"
               role="status"
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-red-700 font-medium">
                     Registration Blocked
                   </span>
@@ -254,39 +254,13 @@ export default function CourseDetailClient({
                       : (blockedReason ?? "Not registerable")}
                   </span>
                 </div>
-                <div className="flex items-center gap-3 text-sm shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => setShowPreCheck(true)}
-                    className="text-red-700 hover:text-red-900 font-medium hover:underline"
-                  >
-                    Why?
-                  </button>
-                  <Link
-                    href={`/search?subject=${course.subject}`}
-                    className="text-red-700 hover:text-red-900 font-medium hover:underline"
-                  >
-                    Find Alternatives
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const open = course.sections.find(
-                        (s) =>
-                          s.seatsAvailable === null ||
-                          (s.seatsAvailable ?? 0) > 0,
-                      );
-                      if (open) handleAddToPlan(open.id, "B");
-                      else
-                        show("No open sections to move to Plan B", {
-                          variant: "warning",
-                        });
-                    }}
-                    className="text-red-700 hover:text-red-900 font-medium hover:underline"
-                  >
-                    Move to Plan B
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowRecovery(true)}
+                  className="shrink-0 text-sm bg-orange-600 text-white px-3 py-1.5 rounded font-medium hover:bg-orange-700 transition-colors"
+                >
+                  See recovery options
+                </button>
               </div>
             </div>
           )}

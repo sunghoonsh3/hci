@@ -215,10 +215,65 @@ export default function ExportPage() {
     </div>
   );
 
+  const currentStep: 1 | 2 | 3 = exported ? 3 : showPreCheck ? 2 : 1;
+  const stepLabels: Record<1 | 2 | 3, string> = {
+    1: "Review",
+    2: "Pre-check",
+    3: "Results",
+  };
+  const stepper = (
+    <ol
+      className="flex items-center gap-2 mb-6"
+      aria-label="Export progress"
+    >
+      {([1, 2, 3] as const).map((n, idx) => {
+        const isDone = n < currentStep;
+        const isCurrent = n === currentStep;
+        return (
+          <li
+            key={n}
+            className="flex items-center gap-2"
+            aria-current={isCurrent ? "step" : undefined}
+          >
+            <span
+              className={`flex items-center justify-center w-7 h-7 rounded-full text-xs font-semibold border ${
+                isDone
+                  ? "bg-[#1B6B3A] text-white border-[#1B6B3A]"
+                  : isCurrent
+                    ? "bg-white text-[#1B6B3A] border-[#1B6B3A]"
+                    : "bg-white text-gray-500 border-gray-300"
+              }`}
+              aria-hidden="true"
+            >
+              {isDone ? "✓" : n}
+            </span>
+            <span
+              className={`text-sm ${
+                isCurrent
+                  ? "font-semibold text-gray-900"
+                  : isDone
+                    ? "text-gray-700"
+                    : "text-gray-500"
+              }`}
+            >
+              Step {n}: {stepLabels[n]}
+            </span>
+            {idx < 2 && (
+              <span aria-hidden="true" className="text-gray-300 mx-2">
+                →
+              </span>
+            )}
+          </li>
+        );
+      })}
+    </ol>
+  );
+
   if (!exported && !showPreCheck) {
     return (
       <div className="max-w-3xl">
         <h1 className="text-xl font-bold text-gray-900 mb-4">Export to NOVO</h1>
+        {stepper}
         {planTabs}
         {slotEntries.length === 0 ? (
           <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
@@ -234,17 +289,54 @@ export default function ExportPage() {
           </div>
         ) : (
           <>
-            <p className="text-sm text-gray-700 mb-6">
-              Review your Plan {activeSlot} courses before exporting to NOVO
-              registration.
+            <p className="text-sm text-gray-700 mb-4">
+              Review your Plan {activeSlot} courses below. When ready, run the
+              pre-check to see which courses are eligible to transfer to NOVO.
             </p>
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden mb-6">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-200 bg-gray-50">
+                    <th className="text-left px-4 py-3 font-medium text-gray-700">
+                      Course
+                    </th>
+                    <th className="text-left px-4 py-3 font-medium text-gray-700">
+                      Section
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map((item) => {
+                    const section = item.course.sections.find(
+                      (s) => s.id === item.sectionId,
+                    );
+                    return (
+                      <tr
+                        key={item.sectionId}
+                        className="border-b border-gray-100"
+                      >
+                        <td className="px-4 py-3 font-medium">
+                          {item.course.subject} {item.course.courseNumber}
+                          <div className="text-xs text-gray-500 font-normal">
+                            {item.course.courseTitle}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-gray-700">
+                          {section?.sectionNumber ?? "-"}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
             <button
               type="button"
               onClick={() => setShowPreCheck(true)}
               className="text-white px-6 py-2.5 rounded-lg font-medium transition-colors"
               style={{ backgroundColor: PLAN_COLORS[activeSlot] }}
             >
-              Run Pre-check &amp; Export
+              Run Pre-check
             </button>
           </>
         )}
@@ -256,8 +348,15 @@ export default function ExportPage() {
     return (
       <div className="max-w-3xl">
         <h1 className="text-xl font-bold text-gray-900 mb-4">
-          Export Pre-check — Plan {activeSlot}
+          Export to NOVO
         </h1>
+        {stepper}
+        {planTabs}
+        <p className="text-sm text-gray-700 mb-4">
+          Pre-check diagnostics for Plan {activeSlot}. Each course was checked
+          against your audit, prerequisites, seat availability, and time
+          conflicts.
+        </p>
 
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden mb-6">
           <table className="w-full text-sm">
@@ -324,7 +423,7 @@ export default function ExportPage() {
               className="text-white px-6 py-2.5 rounded-lg font-medium transition-colors"
               style={{ backgroundColor: PLAN_COLORS[activeSlot] }}
             >
-              Export All
+              Export to NOVO
             </button>
           ) : (
             <button
@@ -340,7 +439,7 @@ export default function ExportPage() {
             onClick={() => setShowPreCheck(false)}
             className="bg-gray-100 text-gray-800 px-6 py-2.5 rounded-lg font-medium hover:bg-gray-200 transition-colors"
           >
-            Back
+            Back to Review
           </button>
         </div>
       </div>
@@ -350,8 +449,10 @@ export default function ExportPage() {
   return (
     <div>
       <h1 className="text-xl font-bold text-gray-900 mb-4">
-        Export to NOVO — Plan {activeSlot} Results
+        Export to NOVO
       </h1>
+      {stepper}
+      {planTabs}
 
       <div className="grid grid-cols-[1fr_280px] gap-6">
         <div>

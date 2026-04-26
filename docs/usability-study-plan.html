@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Usability Study Plan: PATH</title>
+<style>
+  @page { size: letter; margin: 1in; }
+  html, body {
+    font-family: Calibri, Candara, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 11pt;
+    line-height: 1.4;
+    color: #111;
+  }
+  body { margin: 0; }
+  h1 {
+    font-size: 17pt;
+    margin: 0 0 14pt 0;
+    font-weight: 700;
+  }
+  h2 {
+    font-size: 12.5pt;
+    margin: 16pt 0 4pt 0;
+    font-weight: 700;
+  }
+  h3 {
+    font-size: 11pt;
+    margin: 10pt 0 3pt 0;
+    font-weight: 700;
+  }
+  p { margin: 0 0 8pt 0; }
+  ul, ol { margin: 0 0 8pt 18pt; padding: 0; }
+  li { margin-bottom: 3pt; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 6pt 0 10pt 0;
+    font-size: 10.5pt;
+  }
+  th, td {
+    border: 0.5pt solid #bbb;
+    padding: 4pt 6pt;
+    vertical-align: top;
+    text-align: left;
+  }
+  th {
+    background: #f2f2f2;
+    font-weight: 700;
+  }
+  .tasks { counter-reset: t; margin: 4pt 0 8pt 0; }
+  .tasks p {
+    position: relative;
+    padding-left: 22pt;
+    margin-bottom: 7pt;
+  }
+  .tasks p::before {
+    counter-increment: t;
+    content: counter(t) ".";
+    position: absolute;
+    left: 0; top: 0;
+    width: 16pt;
+    font-weight: 700;
+  }
+  .tight li { margin-bottom: 1pt; }
+</style>
+</head>
+<body>
+
+<h1>Usability Study Plan: PATH (Registration Clarity)</h1>
+
+<h2>Overview</h2>
+<p>PATH is a browser-based rewrite of the course-registration workflow at Notre Dame. Students currently bounce between a catalog search (PATH) and a separate registration form (NOVO), and most of the frustration happens because prerequisites, seat limits, and time conflicts only surface after a failed submission. Our version keeps the two tools on one screen. A student pastes their Degree Works audit, searches the Summer 2026 catalog, and sees an eligibility badge on every row. Clicking into a course shows the prereq text rewritten in plain English, with green checks for requirements the student has already met and red marks for the ones they have not. Students build up to three schedule drafts side by side in a Plan A / B / C view, where a weekly calendar flags any time conflict. Before exporting to NOVO, a pre-check runs every rule the registrar would run, so the student catches problems the night before, not at 7 a.m. on registration morning.</p>
+
+<h2>Participants</h2>
+<p>Five Notre Dame undergraduates, each registering for Summer or Fall 2026. Five is a common size for formative testing, and it will catch the painful issues, but it is obviously not a representative sample of the whole student body. What we can do is spread the five across the dimensions most likely to change how someone uses the tool.</p>
+
+<table>
+  <thead>
+    <tr><th style="width:8%;">#</th><th style="width:18%;">Year</th><th style="width:30%;">College</th><th>Comfort with current PATH/NOVO</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>1</td><td>First-year</td><td>Any</td><td>Low. First or second time registering.</td></tr>
+    <tr><td>2</td><td>Sophomore</td><td>Engineering</td><td>Moderate. Used to prereq chains.</td></tr>
+    <tr><td>3</td><td>Junior</td><td>Arts and Letters</td><td>Moderate to high.</td></tr>
+    <tr><td>4</td><td>Senior</td><td>Mendoza</td><td>High. Registering close to graduation.</td></tr>
+    <tr><td>5</td><td>Any</td><td>Any</td><td>Self-identifies as bad at registration.</td></tr>
+  </tbody>
+</table>
+
+<p>Recruiting runs through flyers in LaFortune and Duncan, the r/NotreDame subreddit, and the CS and Arts-and-Letters Slack workspaces. Compensation is a $15 Duncan&rsquo;s Market gift card. Transfer students, double majors, and students outside the BACS catalog are out of scope for this round and should be picked up in a second study.</p>
+
+<h2>Tasks</h2>
+<p>Every participant works off the same seeded persona: Alex Murphy, a senior Computer Science major whose audit is already in the system. The tasks are printed on an index card and read out loud at the start of each one.</p>
+
+<div class="tasks">
+  <p>Imagine you are Alex Murphy. The text on the card is your Degree Works audit. Get it into PATH and then point to where the system shows your major, your class standing, and the CSE courses you have already finished.</p>
+  <p>Alex still owes the university a theology course. Pull up <em>THEO 10001: Foundations of Theology: Biblical/Historical</em> for Summer 2026 and tell me whether Alex can sign up. If something would stop him, say what.</p>
+  <p>Use Plan A, Plan B, and Plan C to sketch three different Summer 2026 schedules for Alex. Each one needs at least two courses, at least six credits, and no time conflicts on the calendar. They cannot all be the same schedule.</p>
+  <p>Add <em>CSE 30872: Programming Challenges</em> to Plan A. You will get a warning because Alex has already taken it. Decide how you want to handle that, using only what PATH is telling you, and explain what you did.</p>
+  <p>Open the Export to NOVO screen. Walk through the pre-check on Plan A, fix whatever it calls out, and then export.</p>
+</div>
+
+<h2>Measures</h2>
+<p>Three categories, each with one thing we measure from the screen recording and one thing we ask the participant.</p>
+
+<table>
+  <thead>
+    <tr><th style="width:17%;">Category</th><th style="width:41.5%;">Objective (from recording)</th><th>Subjective (from the participant)</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Effectiveness</td>
+      <td>Success, partial, or failure on each task, scored against a written rule written before the study starts. Example rule for Task 3: three plans exist, each with &ge; 6 credits, no conflicts, not identical. We separately count <em>critical errors</em>, meaning actions that would have gone through as a real but wrong registration, such as exporting a plan that still had a conflict.</td>
+      <td>After each task, a single 7-point item: &ldquo;I&rsquo;m confident I did that task correctly.&rdquo; A participant who scores a 7 but actually failed is the most useful data point we can collect, because it means PATH let them walk out feeling fine about a broken schedule.</td>
+    </tr>
+    <tr>
+      <td>Efficiency</td>
+      <td>Wall-clock time on task and total click count, pulled from the recording. Reported as a median and range across the five participants, not a mean, because five data points make means misleading.</td>
+      <td>SMEQ after each task. One vertical 0&ndash;150 scale with verbal anchors from &ldquo;Not at all hard to do&rdquo; to &ldquo;Tremendously hard to do.&rdquo; Takes about ten seconds to fill in, so it does not derail momentum between tasks.</td>
+    </tr>
+    <tr>
+      <td>Satisfaction</td>
+      <td>Reaction coding. Two of us independently watch the session tapes and tally positive moments (smile, nod, &ldquo;oh nice&rdquo;) and negative moments (sigh, eyebrow raise, leaning back, audible swear) against each task. We report counts plus Cohen&rsquo;s kappa so readers can judge how reliable the coding is.</td>
+      <td>System Usability Scale at the end of the session. Ten items, 1&ndash;5. Scoring and interpretation are in Appendix A. We want PATH above 72, and we would not ship anything below 68.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>A short exit interview follows: most frustrating moment, easiest moment, one thing you would change.</p>
+
+<h2>Procedure</h2>
+<p>Each session is about 75 minutes in a group-study room at Hesburgh. The setup is one MacBook running the PATH build, OBS for screen and microphone, and a camcorder on a tripod aimed at the participant&rsquo;s hands and face.</p>
+<p>The facilitator opens with the usual test-the-software-not-the-person line, gets the consent form and recording release signed, and collects a small demographic sheet (year, college, major, 1&ndash;5 rating of comfort with the current PATH and NOVO tools).</p>
+<p>Before the real tasks, we run a two-minute think-aloud warm-up on a neutral site, usually a flight search, so narrating thoughts stops feeling weird. Then the five tasks, in order. Between tasks the facilitator stops the timer, resets the app to a clean seeded state, and hands over the confidence item and the SMEQ sheet. If someone is clearly stuck and asks for help, the only response is &ldquo;What are you trying to do right now?&rdquo; Nothing beyond that.</p>
+<p>After Task 5, the participant fills out the SUS on paper, with the browser closed so they are not half-looking at the interface while they answer. Then the exit interview, a thank-you, and the gift card.</p>
+<p>Analysis happens offline. Two researchers code the tapes separately for task outcome, click count, and reaction events, and meet to reconcile. Quantitative results land in a one-page summary. The interview notes and coded frustrations get sorted into an affinity diagram, which becomes the next sprint&rsquo;s backlog.</p>
+
+<h2>Appendix A: System Usability Scale</h2>
+<p>Respondents rate each statement 1 (strongly disagree) to 5 (strongly agree).</p>
+<ol class="tight">
+  <li>I think I would like to use this system frequently.</li>
+  <li>I found the system unnecessarily complex.</li>
+  <li>I thought the system was easy to use.</li>
+  <li>I think I would need the support of a technical person to be able to use this system.</li>
+  <li>I found the various functions in this system were well integrated.</li>
+  <li>I thought there was too much inconsistency in this system.</li>
+  <li>I would imagine most people would learn to use this system very quickly.</li>
+  <li>I found the system very cumbersome to use.</li>
+  <li>I felt very confident using the system.</li>
+  <li>I needed to learn a lot of things before I could get going with this system.</li>
+</ol>
+<p>Scoring: for odd items, subtract 1 from the response. For even items, subtract the response from 5. Add the ten numbers and multiply by 2.5. The result is a 0&ndash;100 score. Above 80 is excellent, 68 is the industry average, 51 to 68 is marginal, and below 51 is unacceptable.</p>
+
+<h2>Appendix B: Per-task sheet</h2>
+<p>Given to the participant after every task.</p>
+<p><em>Confidence.</em> &ldquo;I&rsquo;m confident I did that task correctly.&rdquo; Circle one: 1 (strongly disagree) &middot; 2 &middot; 3 &middot; 4 &middot; 5 &middot; 6 &middot; 7 (strongly agree).</p>
+<p><em>SMEQ.</em> Mark an X on the scale at the level of effort the task took.</p>
+<table style="width:55%;">
+  <tbody>
+    <tr><td style="width:20%;">0</td><td>Not at all hard to do</td></tr>
+    <tr><td>25</td><td>Not very hard to do</td></tr>
+    <tr><td>57</td><td>Rather hard to do</td></tr>
+    <tr><td>85</td><td>Very hard to do</td></tr>
+    <tr><td>112</td><td>Tremendously hard to do</td></tr>
+    <tr><td>150</td><td>(scale maximum)</td></tr>
+  </tbody>
+</table>
+
+</body>
+</html>
