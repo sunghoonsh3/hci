@@ -10,6 +10,7 @@ export interface ParsedRestriction {
 export interface PrereqCheck {
   courseCode: string;
   completed: boolean;
+  inProgress: boolean;
   grade?: string;
   term?: string;
 }
@@ -149,6 +150,7 @@ export function prereqGroupsSatisfied(
 export function checkPrerequisites(
   restrictionsJson: string | null,
   completedCourses: CompletedCourse[],
+  inProgressCourses: CompletedCourse[] = [],
 ): PrereqCheck[] {
   const prereqCodes = extractPrereqCourses(restrictionsJson);
   return prereqCodes.map((code) => {
@@ -156,11 +158,15 @@ export function checkPrerequisites(
     const completed = completedCourses.find(
       (c) => c.subject === subject && c.courseNumber === number,
     );
+    const inProgress = inProgressCourses.find(
+      (c) => c.subject === subject && c.courseNumber === number,
+    );
     return {
       courseCode: code,
       completed: !!completed,
-      grade: completed?.grade,
-      term: completed?.term,
+      inProgress: !completed && !!inProgress,
+      grade: completed?.grade ?? inProgress?.grade,
+      term: completed?.term ?? inProgress?.term,
     };
   });
 }

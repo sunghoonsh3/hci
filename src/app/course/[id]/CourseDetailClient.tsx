@@ -124,6 +124,7 @@ export default function CourseDetailClient({
       checkPrerequisites(
         course.registrationRestrictions,
         audit?.completedCourses ?? [],
+        audit?.inProgressCourses ?? [],
       ),
     [course.registrationRestrictions, audit],
   );
@@ -227,15 +228,6 @@ export default function CourseDetailClient({
             >
               Pre-check
             </button>
-            {isBlocked && (
-              <button
-                type="button"
-                onClick={() => setShowRecovery(true)}
-                className="bg-white border border-orange-300 text-orange-800 px-4 py-2 rounded-lg text-sm font-medium hover:bg-orange-50 transition-colors"
-              >
-                Recovery Options
-              </button>
-            )}
           </div>
 
           {isBlocked && (
@@ -262,98 +254,6 @@ export default function CourseDetailClient({
                   See recovery options
                 </button>
               </div>
-            </div>
-          )}
-
-          {isBlocked && (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
-              <h3 className="text-sm font-semibold text-amber-900 mb-2">
-                Official Next Steps (
-                {status === "full"
-                  ? "Full Course"
-                  : status === "needs-prereq"
-                    ? "Missing Prerequisites"
-                    : status === "restricted"
-                      ? "Restricted"
-                      : status === "already-taken"
-                        ? "Already Taken"
-                        : "Course Data Unavailable"}
-                )
-              </h3>
-              <ul className="space-y-1 text-sm text-amber-900">
-                {status === "full" && (
-                  <>
-                    <li>
-                      • <strong>Waitlist:</strong> Available — add yourself via
-                      NOVO
-                    </li>
-                    <li>
-                      • <strong>Seat Alert:</strong> Enable notifications when a
-                      seat opens
-                    </li>
-                    <li>
-                      • <strong>Override:</strong> Submit override request
-                      through department
-                    </li>
-                  </>
-                )}
-                {status === "needs-prereq" && (
-                  <>
-                    <li>
-                      • <strong>Check GPS:</strong> Verify prerequisite
-                      completion in Degree Works
-                    </li>
-                    <li>
-                      • <strong>Contact Advisor:</strong> Request prerequisite
-                      override if equivalent taken
-                    </li>
-                    <li>
-                      • <strong>Alternatives:</strong> Find courses without this
-                      prerequisite
-                    </li>
-                  </>
-                )}
-                {status === "restricted" && (
-                  <>
-                    <li>
-                      • <strong>Permission:</strong> Contact the instructor or
-                      department for approval
-                    </li>
-                    <li>
-                      • <strong>Override:</strong> Submit an override request
-                      through your advisor
-                    </li>
-                    <li>
-                      • <strong>Alternatives:</strong> Look for unrestricted
-                      sections or similar courses
-                    </li>
-                  </>
-                )}
-                {status === "already-taken" && (
-                  <>
-                    <li>
-                      • <strong>Repeat Policy:</strong> Contact your advisor if
-                      you need to retake for a higher grade
-                    </li>
-                    <li>
-                      • <strong>Substitute:</strong> Consider a higher-level
-                      course in the same subject
-                    </li>
-                  </>
-                )}
-                {status === "unknown" && (
-                  <>
-                    <li>
-                      • <strong>Course data unavailable:</strong> Section and
-                      seat info could not be loaded
-                    </li>
-                    <li>
-                      • <strong>Try later:</strong> Refresh the page once the
-                      registrar has posted the term
-                    </li>
-                  </>
-                )}
-              </ul>
             </div>
           )}
 
@@ -413,7 +313,7 @@ export default function CourseDetailClient({
           </div>
 
           {prereqChecks.filter(
-            (c) => c.completed || courseTitleMap[c.courseCode],
+            (c) => c.completed || c.inProgress || courseTitleMap[c.courseCode],
           ).length > 0 && (
             <div className="mb-6">
               <h2 className="text-sm font-semibold text-gray-800 uppercase tracking-wide mb-2">
@@ -422,22 +322,28 @@ export default function CourseDetailClient({
               <div className="space-y-1">
                 {prereqChecks
                   .filter(
-                    (c) => c.completed || courseTitleMap[c.courseCode],
+                    (c) =>
+                      c.completed || c.inProgress || courseTitleMap[c.courseCode],
                   )
                   .map((check) => {
                     const title = courseTitleMap[check.courseCode];
+                    const color = check.completed
+                      ? "text-green-700"
+                      : check.inProgress
+                        ? "text-amber-700"
+                        : "text-red-700";
+                    const marker = check.completed
+                      ? "✓"
+                      : check.inProgress
+                        ? "◐"
+                        : "✗";
                     return (
                       <div
                         key={check.courseCode}
                         className="flex items-center gap-2 text-sm"
                       >
-                        <span
-                          className={
-                            check.completed ? "text-green-700" : "text-red-700"
-                          }
-                          aria-hidden="true"
-                        >
-                          {check.completed ? "✓" : "✗"}
+                        <span className={color} aria-hidden="true">
+                          {marker}
                         </span>
                         <span className="font-medium">
                           {check.courseCode}
@@ -446,6 +352,10 @@ export default function CourseDetailClient({
                         {check.completed ? (
                           <span className="text-green-800">
                             — completed {check.term} ({check.grade})
+                          </span>
+                        ) : check.inProgress ? (
+                          <span className="text-amber-800">
+                            — in progress ({check.term})
                           </span>
                         ) : (
                           <span className="text-red-700">— not completed</span>
@@ -640,11 +550,6 @@ export default function CourseDetailClient({
                           >
                             {avail}/{max}
                           </span>
-                          {isFull && (
-                            <span className="text-red-700 text-xs ml-2">
-                              Full
-                            </span>
-                          )}
                         </td>
                         <td className="px-4 py-2 text-right">
                           {inPlan ? (
@@ -706,9 +611,6 @@ export default function CourseDetailClient({
               <div className="flex justify-between">
                 <span className="text-gray-600">Sections</span>
                 <span className="font-medium">{course.sections.length}</span>
-              </div>
-              <div className="pt-2 border-t border-gray-100">
-                <EligibilityBadge status={status} size="md" />
               </div>
             </div>
           </div>

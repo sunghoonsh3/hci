@@ -138,12 +138,12 @@ export default function WeeklyCalendar({
         </div>
       )}
       {/* Day headers */}
-      <div className="grid grid-cols-[48px_repeat(5,1fr)] border-b border-gray-200">
-        <div className="p-1" />
+      <div className="grid grid-cols-[40px_repeat(5,1fr)] border-b border-gray-200 bg-gray-50">
+        <div />
         {DAY_LABELS.map((d) => (
           <div
             key={d}
-            className="text-center text-xs font-medium text-gray-500 py-1 border-l border-gray-100"
+            className="text-center text-xs font-medium text-gray-700 py-2 border-l border-gray-200"
           >
             {d}
           </div>
@@ -152,7 +152,7 @@ export default function WeeklyCalendar({
 
       {/* Time grid */}
       <div
-        className="grid grid-cols-[48px_repeat(5,1fr)] relative"
+        className="grid grid-cols-[40px_repeat(5,1fr)] relative"
         style={{ height: totalHeight }}
       >
         {/* Hour labels */}
@@ -160,8 +160,8 @@ export default function WeeklyCalendar({
           {HOURS.map((h) => (
             <div
               key={h}
-              className="absolute text-[10px] text-gray-400 pr-1 text-right w-full"
-              style={{ top: (h - START_HOUR) * hourHeight - 6 }}
+              className="absolute text-[10px] text-gray-500 pr-1.5 text-right w-full leading-none"
+              style={{ top: (h - START_HOUR) * hourHeight + 3 }}
             >
               {h > 12 ? h - 12 : h}
               {h >= 12 ? "p" : "a"}
@@ -171,12 +171,12 @@ export default function WeeklyCalendar({
 
         {/* Day columns */}
         {DAYS.map((day) => (
-          <div key={day} className="relative border-l border-gray-100">
+          <div key={day} className="relative border-l border-gray-200">
             {/* Hour lines */}
             {HOURS.map((h) => (
               <div
                 key={h}
-                className="absolute w-full border-t border-gray-50"
+                className="absolute w-full border-t border-gray-100"
                 style={{ top: (h - START_HOUR) * hourHeight }}
               />
             ))}

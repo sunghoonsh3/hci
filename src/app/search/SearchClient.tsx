@@ -56,6 +56,53 @@ function parseDays(days: string | null): string[] {
   }
 }
 
+function FilterChip({
+  label,
+  checked,
+  onChange,
+}: {
+  label: string;
+  checked: boolean;
+  onChange: (next: boolean) => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="checkbox"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      className={`h-10 inline-flex items-center gap-2 px-3 rounded-lg text-sm border transition-colors ${
+        checked
+          ? "bg-[#0C2340] border-[#0C2340] text-white"
+          : "bg-white border-gray-300 text-gray-700 hover:border-gray-400"
+      }`}
+    >
+      <span
+        className={`w-4 h-4 rounded border flex items-center justify-center ${
+          checked ? "bg-white border-white" : "bg-white border-gray-400"
+        }`}
+      >
+        {checked && (
+          <svg
+            className="w-3 h-3 text-[#0C2340]"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={3}
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+        )}
+      </span>
+      {label}
+    </button>
+  );
+}
+
 export default function SearchClient({
   courses,
   subjects,
@@ -261,76 +308,71 @@ export default function SearchClient({
         </h1>
       </div>
 
-      <div className="flex flex-wrap gap-3 mb-6 items-end">
-        <div>
-          <label
-            htmlFor="search-subject"
-            className="block text-xs text-gray-600 mb-1"
+      <div className="bg-white border border-gray-200 rounded-lg p-3 mb-6 flex flex-wrap items-center gap-2">
+        <select
+          id="search-subject"
+          aria-label="Subject"
+          value={subject}
+          onChange={(e) => setSubject(e.target.value)}
+          className="h-10 border border-gray-300 rounded-lg px-3 text-sm bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#0C2340]/20 focus:border-[#0C2340]"
+        >
+          <option value="">All Subjects</option>
+          {subjects.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
+
+        <div className="relative flex-1 min-w-[200px]">
+          <svg
+            aria-hidden="true"
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
           >
-            Subject
-          </label>
-          <select
-            id="search-subject"
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"
-          >
-            <option value="">All Subjects</option>
-            {subjects.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label
-            htmlFor="search-keyword"
-            className="block text-xs text-gray-600 mb-1"
-          >
-            Keyword
-          </label>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"
+            />
+          </svg>
           <input
             id="search-keyword"
             type="text"
+            aria-label="Keyword"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && applyFilters()}
             placeholder="Search courses..."
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-56"
+            className="h-10 w-full border border-gray-300 rounded-lg pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0C2340]/20 focus:border-[#0C2340]"
           />
         </div>
-        <label className="flex items-center gap-2 text-sm text-gray-700 pb-1">
-          <input
-            type="checkbox"
+
+        <div className="flex items-center gap-2 flex-wrap">
+          <FilterChip
+            label="Open seats only"
             checked={openOnly}
-            onChange={(e) => setOpenOnly(e.target.checked)}
-            className="rounded"
+            onChange={setOpenOnly}
           />
-          Open seats only
-        </label>
-        <label className="flex items-center gap-2 text-sm text-gray-700 pb-1">
-          <input
-            type="checkbox"
+          <FilterChip
+            label="Core requirements"
             checked={coreOnly}
-            onChange={(e) => setCoreOnly(e.target.checked)}
-            className="rounded"
+            onChange={setCoreOnly}
           />
-          Core requirements
-        </label>
-        <label className="flex items-center gap-2 text-sm text-gray-700 pb-1">
-          <input
-            type="checkbox"
+          <FilterChip
+            label="My major courses"
             checked={majorOnly}
-            onChange={(e) => setMajorOnly(e.target.checked)}
-            className="rounded"
+            onChange={setMajorOnly}
           />
-          My major courses
-        </label>
+        </div>
+
         <button
           type="button"
           onClick={applyFilters}
-          className="bg-[#0C2340] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#0a1d35] transition-colors"
+          className="h-10 bg-[#0C2340] text-white px-5 rounded-lg text-sm font-medium hover:bg-[#0a1d35] transition-colors"
         >
           Search
         </button>

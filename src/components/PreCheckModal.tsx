@@ -107,25 +107,29 @@ export default function PreCheckModal({
   const prereqs = checkPrerequisites(
     course.registrationRestrictions,
     audit?.completedCourses ?? [],
+    audit?.inProgressCourses ?? [],
   );
   const prereqGroups = extractPrereqGroups(course.registrationRestrictions);
-  const completedCodes = (audit?.completedCourses ?? []).map(
+  const satisfyingCodes = allCourses.map(
     (c) => `${c.subject} ${c.courseNumber}`,
   );
-  const allPrereqsMet = prereqGroupsSatisfied(prereqGroups, completedCodes);
+  const allPrereqsMet = prereqGroupsSatisfied(prereqGroups, satisfyingCodes);
   const unmetGroups = prereqGroups.filter(
-    (group) => !group.some((code) => completedCodes.includes(code)),
+    (group) => !group.some((code) => satisfyingCodes.includes(code)),
   );
   const unmetLabel = unmetGroups
     .map((group) => group.join(" or "))
     .join("; ");
+  const anyInProgress = prereqs.some((p) => p.inProgress);
   checks.push({
     label: "Prerequisites",
     passed: allPrereqsMet,
     message: allPrereqsMet
       ? prereqs.length === 0
         ? "None required"
-        : "All prerequisites completed"
+        : anyInProgress
+          ? "All prerequisites completed or in progress"
+          : "All prerequisites completed"
       : `Missing: ${unmetLabel}`,
   });
 
@@ -264,32 +268,23 @@ export default function PreCheckModal({
           </ul>
         </div>
 
-        <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-          <div
-            className={`text-sm font-semibold ${
-              allPassed ? "text-green-700" : "text-red-700"
-            }`}
+        <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900"
           >
-            {allPassed ? "Eligible" : "Blocked"}
-          </div>
-          <div className="flex gap-2">
+            Close
+          </button>
+          {allPassed && !inPlan && (
             <button
               type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900"
+              onClick={onAddToPlan}
+              className="px-4 py-2 text-sm bg-[#1B6B3A] text-white rounded-lg font-medium hover:bg-[#155a2f] transition-colors"
             >
-              Close
+              Add to Plan A
             </button>
-            {allPassed && !inPlan && (
-              <button
-                type="button"
-                onClick={onAddToPlan}
-                className="px-4 py-2 text-sm bg-[#1B6B3A] text-white rounded-lg font-medium hover:bg-[#155a2f] transition-colors"
-              >
-                Add to Plan A
-              </button>
-            )}
-          </div>
+          )}
         </div>
       </div>
     </div>
