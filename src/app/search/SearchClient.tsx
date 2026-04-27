@@ -298,6 +298,15 @@ export default function SearchClient({
 
   return (
     <div>
+      <button
+        type="button"
+        onClick={() => router.back()}
+        aria-label="Go back to previous page"
+        className="mb-3 inline-flex items-center text-sm text-gray-700 hover:text-gray-900"
+      >
+        ← Back
+      </button>
+
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-bold text-gray-900">
           Search Results{" "}

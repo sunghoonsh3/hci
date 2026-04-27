@@ -233,11 +233,19 @@ export default function PlanPage() {
 
   const calendarEntries = showAllPlans ? plans : slotEntries;
   const events: CalendarEvent[] = [];
+  const untimed: {
+    sectionId: number;
+    label: string;
+    color: string;
+    isOnline: boolean;
+    planSlot: PlanSlot;
+  }[] = [];
   for (const entry of calendarEntries) {
     const course = courseDataMap[entry.courseId];
     if (!course) continue;
     const section = course.sections.find((s) => s.id === entry.sectionId);
     if (!section) continue;
+    let scheduled = false;
     for (const meeting of section.meetings) {
       if (!meeting.startTime || !meeting.endTime) continue;
       const days = parseDays(meeting.days);
@@ -249,6 +257,19 @@ export default function PlanPage() {
         startTime: meeting.startTime,
         endTime: meeting.endTime,
         color: PLAN_COLORS[entry.planSlot],
+      });
+      scheduled = true;
+    }
+    if (!scheduled) {
+      const isOnline = section.meetings.some((m) =>
+        /online/i.test(m.room ?? ""),
+      );
+      untimed.push({
+        sectionId: entry.sectionId,
+        label: `${course.subject} ${course.courseNumber}`,
+        color: PLAN_COLORS[entry.planSlot],
+        isOnline,
+        planSlot: entry.planSlot,
       });
     }
   }
@@ -563,11 +584,41 @@ export default function PlanPage() {
               setHighlightedSection((prev) => (prev === id ? null : id))
             }
             emptyMessage={
-              showAllPlans
-                ? "No courses planned across any slot yet."
-                : `No courses in Plan ${activeSlot} yet.`
+              events.length === 0 && untimed.length > 0
+                ? showAllPlans
+                  ? "All planned courses are async or have no fixed meeting time."
+                  : `Plan ${activeSlot} has no courses with fixed meeting times.`
+                : showAllPlans
+                  ? "No courses planned across any slot yet."
+                  : `No courses in Plan ${activeSlot} yet.`
             }
           />
+          {untimed.length > 0 && (
+            <div className="mt-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-xs text-amber-900">
+              <div className="font-medium mb-1">No fixed meeting time</div>
+              <ul className="space-y-1">
+                {untimed.map((u) => (
+                  <li
+                    key={`${u.planSlot}-${u.sectionId}`}
+                    className="flex items-center gap-2"
+                  >
+                    <span
+                      className="w-2 h-2 rounded-sm shrink-0"
+                      style={{ backgroundColor: u.color }}
+                      aria-hidden="true"
+                    />
+                    <span>
+                      {u.label}{" "}
+                      <span className="text-amber-800/80">
+                        ({u.isOnline ? "online / async" : "TBA"}
+                        {showAllPlans ? `, Plan ${u.planSlot}` : ""})
+                      </span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           {showAllPlans && (
             <div className="flex items-center gap-4 mt-2 text-xs text-gray-600">
               <div className="flex items-center gap-1">
