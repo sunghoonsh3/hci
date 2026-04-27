@@ -12,9 +12,9 @@ const CONFIG: Record<
     text: "text-yellow-800",
   },
   "needs-prereq": {
-    label: "Needs Prereq",
-    bg: "bg-orange-100",
-    text: "text-orange-800",
+    label: "Restricted",
+    bg: "bg-yellow-100",
+    text: "text-yellow-800",
   },
   "already-taken": {
     label: "Taken",

@@ -37,9 +37,9 @@ export function computeEligibility(
   if (hasAudit) {
     const groups = extractPrereqGroups(registrationRestrictions);
     if (groups.length > 0) {
-      const completedCodes = completedCourses.map(
-        (c) => `${c.subject} ${c.courseNumber}`,
-      );
+      const completedCodes = completedCourses
+        .filter((c) => c.status === "completed")
+        .map((c) => `${c.subject} ${c.courseNumber}`);
       if (!prereqGroupsSatisfied(groups, completedCodes)) return "needs-prereq";
     }
   }
