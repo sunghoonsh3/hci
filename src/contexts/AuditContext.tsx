@@ -7,8 +7,8 @@ import {
   type ReactNode,
 } from "react";
 import type { ParsedAudit } from "@/types";
-import { parseAuditText, isValidAudit } from "@/lib/auditParser";
 import { ParsedAuditSchema } from "@/lib/schemas";
+import { parseAuditViaApi, type ParseAuditResult } from "@/lib/parseAuditClient";
 import { createLocalStore, useLocalStoreValue } from "@/lib/localStore";
 
 const auditStore = createLocalStore<ParsedAudit | null>(
@@ -20,7 +20,7 @@ const auditStore = createLocalStore<ParsedAudit | null>(
 interface AuditContextValue {
   audit: ParsedAudit | null;
   loaded: boolean;
-  setAuditText: (rawText: string) => ParsedAudit | null;
+  setAuditText: (rawText: string) => Promise<ParseAuditResult>;
   clearAudit: () => void;
   isCourseTaken: (subject: string, courseNumber: string) => boolean;
   isCourseInProgress: (subject: string, courseNumber: string) => boolean;
@@ -31,14 +31,16 @@ const AuditContext = createContext<AuditContextValue | null>(null);
 export function AuditProvider({ children }: { children: ReactNode }) {
   const audit = useLocalStoreValue(auditStore);
 
-  const setAuditText = useCallback((rawText: string): ParsedAudit | null => {
-    const parsed = parseAuditText(rawText);
-    if (isValidAudit(parsed)) {
-      auditStore.set(parsed);
-      return parsed;
-    }
-    return null;
-  }, []);
+  const setAuditText = useCallback(
+    async (rawText: string): Promise<ParseAuditResult> => {
+      const result = await parseAuditViaApi(rawText);
+      if (result.ok) {
+        auditStore.set(result.audit);
+      }
+      return result;
+    },
+    [],
+  );
 
   const clearAudit = useCallback(() => {
     auditStore.set(null);

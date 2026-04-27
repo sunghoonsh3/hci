@@ -1,0 +1,107 @@
+- generic [active] [ref=e1]:
+  - navigation "Main navigation" [ref=e2]:
+    - link "PATH — Registration Clarity home" [ref=e3] [cursor=pointer]:
+      - /url: /search
+      - generic [ref=e4]: ☘️
+      - generic [ref=e5]: PATH
+    - generic [ref=e6]:
+      - link "Search" [ref=e7] [cursor=pointer]:
+        - /url: /search
+        - generic [ref=e8]: Search
+      - link "Plan — 1 course planned" [ref=e9] [cursor=pointer]:
+        - /url: /plan
+        - generic [ref=e10]: Plan
+        - generic [ref=e11]: "1"
+      - link "Export" [ref=e12] [cursor=pointer]:
+        - /url: /export
+        - generic [ref=e13]: Export
+    - generic [ref=e14]:
+      - generic [ref=e15]: Summer 2026
+      - generic [ref=e16]: AM
+      - generic [ref=e17]: Alex Murphy
+  - generic [ref=e18]:
+    - complementary "Plans and progress" [ref=e19]:
+      - generic [ref=e20]:
+        - generic [ref=e21]: Term
+        - generic [ref=e22]: Summer 2026
+      - generic [ref=e23]:
+        - generic [ref=e24]: My Plans
+        - tablist "Plan slots" [ref=e25]:
+          - tab "Plan A (0)" [selected] [ref=e26]
+          - tab "Plan B (1)" [ref=e27]
+          - tab "Plan C (0)" [ref=e28]
+        - tabpanel [ref=e29]:
+          - paragraph [ref=e30]: No courses in Plan A
+      - generic [ref=e31]:
+        - generic [ref=e32]:
+          - generic [ref=e33]: Progress
+          - generic [ref=e34]: On Track
+        - generic [ref=e35]:
+          - generic [ref=e36]:
+            - generic [ref=e37]:
+              - generic [ref=e38]: Credits
+              - generic [ref=e39]: 75/120
+            - progressbar "Credits progress" [ref=e40]
+          - generic [ref=e42]:
+            - generic [ref=e43]:
+              - generic [ref=e44]: Major (CS)
+              - generic [ref=e45]: 14/42
+            - progressbar "Major credits progress" [ref=e46]
+          - generic [ref=e48]:
+            - generic [ref=e49]:
+              - generic [ref=e50]: Degree
+              - generic [ref=e51]: 62.5%
+            - progressbar "Degree progress" [ref=e52]
+          - generic [ref=e54]: "GPA: 3.420 | Junior"
+      - generic [ref=e55]:
+        - generic [ref=e56]: My GPS
+        - generic [ref=e57]:
+          - generic [ref=e58]: Bachelor of Arts in Computer Science
+          - generic [ref=e59]: College of Arts and Letters
+    - main [ref=e60]:
+      - generic [ref=e61]:
+        - generic [ref=e62]:
+          - heading "My Plan" [level=1] [ref=e63]
+          - link "Export to NOVO" [ref=e64] [cursor=pointer]:
+            - /url: /export
+        - tablist "Plan slots" [ref=e65]:
+          - tab "Plan A (0)" [selected] [ref=e66]
+          - tab "Plan B (1)" [ref=e67]
+          - tab "Plan C (0)" [ref=e68]
+          - generic [ref=e69]:
+            - checkbox "Show all plans on calendar" [ref=e70]
+            - text: Show all plans on calendar
+        - generic [ref=e71]:
+          - generic [ref=e73]:
+            - paragraph [ref=e74]: No courses in Plan A.
+            - link "Search for courses" [ref=e75] [cursor=pointer]:
+              - /url: /search
+          - generic [ref=e76]:
+            - heading "Weekly Schedule" [level=2] [ref=e77]
+            - generic [ref=e78]:
+              - note:
+                - paragraph [ref=e79]: No courses in Plan A yet.
+              - generic [ref=e80]:
+                - generic [ref=e82]: Mon
+                - generic [ref=e83]: Tue
+                - generic [ref=e84]: Wed
+                - generic [ref=e85]: Thu
+                - generic [ref=e86]: Fri
+              - generic [ref=e88]:
+                - generic [ref=e89]: 8a
+                - generic [ref=e90]: 9a
+                - generic [ref=e91]: 10a
+                - generic [ref=e92]: 11a
+                - generic [ref=e93]: 12p
+                - generic [ref=e94]: 1p
+                - generic [ref=e95]: 2p
+                - generic [ref=e96]: 3p
+                - generic [ref=e97]: 4p
+                - generic [ref=e98]: 5p
+                - generic [ref=e99]: 6p
+                - generic [ref=e100]: 7p
+                - generic [ref=e101]: 8p
+                - generic [ref=e102]: 9p
+  - button "Open Next.js Dev Tools" [ref=e183] [cursor=pointer]:
+    - img [ref=e184]
+  - alert [ref=e187]

@@ -1,0 +1,527 @@
+- generic [active] [ref=e1]:
+  - navigation "Main navigation" [ref=e2]:
+    - link "PATH — Registration Clarity home" [ref=e3] [cursor=pointer]:
+      - /url: /search
+      - generic [ref=e4]: ☘️
+      - generic [ref=e5]: PATH
+    - generic [ref=e6]:
+      - link "Search" [ref=e7] [cursor=pointer]:
+        - /url: /search
+        - generic [ref=e8]: Search
+      - link "Plan — 1 course planned" [ref=e9] [cursor=pointer]:
+        - /url: /plan
+        - generic [ref=e10]: Plan
+        - generic [ref=e11]: "1"
+      - link "Export" [ref=e12] [cursor=pointer]:
+        - /url: /export
+        - generic [ref=e13]: Export
+    - generic [ref=e14]:
+      - generic [ref=e15]: Summer 2026
+      - generic [ref=e16]: AM
+      - generic [ref=e17]: Alex Murphy
+  - generic [ref=e18]:
+    - complementary "Plans and progress" [ref=e19]:
+      - generic [ref=e20]:
+        - generic [ref=e21]: Term
+        - generic [ref=e22]: Summer 2026
+      - generic [ref=e23]:
+        - generic [ref=e24]: My Plans
+        - tablist "Plan slots" [ref=e25]:
+          - tab "Plan A (0)" [selected] [ref=e26]
+          - tab "Plan B (1)" [ref=e27]
+          - tab "Plan C (0)" [ref=e28]
+        - tabpanel [ref=e29]:
+          - paragraph [ref=e30]: No courses in Plan A
+      - generic [ref=e31]:
+        - generic [ref=e32]:
+          - generic [ref=e33]: Progress
+          - generic [ref=e34]: On Track
+        - generic [ref=e35]:
+          - generic [ref=e36]:
+            - generic [ref=e37]:
+              - generic [ref=e38]: Credits
+              - generic [ref=e39]: 75/120
+            - progressbar "Credits progress" [ref=e40]
+          - generic [ref=e42]:
+            - generic [ref=e43]:
+              - generic [ref=e44]: Major (CS)
+              - generic [ref=e45]: 14/42
+            - progressbar "Major credits progress" [ref=e46]
+          - generic [ref=e48]:
+            - generic [ref=e49]:
+              - generic [ref=e50]: Degree
+              - generic [ref=e51]: 62.5%
+            - progressbar "Degree progress" [ref=e52]
+          - generic [ref=e54]: "GPA: 3.420 | Junior"
+      - generic [ref=e55]:
+        - generic [ref=e56]: My GPS
+        - generic [ref=e57]:
+          - generic [ref=e58]: Bachelor of Arts in Computer Science
+          - generic [ref=e59]: College of Arts and Letters
+    - main [ref=e60]:
+      - generic [ref=e61]:
+        - heading "Search Results — 20 courses" [level=1] [ref=e63]:
+          - text: Search Results
+          - generic [ref=e64]: — 20 courses
+        - generic [ref=e65]:
+          - combobox "Subject" [ref=e66]:
+            - option "All Subjects"
+            - option "ACCT"
+            - option "ACMS"
+            - option "AFST"
+            - option "AL"
+            - option "AME"
+            - option "AMST"
+            - option "ANTH"
+            - option "ARCH"
+            - option "ARHI"
+            - option "ARST"
+            - option "BAEG"
+            - option "BALW"
+            - option "BASC"
+            - option "BAUG"
+            - option "BES"
+            - option "BIOS"
+            - option "BPHY"
+            - option "CBE"
+            - option "CDT"
+            - option "CE"
+            - option "CHEM"
+            - option "CLAS"
+            - option "CLGR"
+            - option "CLLA"
+            - option "CNST"
+            - option "CSE" [selected]
+            - option "CSEM"
+            - option "DESN"
+            - option "DMA"
+            - option "DS"
+            - option "EALJ"
+            - option "ECON"
+            - option "EDU"
+            - option "EE"
+            - option "EG"
+            - option "ENGL"
+            - option "ESS"
+            - option "ESTM"
+            - option "FIN"
+            - option "FTT"
+            - option "GE"
+            - option "GH"
+            - option "GLAF"
+            - option "GRED"
+            - option "GSC"
+            - option "HIST"
+            - option "HPS"
+            - option "IBMS"
+            - option "IIPS"
+            - option "ILS"
+            - option "ISS"
+            - option "ITAO"
+            - option "KSGA"
+            - option "LLRO"
+            - option "MARK"
+            - option "MATH"
+            - option "MBA"
+            - option "MBAE"
+            - option "MDMK"
+            - option "MDSC"
+            - option "MEAR"
+            - option "MGA"
+            - option "MGTO"
+            - option "MI"
+            - option "MNAE"
+            - option "MSA"
+            - option "MSBR"
+            - option "MSF"
+            - option "MSFR"
+            - option "MSM"
+            - option "MSMG"
+            - option "MUS"
+            - option "NSCI"
+            - option "PCSE"
+            - option "PHIL"
+            - option "PHYS"
+            - option "POLS"
+            - option "PSY"
+            - option "RE"
+            - option "REG"
+            - option "ROFR"
+            - option "ROIT"
+            - option "ROPO"
+            - option "ROSP"
+            - option "SC"
+            - option "SMAC"
+            - option "SOC"
+            - option "SOCO"
+            - option "STV"
+            - option "SUSD"
+            - option "THEO"
+            - option "UGED"
+          - generic [ref=e67]:
+            - img [ref=e68]
+            - textbox "Keyword" [ref=e70]:
+              - /placeholder: Search courses...
+          - generic [ref=e71]:
+            - checkbox "Open seats only" [ref=e72]: Open seats only
+            - checkbox "Core requirements" [ref=e74]: Core requirements
+            - checkbox "My major courses" [ref=e76]: My major courses
+          - button "Search" [ref=e78]
+        - generic [ref=e79]:
+          - table [ref=e81]:
+            - rowgroup [ref=e82]:
+              - row "Course Title Status Seats Reqs Actions" [ref=e83]:
+                - columnheader "Course" [ref=e84]
+                - columnheader "Title" [ref=e85]
+                - columnheader "Status" [ref=e86]
+                - columnheader "Seats" [ref=e87]
+                - columnheader "Reqs" [ref=e88]
+                - columnheader "Actions" [ref=e89]
+            - rowgroup [ref=e90]:
+              - 'row "CSE 10001 Principles of Computing Eligibility: Eligible 25/25 1 of 1 section open Add CSE 10001 to Plan A Remove CSE 10001 from Plan B Add CSE 10001 to Plan C" [ref=e91] [cursor=pointer]':
+                - cell "CSE 10001" [ref=e92]:
+                  - generic [ref=e93]: CSE 10001
+                - cell "Principles of Computing" [ref=e94]
+                - 'cell "Eligibility: Eligible" [ref=e95]':
+                  - 'status "Eligibility: Eligible" [ref=e96]': Eligible
+                - cell "25/25 1 of 1 section open" [ref=e97]:
+                  - generic [ref=e98]:
+                    - generic [ref=e99]: 25/25
+                    - generic [ref=e100]: 1 of 1 section open
+                - cell [ref=e101]
+                - cell "Add CSE 10001 to Plan A Remove CSE 10001 from Plan B Add CSE 10001 to Plan C" [ref=e102]:
+                  - generic [ref=e103]:
+                    - button "Add CSE 10001 to Plan A" [ref=e104]: + A
+                    - button "Remove CSE 10001 from Plan B" [ref=e105]:
+                      - generic [ref=e106]: × B
+                    - button "Add CSE 10001 to Plan C" [ref=e107]: + C
+              - 'row "CSE 20232 C/C++ Programming Eligibility: Eligible 19/20 1 of 1 section open Add CSE 20232 to Plan A Add CSE 20232 to Plan B Add CSE 20232 to Plan C" [ref=e108] [cursor=pointer]':
+                - cell "CSE 20232" [ref=e109]:
+                  - generic [ref=e110]: CSE 20232
+                - cell "C/C++ Programming" [ref=e111]
+                - 'cell "Eligibility: Eligible" [ref=e112]':
+                  - 'status "Eligibility: Eligible" [ref=e113]': Eligible
+                - cell "19/20 1 of 1 section open" [ref=e114]:
+                  - generic [ref=e115]:
+                    - generic [ref=e116]: 19/20
+                    - generic [ref=e117]: 1 of 1 section open
+                - cell [ref=e118]
+                - cell "Add CSE 20232 to Plan A Add CSE 20232 to Plan B Add CSE 20232 to Plan C" [ref=e119]:
+                  - generic [ref=e120]:
+                    - button "Add CSE 20232 to Plan A" [ref=e121]: + A
+                    - button "Add CSE 20232 to Plan B" [ref=e122]: + B
+                    - button "Add CSE 20232 to Plan C" [ref=e123]: + C
+              - 'row "CSE 20312 Programming Paradigms Eligibility: Eligible 18/30 1 of 1 section open CS Core Add CSE 20312 to Plan A Add CSE 20312 to Plan B Add CSE 20312 to Plan C" [ref=e124] [cursor=pointer]':
+                - cell "CSE 20312" [ref=e125]:
+                  - generic [ref=e126]: CSE 20312
+                - cell "Programming Paradigms" [ref=e127]
+                - 'cell "Eligibility: Eligible" [ref=e128]':
+                  - 'status "Eligibility: Eligible" [ref=e129]': Eligible
+                - cell "18/30 1 of 1 section open" [ref=e130]:
+                  - generic [ref=e131]:
+                    - generic [ref=e132]: 18/30
+                    - generic [ref=e133]: 1 of 1 section open
+                - cell "CS Core" [ref=e134]:
+                  - generic [ref=e136]: CS Core
+                - cell "Add CSE 20312 to Plan A Add CSE 20312 to Plan B Add CSE 20312 to Plan C" [ref=e137]:
+                  - generic [ref=e138]:
+                    - button "Add CSE 20312 to Plan A" [ref=e139]: + A
+                    - button "Add CSE 20312 to Plan B" [ref=e140]: + B
+                    - button "Add CSE 20312 to Plan C" [ref=e141]: + C
+              - 'row "CSE 20639 3D Game Environments in Unity Eligibility: Eligible 25/25 1 of 1 section open Add CSE 20639 to Plan A Add CSE 20639 to Plan B Add CSE 20639 to Plan C" [ref=e142] [cursor=pointer]':
+                - cell "CSE 20639" [ref=e143]:
+                  - generic [ref=e144]: CSE 20639
+                - cell "3D Game Environments in Unity" [ref=e145]
+                - 'cell "Eligibility: Eligible" [ref=e146]':
+                  - 'status "Eligibility: Eligible" [ref=e147]': Eligible
+                - cell "25/25 1 of 1 section open" [ref=e148]:
+                  - generic [ref=e149]:
+                    - generic [ref=e150]: 25/25
+                    - generic [ref=e151]: 1 of 1 section open
+                - cell [ref=e152]
+                - cell "Add CSE 20639 to Plan A Add CSE 20639 to Plan B Add CSE 20639 to Plan C" [ref=e153]:
+                  - generic [ref=e154]:
+                    - button "Add CSE 20639 to Plan A" [ref=e155]: + A
+                    - button "Add CSE 20639 to Plan B" [ref=e156]: + B
+                    - button "Add CSE 20639 to Plan C" [ref=e157]: + C
+              - 'row "CSE 30151 Theory of Computing Eligibility: Restricted 12/30 1 of 1 section open CS Core —" [ref=e158] [cursor=pointer]':
+                - cell "CSE 30151" [ref=e159]:
+                  - generic [ref=e160]: CSE 30151
+                - cell "Theory of Computing" [ref=e161]
+                - 'cell "Eligibility: Restricted" [ref=e162]':
+                  - 'status "Eligibility: Restricted" [ref=e163]': Restricted
+                - cell "12/30 1 of 1 section open" [ref=e164]:
+                  - generic [ref=e165]:
+                    - generic [ref=e166]: 12/30
+                    - generic [ref=e167]: 1 of 1 section open
+                - cell "CS Core" [ref=e168]:
+                  - generic [ref=e170]: CS Core
+                - cell "—" [ref=e171]
+              - 'row "CSE 30332 Programming Paradigms Eligibility: Eligible 25/25 1 of 1 section open CS Elective Add CSE 30332 to Plan A Add CSE 30332 to Plan B Add CSE 30332 to Plan C" [ref=e172] [cursor=pointer]':
+                - cell "CSE 30332" [ref=e173]:
+                  - generic [ref=e174]: CSE 30332
+                - cell "Programming Paradigms" [ref=e175]
+                - 'cell "Eligibility: Eligible" [ref=e176]':
+                  - 'status "Eligibility: Eligible" [ref=e177]': Eligible
+                - cell "25/25 1 of 1 section open" [ref=e178]:
+                  - generic [ref=e179]:
+                    - generic [ref=e180]: 25/25
+                    - generic [ref=e181]: 1 of 1 section open
+                - cell "CS Elective" [ref=e182]:
+                  - generic [ref=e184]: CS Elective
+                - cell "Add CSE 30332 to Plan A Add CSE 30332 to Plan B Add CSE 30332 to Plan C" [ref=e185]:
+                  - generic [ref=e186]:
+                    - button "Add CSE 30332 to Plan A" [ref=e187]: + A
+                    - button "Add CSE 30332 to Plan B" [ref=e188]: + B
+                    - button "Add CSE 30332 to Plan C" [ref=e189]: + C
+              - 'row "CSE 30872 Programming Challenges Eligibility: Restricted 25/30 1 of 1 section open CS Elective —" [ref=e190] [cursor=pointer]':
+                - cell "CSE 30872" [ref=e191]:
+                  - generic [ref=e192]: CSE 30872
+                - cell "Programming Challenges" [ref=e193]
+                - 'cell "Eligibility: Restricted" [ref=e194]':
+                  - 'status "Eligibility: Restricted" [ref=e195]': Restricted
+                - cell "25/30 1 of 1 section open" [ref=e196]:
+                  - generic [ref=e197]:
+                    - generic [ref=e198]: 25/30
+                    - generic [ref=e199]: 1 of 1 section open
+                - cell "CS Elective" [ref=e200]:
+                  - generic [ref=e202]: CS Elective
+                - cell "—" [ref=e203]
+              - 'row "CSE 40424 Human Computer Interaction Eligibility: Eligible 21/25 1 of 1 section open CS Elective Add CSE 40424 to Plan A Add CSE 40424 to Plan B Add CSE 40424 to Plan C" [ref=e204] [cursor=pointer]':
+                - cell "CSE 40424" [ref=e205]:
+                  - generic [ref=e206]: CSE 40424
+                - cell "Human Computer Interaction" [ref=e207]
+                - 'cell "Eligibility: Eligible" [ref=e208]':
+                  - 'status "Eligibility: Eligible" [ref=e209]': Eligible
+                - cell "21/25 1 of 1 section open" [ref=e210]:
+                  - generic [ref=e211]:
+                    - generic [ref=e212]: 21/25
+                    - generic [ref=e213]: 1 of 1 section open
+                - cell "CS Elective" [ref=e214]:
+                  - generic [ref=e216]: CS Elective
+                - cell "Add CSE 40424 to Plan A Add CSE 40424 to Plan B Add CSE 40424 to Plan C" [ref=e217]:
+                  - generic [ref=e218]:
+                    - button "Add CSE 40424 to Plan A" [ref=e219]: + A
+                    - button "Add CSE 40424 to Plan B" [ref=e220]: + B
+                    - button "Add CSE 40424 to Plan C" [ref=e221]: + C
+              - 'row "CSE 40693 Modern Web Development Eligibility: Eligible 24/25 1 of 1 section open CS Elective Add CSE 40693 to Plan A Add CSE 40693 to Plan B Add CSE 40693 to Plan C" [ref=e222] [cursor=pointer]':
+                - cell "CSE 40693" [ref=e223]:
+                  - generic [ref=e224]: CSE 40693
+                - cell "Modern Web Development" [ref=e225]
+                - 'cell "Eligibility: Eligible" [ref=e226]':
+                  - 'status "Eligibility: Eligible" [ref=e227]': Eligible
+                - cell "24/25 1 of 1 section open" [ref=e228]:
+                  - generic [ref=e229]:
+                    - generic [ref=e230]: 24/25
+                    - generic [ref=e231]: 1 of 1 section open
+                - cell "CS Elective" [ref=e232]:
+                  - generic [ref=e234]: CS Elective
+                - cell "Add CSE 40693 to Plan A Add CSE 40693 to Plan B Add CSE 40693 to Plan C" [ref=e235]:
+                  - generic [ref=e236]:
+                    - button "Add CSE 40693 to Plan A" [ref=e237]: + A
+                    - button "Add CSE 40693 to Plan B" [ref=e238]: + B
+                    - button "Add CSE 40693 to Plan C" [ref=e239]: + C
+              - 'row "CSE 48901 Undergraduate Research Eligibility: Restricted 170/170 33 of 33 sections open CS Elective —" [ref=e240] [cursor=pointer]':
+                - cell "CSE 48901" [ref=e241]:
+                  - generic [ref=e242]: CSE 48901
+                - cell "Undergraduate Research" [ref=e243]
+                - 'cell "Eligibility: Restricted" [ref=e244]':
+                  - 'status "Eligibility: Restricted" [ref=e245]': Restricted
+                - cell "170/170 33 of 33 sections open" [ref=e246]:
+                  - generic [ref=e247]:
+                    - generic [ref=e248]: 170/170
+                    - generic [ref=e249]: 33 of 33 sections open
+                - cell "CS Elective" [ref=e250]:
+                  - generic [ref=e252]: CS Elective
+                - cell "—" [ref=e253]
+              - 'row "CSE 48999 Research Experience for Undergraduates Eligibility: Restricted 20/20 1 of 1 section open CS Elective —" [ref=e254] [cursor=pointer]':
+                - cell "CSE 48999" [ref=e255]:
+                  - generic [ref=e256]: CSE 48999
+                - cell "Research Experience for Undergraduates" [ref=e257]
+                - 'cell "Eligibility: Restricted" [ref=e258]':
+                  - 'status "Eligibility: Restricted" [ref=e259]': Restricted
+                - cell "20/20 1 of 1 section open" [ref=e260]:
+                  - generic [ref=e261]:
+                    - generic [ref=e262]: 20/20
+                    - generic [ref=e263]: 1 of 1 section open
+                - cell "CS Elective" [ref=e264]:
+                  - generic [ref=e266]: CS Elective
+                - cell "—" [ref=e267]
+              - 'row "CSE 60693 Modern Web Development Eligibility: Eligible 18/19 1 of 1 section open CS Elective Add CSE 60693 to Plan A Add CSE 60693 to Plan B Add CSE 60693 to Plan C" [ref=e268] [cursor=pointer]':
+                - cell "CSE 60693" [ref=e269]:
+                  - generic [ref=e270]: CSE 60693
+                - cell "Modern Web Development" [ref=e271]
+                - 'cell "Eligibility: Eligible" [ref=e272]':
+                  - 'status "Eligibility: Eligible" [ref=e273]': Eligible
+                - cell "18/19 1 of 1 section open" [ref=e274]:
+                  - generic [ref=e275]:
+                    - generic [ref=e276]: 18/19
+                    - generic [ref=e277]: 1 of 1 section open
+                - cell "CS Elective" [ref=e278]:
+                  - generic [ref=e280]: CS Elective
+                - cell "Add CSE 60693 to Plan A Add CSE 60693 to Plan B Add CSE 60693 to Plan C" [ref=e281]:
+                  - generic [ref=e282]:
+                    - button "Add CSE 60693 to Plan A" [ref=e283]: + A
+                    - button "Add CSE 60693 to Plan B" [ref=e284]: + B
+                    - button "Add CSE 60693 to Plan C" [ref=e285]: + C
+              - 'row "CSE 60732 C/C++ Programming Eligibility: Eligible 17/20 1 of 1 section open CS Elective Add CSE 60732 to Plan A Add CSE 60732 to Plan B Add CSE 60732 to Plan C" [ref=e286] [cursor=pointer]':
+                - cell "CSE 60732" [ref=e287]:
+                  - generic [ref=e288]: CSE 60732
+                - cell "C/C++ Programming" [ref=e289]
+                - 'cell "Eligibility: Eligible" [ref=e290]':
+                  - 'status "Eligibility: Eligible" [ref=e291]': Eligible
+                - cell "17/20 1 of 1 section open" [ref=e292]:
+                  - generic [ref=e293]:
+                    - generic [ref=e294]: 17/20
+                    - generic [ref=e295]: 1 of 1 section open
+                - cell "CS Elective" [ref=e296]:
+                  - generic [ref=e298]: CS Elective
+                - cell "Add CSE 60732 to Plan A Add CSE 60732 to Plan B Add CSE 60732 to Plan C" [ref=e299]:
+                  - generic [ref=e300]:
+                    - button "Add CSE 60732 to Plan A" [ref=e301]: + A
+                    - button "Add CSE 60732 to Plan B" [ref=e302]: + B
+                    - button "Add CSE 60732 to Plan C" [ref=e303]: + C
+              - 'row "CSE 60901 Special Studies Eligibility: Restricted 5/5 1 of 1 section open CS Elective —" [ref=e304] [cursor=pointer]':
+                - cell "CSE 60901" [ref=e305]:
+                  - generic [ref=e306]: CSE 60901
+                - cell "Special Studies" [ref=e307]
+                - 'cell "Eligibility: Restricted" [ref=e308]':
+                  - 'status "Eligibility: Restricted" [ref=e309]': Restricted
+                - cell "5/5 1 of 1 section open" [ref=e310]:
+                  - generic [ref=e311]:
+                    - generic [ref=e312]: 5/5
+                    - generic [ref=e313]: 1 of 1 section open
+                - cell "CS Elective" [ref=e314]:
+                  - generic [ref=e316]: CS Elective
+                - cell "—" [ref=e317]
+              - 'row "CSE 67890 Independent Summer Research Eligibility: Eligible 92/165 1 of 1 section open CS Elective Add CSE 67890 to Plan A Add CSE 67890 to Plan B Add CSE 67890 to Plan C" [ref=e318] [cursor=pointer]':
+                - cell "CSE 67890" [ref=e319]:
+                  - generic [ref=e320]: CSE 67890
+                - cell "Independent Summer Research" [ref=e321]
+                - 'cell "Eligibility: Eligible" [ref=e322]':
+                  - 'status "Eligibility: Eligible" [ref=e323]': Eligible
+                - cell "92/165 1 of 1 section open" [ref=e324]:
+                  - generic [ref=e325]:
+                    - generic [ref=e326]: 92/165
+                    - generic [ref=e327]: 1 of 1 section open
+                - cell "CS Elective" [ref=e328]:
+                  - generic [ref=e330]: CS Elective
+                - cell "Add CSE 67890 to Plan A Add CSE 67890 to Plan B Add CSE 67890 to Plan C" [ref=e331]:
+                  - generic [ref=e332]:
+                    - button "Add CSE 67890 to Plan A" [ref=e333]: + A
+                    - button "Add CSE 67890 to Plan B" [ref=e334]: + B
+                    - button "Add CSE 67890 to Plan C" [ref=e335]: + C
+              - 'row "CSE 68901 Thesis Direction Eligibility: Eligible 354/355 40 of 40 sections open CS Elective Add CSE 68901 to Plan A Add CSE 68901 to Plan B Add CSE 68901 to Plan C" [ref=e336] [cursor=pointer]':
+                - cell "CSE 68901" [ref=e337]:
+                  - generic [ref=e338]: CSE 68901
+                - cell "Thesis Direction" [ref=e339]
+                - 'cell "Eligibility: Eligible" [ref=e340]':
+                  - 'status "Eligibility: Eligible" [ref=e341]': Eligible
+                - cell "354/355 40 of 40 sections open" [ref=e342]:
+                  - generic [ref=e343]:
+                    - generic [ref=e344]: 354/355
+                    - generic [ref=e345]: 40 of 40 sections open
+                - cell "CS Elective" [ref=e346]:
+                  - generic [ref=e348]: CS Elective
+                - cell "Add CSE 68901 to Plan A Add CSE 68901 to Plan B Add CSE 68901 to Plan C" [ref=e349]:
+                  - generic [ref=e350]:
+                    - button "Add CSE 68901 to Plan A" [ref=e351]: + A
+                    - button "Add CSE 68901 to Plan B" [ref=e352]: + B
+                    - button "Add CSE 68901 to Plan C" [ref=e353]: + C
+              - 'row "CSE 68902 Thesis Project Eligibility: Eligible 181/181 37 of 37 sections open CS Elective Add CSE 68902 to Plan A Add CSE 68902 to Plan B Add CSE 68902 to Plan C" [ref=e354] [cursor=pointer]':
+                - cell "CSE 68902" [ref=e355]:
+                  - generic [ref=e356]: CSE 68902
+                - cell "Thesis Project" [ref=e357]
+                - 'cell "Eligibility: Eligible" [ref=e358]':
+                  - 'status "Eligibility: Eligible" [ref=e359]': Eligible
+                - cell "181/181 37 of 37 sections open" [ref=e360]:
+                  - generic [ref=e361]:
+                    - generic [ref=e362]: 181/181
+                    - generic [ref=e363]: 37 of 37 sections open
+                - cell "CS Elective" [ref=e364]:
+                  - generic [ref=e366]: CS Elective
+                - cell "Add CSE 68902 to Plan A Add CSE 68902 to Plan B Add CSE 68902 to Plan C" [ref=e367]:
+                  - generic [ref=e368]:
+                    - button "Add CSE 68902 to Plan A" [ref=e369]: + A
+                    - button "Add CSE 68902 to Plan B" [ref=e370]: + B
+                    - button "Add CSE 68902 to Plan C" [ref=e371]: + C
+              - 'row "CSE 68905 Nonresident Thesis Direction Eligibility: Eligible 8/20 1 of 1 section open CS Elective Add CSE 68905 to Plan A Add CSE 68905 to Plan B Add CSE 68905 to Plan C" [ref=e372] [cursor=pointer]':
+                - cell "CSE 68905" [ref=e373]:
+                  - generic [ref=e374]: CSE 68905
+                - cell "Nonresident Thesis Direction" [ref=e375]
+                - 'cell "Eligibility: Eligible" [ref=e376]':
+                  - 'status "Eligibility: Eligible" [ref=e377]': Eligible
+                - cell "8/20 1 of 1 section open" [ref=e378]:
+                  - generic [ref=e379]:
+                    - generic [ref=e380]: 8/20
+                    - generic [ref=e381]: 1 of 1 section open
+                - cell "CS Elective" [ref=e382]:
+                  - generic [ref=e384]: CS Elective
+                - cell "Add CSE 68905 to Plan A Add CSE 68905 to Plan B Add CSE 68905 to Plan C" [ref=e385]:
+                  - generic [ref=e386]:
+                    - button "Add CSE 68905 to Plan A" [ref=e387]: + A
+                    - button "Add CSE 68905 to Plan B" [ref=e388]: + B
+                    - button "Add CSE 68905 to Plan C" [ref=e389]: + C
+              - 'row "CSE 87001 Computing Research Experiences for Teachers Eligibility: Eligible 20/20 1 of 1 section open CS Elective Add CSE 87001 to Plan A Add CSE 87001 to Plan B Add CSE 87001 to Plan C" [ref=e390] [cursor=pointer]':
+                - cell "CSE 87001" [ref=e391]:
+                  - generic [ref=e392]: CSE 87001
+                - cell "Computing Research Experiences for Teachers" [ref=e393]
+                - 'cell "Eligibility: Eligible" [ref=e394]':
+                  - 'status "Eligibility: Eligible" [ref=e395]': Eligible
+                - cell "20/20 1 of 1 section open" [ref=e396]:
+                  - generic [ref=e397]:
+                    - generic [ref=e398]: 20/20
+                    - generic [ref=e399]: 1 of 1 section open
+                - cell "CS Elective" [ref=e400]:
+                  - generic [ref=e402]: CS Elective
+                - cell "Add CSE 87001 to Plan A Add CSE 87001 to Plan B Add CSE 87001 to Plan C" [ref=e403]:
+                  - generic [ref=e404]:
+                    - button "Add CSE 87001 to Plan A" [ref=e405]: + A
+                    - button "Add CSE 87001 to Plan B" [ref=e406]: + B
+                    - button "Add CSE 87001 to Plan C" [ref=e407]: + C
+              - 'row "CSE 98901 Research and Dissertation Eligibility: Eligible 320/320 32 of 32 sections open CS Elective Add CSE 98901 to Plan A Add CSE 98901 to Plan B Add CSE 98901 to Plan C" [ref=e408] [cursor=pointer]':
+                - cell "CSE 98901" [ref=e409]:
+                  - generic [ref=e410]: CSE 98901
+                - cell "Research and Dissertation" [ref=e411]
+                - 'cell "Eligibility: Eligible" [ref=e412]':
+                  - 'status "Eligibility: Eligible" [ref=e413]': Eligible
+                - cell "320/320 32 of 32 sections open" [ref=e414]:
+                  - generic [ref=e415]:
+                    - generic [ref=e416]: 320/320
+                    - generic [ref=e417]: 32 of 32 sections open
+                - cell "CS Elective" [ref=e418]:
+                  - generic [ref=e420]: CS Elective
+                - cell "Add CSE 98901 to Plan A Add CSE 98901 to Plan B Add CSE 98901 to Plan C" [ref=e421]:
+                  - generic [ref=e422]:
+                    - button "Add CSE 98901 to Plan A" [ref=e423]: + A
+                    - button "Add CSE 98901 to Plan B" [ref=e424]: + B
+                    - button "Add CSE 98901 to Plan C" [ref=e425]: + C
+          - generic [ref=e426]:
+            - heading "Weekly Schedule" [level=2] [ref=e428]
+            - generic [ref=e429]:
+              - note:
+                - paragraph [ref=e430]: Add courses to your plan to see them on the schedule.
+              - generic [ref=e431]:
+                - generic [ref=e433]: Mon
+                - generic [ref=e434]: Tue
+                - generic [ref=e435]: Wed
+                - generic [ref=e436]: Thu
+                - generic [ref=e437]: Fri
+              - generic [ref=e439]:
+                - generic [ref=e440]: 8a
+                - generic [ref=e441]: 9a
+                - generic [ref=e442]: 10a
+                - generic [ref=e443]: 11a
+                - generic [ref=e444]: 12p
+                - generic [ref=e445]: 1p
+                - generic [ref=e446]: 2p
+                - generic [ref=e447]: 3p
+                - generic [ref=e448]: 4p
+                - generic [ref=e449]: 5p
+                - generic [ref=e450]: 6p
+                - generic [ref=e451]: 7p
+                - generic [ref=e452]: 8p
+                - generic [ref=e453]: 9p
+  - button "Open Next.js Dev Tools" [ref=e534] [cursor=pointer]:
+    - img [ref=e535]
+  - alert [ref=e538]

@@ -148,6 +148,88 @@ test("eligible when prereqs met and seats available", () => {
   assert.equal(status, "eligible");
 });
 
+test("eligible when the only prereq is in-progress (next-term registration)", () => {
+  const inProgress: CompletedCourse[] = [
+    {
+      subject: "ACCT",
+      courseNumber: "20100",
+      title: "Accountancy I",
+      grade: "IP",
+      credits: 3,
+      term: "Spring 2026",
+      status: "in-progress",
+    },
+  ];
+  const restrictions = JSON.stringify(["Prerequisites: ACCT 20100"]);
+  const status = computeEligibility(
+    "ACCT",
+    "20200",
+    restrictions,
+    [{ seatsAvailable: 5, specialApproval: null }],
+    inProgress,
+  );
+  assert.equal(status, "eligible");
+});
+
+test("eligible when an AND-group prereq is partly completed and partly in-progress", () => {
+  const courses: CompletedCourse[] = [
+    {
+      subject: "CSE",
+      courseNumber: "20312",
+      title: "Data Structures",
+      grade: "A",
+      credits: 4,
+      term: "Fall 2024",
+      status: "completed",
+    },
+    {
+      subject: "CSE",
+      courseNumber: "20289",
+      title: "Systems Programming",
+      grade: "IP",
+      credits: 4,
+      term: "Spring 2026",
+      status: "in-progress",
+    },
+  ];
+  const restrictions = JSON.stringify([
+    "Prerequisites: (CSE 20312 and CSE 20289)",
+  ]);
+  const status = computeEligibility(
+    "CSE",
+    "30151",
+    restrictions,
+    [{ seatsAvailable: 5, specialApproval: null }],
+    courses,
+  );
+  assert.equal(status, "eligible");
+});
+
+test("needs-prereq still returns when prereq is neither completed nor in-progress", () => {
+  const inProgress: CompletedCourse[] = [
+    {
+      subject: "CSE",
+      courseNumber: "20312",
+      title: "Data Structures",
+      grade: "IP",
+      credits: 4,
+      term: "Spring 2026",
+      status: "in-progress",
+    },
+  ];
+  const restrictions = JSON.stringify([
+    "Prerequisites: (CSE 20312 and CSE 20289)",
+  ]);
+  const status = computeEligibility(
+    "CSE",
+    "30151",
+    restrictions,
+    [{ seatsAvailable: 5, specialApproval: null }],
+    inProgress,
+  );
+  assert.equal(status, "needs-prereq");
+});
+
 test("no prereq check without audit data", () => {
   const restrictions = JSON.stringify([
     "Prerequisites: (CSE 20312)",

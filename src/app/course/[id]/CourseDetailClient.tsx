@@ -10,7 +10,11 @@ import {
   isRegisterable,
   registrationBlockedReason,
 } from "@/lib/eligibility";
-import { parseRestrictions, checkPrerequisites } from "@/lib/restrictions";
+import {
+  parseRestrictions,
+  checkPrerequisites,
+  extractPrereqGroups,
+} from "@/lib/restrictions";
 import { getRequirementBadges } from "@/lib/requirements";
 import { useToast } from "@/contexts/ToastContext";
 import { getCourseGuidance, getCoursePath } from "@/lib/guidance";
@@ -83,6 +87,22 @@ function formatTime(start: string | null, end: string | null): string {
   return `${start}-${end}`;
 }
 
+function formatCredits(min: number | null, max: number | null): string {
+  if (min == null && max == null) return "—";
+  if (min == null) return `${max}`;
+  if (max == null) return `${min}`;
+  if (min === max) return `${min}`;
+  return `${min}-${max}`;
+}
+
+const PLAN_COLORS: Record<PlanSlot, string> = {
+  A: "#1B6B3A",
+  B: "#2563eb",
+  C: "#6b7280",
+};
+
+const PLAN_SLOTS: PlanSlot[] = ["A", "B", "C"];
+
 
 export default function CourseDetailClient({
   course,
@@ -93,8 +113,14 @@ export default function CourseDetailClient({
 }) {
   const router = useRouter();
   const { audit } = useAudit();
-  const { addToPlan, removeFromPlan, isSectionInPlan, findSlotsForSection } =
-    usePlans();
+  const {
+    plans,
+    addToPlan,
+    removeFromPlan,
+    isInPlan,
+    isSectionInPlan,
+    findSlotsForSection,
+  } = usePlans();
   const [showPreCheck, setShowPreCheck] = useState(false);
   const [showRecovery, setShowRecovery] = useState(false);
   const { show } = useToast();
@@ -130,15 +156,33 @@ export default function CourseDetailClient({
       ),
     [course.registrationRestrictions, audit],
   );
+  const prereqGroups = useMemo(() => {
+    const groups = extractPrereqGroups(course.registrationRestrictions);
+    return groups.map((group) => {
+      const alternatives = group.map((code) => {
+        const check = prereqChecks.find((c) => c.courseCode === code);
+        return {
+          code,
+          title: courseTitleMap[code] ?? null,
+          completed: check?.completed ?? false,
+          inProgress: check?.inProgress ?? false,
+          term: check?.term,
+          grade: check?.grade,
+        };
+      });
+      const satisfier =
+        alternatives.find((a) => a.completed) ??
+        alternatives.find((a) => a.inProgress) ??
+        null;
+      return { alternatives, satisfier };
+    });
+  }, [course.registrationRestrictions, prereqChecks, courseTitleMap]);
   const badges = getRequirementBadges(course.subject, course.courseNumber);
   const isBlocked = !isRegisterable(status);
   const blockedReason = registrationBlockedReason(status);
   const primaryInstructor =
     course.sections[0]?.instructors[0]?.name ?? "TBA";
-  const credits =
-    course.creditHoursMin === course.creditHoursMax
-      ? `${course.creditHoursMin}`
-      : `${course.creditHoursMin}-${course.creditHoursMax}`;
+  const credits = formatCredits(course.creditHoursMin, course.creditHoursMax);
 
   const courseKey = `${course.subject} ${course.courseNumber}`;
   const guidance = getCourseGuidance(course.subject, course.courseNumber);
@@ -171,6 +215,53 @@ export default function CourseDetailClient({
       : "";
     show(`${label} added to Plan ${slot}${extra}`, {
       undo: () => removeFromPlan(sectionId, slot),
+    });
+  }
+
+  function handleRemoveFromPlan(sectionId: number, slot: PlanSlot) {
+    removeFromPlan(sectionId, slot);
+    const label = `${course.subject} ${course.courseNumber}`;
+    show(`${label} removed from Plan ${slot}`, {
+      undo: () =>
+        addToPlan(course.id, sectionId, slot, {
+          subject: course.subject,
+          courseNumber: course.courseNumber,
+          courseTitle: course.courseTitle,
+        }),
+    });
+  }
+
+  function handleAddCourseToPlan(slot: PlanSlot) {
+    const openSection = course.sections.find(
+      (s) => s.seatsAvailable === null || (s.seatsAvailable ?? 0) > 0,
+    );
+    if (!openSection) {
+      show(
+        `${course.subject} ${course.courseNumber} has no open seats`,
+        { variant: "error" },
+      );
+      return;
+    }
+    handleAddToPlan(openSection.id, slot);
+  }
+
+  function handleRemoveCourseFromPlan(slot: PlanSlot) {
+    const entries = plans.filter(
+      (p) => p.courseId === course.id && p.planSlot === slot,
+    );
+    if (entries.length === 0) return;
+    for (const e of entries) removeFromPlan(e.sectionId, slot);
+    const label = `${course.subject} ${course.courseNumber}`;
+    show(`${label} removed from Plan ${slot}`, {
+      undo: () => {
+        for (const e of entries) {
+          addToPlan(course.id, e.sectionId, slot, {
+            subject: course.subject,
+            courseNumber: course.courseNumber,
+            courseTitle: course.courseTitle,
+          });
+        }
+      },
     });
   }
 
@@ -210,27 +301,51 @@ export default function CourseDetailClient({
             </div>
           </div>
 
-          <div className="flex gap-3 mb-6">
+          <div className="flex flex-wrap gap-2 mb-6">
             {isBlocked ? (
               <button
                 type="button"
                 disabled
                 className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium opacity-75 cursor-not-allowed"
               >
-                Register (Blocked)
+                Add to Plan (Blocked)
               </button>
             ) : (
-              <button
-                type="button"
-                onClick={() =>
-                  show(
-                    "Registration would be executed in NOVO. This is a prototype.",
-                  )
+              PLAN_SLOTS.map((slot) => {
+                const inThisSlot = isInPlan(course.id, slot);
+                if (inThisSlot) {
+                  return (
+                    <button
+                      key={slot}
+                      type="button"
+                      onClick={() => handleRemoveCourseFromPlan(slot)}
+                      aria-label={`Remove ${course.subject} ${course.courseNumber} from Plan ${slot}`}
+                      title={`Remove from Plan ${slot}`}
+                      className="group text-white px-4 py-2 rounded-lg text-sm font-medium hover:brightness-110 transition inline-flex items-center"
+                      style={{ backgroundColor: PLAN_COLORS[slot] }}
+                    >
+                      <span className="group-hover:hidden">
+                        ✓ In Plan {slot}
+                      </span>
+                      <span className="hidden group-hover:inline">
+                        × Remove from Plan {slot}
+                      </span>
+                    </button>
+                  );
                 }
-                className="bg-[#1B6B3A] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#155a2f] transition-colors"
-              >
-                Register
-              </button>
+                return (
+                  <button
+                    key={slot}
+                    type="button"
+                    onClick={() => handleAddCourseToPlan(slot)}
+                    aria-label={`Add ${course.subject} ${course.courseNumber} to Plan ${slot}`}
+                    className="text-white px-4 py-2 rounded-lg text-sm font-medium hover:brightness-110 transition"
+                    style={{ backgroundColor: PLAN_COLORS[slot] }}
+                  >
+                    + Plan {slot}
+                  </button>
+                );
+              })
             )}
             <button
               type="button"
@@ -323,57 +438,79 @@ export default function CourseDetailClient({
             </div>
           </div>
 
-          {prereqChecks.filter(
-            (c) => c.completed || c.inProgress || courseTitleMap[c.courseCode],
-          ).length > 0 && (
+          {prereqGroups.length > 0 && (
             <div className="mb-6">
               <h2 className="text-sm font-semibold text-gray-800 uppercase tracking-wide mb-2">
                 Prerequisites
               </h2>
-              <div className="space-y-1">
-                {prereqChecks
-                  .filter(
-                    (c) =>
-                      c.completed || c.inProgress || courseTitleMap[c.courseCode],
-                  )
-                  .map((check) => {
-                    const title = courseTitleMap[check.courseCode];
-                    const color = check.completed
+              <div className="space-y-1.5">
+                {prereqGroups.map((group, idx) => {
+                  const { alternatives, satisfier } = group;
+                  const isOrGroup = alternatives.length > 1;
+                  if (satisfier) {
+                    const otherCount = alternatives.length - 1;
+                    const color = satisfier.completed
                       ? "text-green-700"
-                      : check.inProgress
-                        ? "text-amber-700"
-                        : "text-red-700";
-                    const marker = check.completed
-                      ? "✓"
-                      : check.inProgress
-                        ? "◐"
-                        : "✗";
+                      : "text-amber-700";
+                    const marker = satisfier.completed ? "✓" : "◐";
                     return (
                       <div
-                        key={check.courseCode}
-                        className="flex items-center gap-2 text-sm"
+                        key={idx}
+                        className="flex items-center flex-wrap gap-x-2 gap-y-0.5 text-sm"
                       >
                         <span className={color} aria-hidden="true">
                           {marker}
                         </span>
                         <span className="font-medium">
-                          {check.courseCode}
-                          {title ? `: ${title}` : ""}
+                          {satisfier.code}
+                          {satisfier.title ? `: ${satisfier.title}` : ""}
                         </span>
-                        {check.completed ? (
+                        {satisfier.completed ? (
                           <span className="text-green-800">
-                            — completed {check.term} ({check.grade})
-                          </span>
-                        ) : check.inProgress ? (
-                          <span className="text-amber-800">
-                            — in progress ({check.term})
+                            — completed {satisfier.term} ({satisfier.grade})
                           </span>
                         ) : (
-                          <span className="text-red-700">— not completed</span>
+                          <span className="text-amber-800">
+                            — in progress ({satisfier.term})
+                          </span>
+                        )}
+                        {isOrGroup && (
+                          <span className="text-xs text-gray-500">
+                            (satisfies {alternatives.length}-way prereq, or{" "}
+                            {otherCount} alternative
+                            {otherCount === 1 ? "" : "s"})
+                          </span>
                         )}
                       </div>
                     );
-                  })}
+                  }
+                  return (
+                    <div
+                      key={idx}
+                      className="flex items-start flex-wrap gap-x-2 gap-y-0.5 text-sm"
+                    >
+                      <span className="text-red-700" aria-hidden="true">
+                        ✗
+                      </span>
+                      <span className="font-medium text-gray-900">
+                        {isOrGroup ? "Any of " : ""}
+                        {alternatives.map((a, i) => (
+                          <span key={a.code}>
+                            {a.code}
+                            {a.title ? `: ${a.title}` : ""}
+                            {i < alternatives.length - 1 && (
+                              <span className="font-normal text-gray-500">
+                                {" "}
+                                or{" "}
+                              </span>
+                            )}
+                          </span>
+                        ))}
+                      </span>
+                      <span className="text-red-700">— not completed</span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -563,21 +700,65 @@ export default function CourseDetailClient({
                           </span>
                         </td>
                         <td className="px-4 py-2 text-right">
-                          {inPlan ? (
-                            <span className="text-xs text-green-800 font-medium">
-                              In Plan ✓
-                            </span>
-                          ) : isFull ? (
+                          {isFull && !inPlan ? (
                             <span className="text-xs text-red-700">Full</span>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => handleAddToPlan(section.id, "A")}
-                              aria-label={`Add section ${section.sectionNumber ?? section.id} to Plan A`}
-                              className="text-xs bg-[#1B6B3A] text-white px-3 py-1.5 rounded font-medium hover:bg-[#155a2f] transition-colors"
+                          ) : isBlocked && !inPlan ? (
+                            <span
+                              className="text-xs text-yellow-800"
+                              title={blockedReason ?? undefined}
                             >
-                              Select
-                            </button>
+                              Blocked
+                            </span>
+                          ) : (
+                            <div className="flex justify-end gap-1.5">
+                              {PLAN_SLOTS.map((slot) => {
+                                const inThisSlot = isSectionInPlan(
+                                  section.id,
+                                  slot,
+                                );
+                                if (inThisSlot) {
+                                  return (
+                                    <button
+                                      key={slot}
+                                      type="button"
+                                      onClick={() =>
+                                        handleRemoveFromPlan(section.id, slot)
+                                      }
+                                      aria-label={`Remove section ${section.sectionNumber ?? section.id} from Plan ${slot}`}
+                                      title={`Remove from Plan ${slot}`}
+                                      className="group text-xs px-2.5 py-1.5 rounded font-medium text-white inline-flex items-center hover:brightness-110 transition"
+                                      style={{
+                                        backgroundColor: PLAN_COLORS[slot],
+                                      }}
+                                    >
+                                      <span className="group-hover:hidden">
+                                        ✓ {slot}
+                                      </span>
+                                      <span className="hidden group-hover:inline">
+                                        × {slot}
+                                      </span>
+                                    </button>
+                                  );
+                                }
+                                return (
+                                  <button
+                                    key={slot}
+                                    type="button"
+                                    onClick={() =>
+                                      handleAddToPlan(section.id, slot)
+                                    }
+                                    disabled={isFull || isBlocked}
+                                    aria-label={`Add section ${section.sectionNumber ?? section.id} to Plan ${slot}`}
+                                    className="text-xs px-2.5 py-1.5 rounded font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                                    style={{
+                                      backgroundColor: PLAN_COLORS[slot],
+                                    }}
+                                  >
+                                    + {slot}
+                                  </button>
+                                );
+                              })}
+                            </div>
                           )}
                         </td>
                       </tr>
@@ -632,12 +813,12 @@ export default function CourseDetailClient({
         <PreCheckModal
           course={course}
           onClose={() => setShowPreCheck(false)}
-          onAddToPlan={() => {
+          onAddToPlan={(slot) => {
             const open = course.sections.find(
               (s) =>
                 s.seatsAvailable === null || (s.seatsAvailable ?? 0) > 0,
             );
-            if (open) handleAddToPlan(open.id, "A");
+            if (open) handleAddToPlan(open.id, slot);
             setShowPreCheck(false);
           }}
         />

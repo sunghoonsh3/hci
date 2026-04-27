@@ -21,6 +21,11 @@ const CONFIG: Record<
     bg: "bg-gray-100",
     text: "text-gray-700",
   },
+  "time-conflict": {
+    label: "Conflict",
+    bg: "bg-red-100",
+    text: "text-red-800",
+  },
   unknown: {
     label: "Unknown",
     bg: "bg-gray-100",

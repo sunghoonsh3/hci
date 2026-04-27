@@ -10,7 +10,6 @@ import {
 } from "react";
 import { cycleIndex } from "@/hooks/useRovingTabIndex";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { usePlans } from "@/contexts/PlansContext";
 import { useAudit } from "@/contexts/AuditContext";
 import { getRequirementBadges } from "@/lib/requirements";
@@ -164,7 +163,6 @@ function parseDays(days: string | null): string[] {
 }
 
 export default function PlanPage() {
-  const router = useRouter();
   const { plans, removeFromPlan, moveToPlan, addToPlan, loaded } = usePlans();
   const { audit } = useAudit();
   const [activeSlot, setActiveSlot] = useState<PlanSlot>("A");
@@ -175,13 +173,8 @@ export default function PlanPage() {
   const [highlightedSection, setHighlightedSection] = useState<number | null>(
     null,
   );
-  const { show, markRead } = useToast();
+  const { show } = useToast();
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
-
-  // Visiting the Plan page clears the unread plan-update badge.
-  useEffect(() => {
-    markRead();
-  }, [markRead]);
 
   function handleTabKey(e: KeyboardEvent<HTMLButtonElement>, idx: number) {
     const next = cycleIndex(idx, e.key, SLOTS.length, "horizontal");
@@ -540,17 +533,6 @@ export default function PlanPage() {
                             >
                               Remove
                             </button>
-                            {course && (
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  router.push(`/course/${course.id}`)
-                                }
-                                className="text-gray-700 hover:text-gray-900 font-medium hover:underline"
-                              >
-                                Options
-                              </button>
-                            )}
                             <RowMenu
                               sectionId={entry.sectionId}
                               courseLabel={label}

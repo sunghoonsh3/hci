@@ -11,6 +11,15 @@ import {
 import { sectionsConflict } from "@/lib/conflicts";
 import { fetchCourses } from "@/lib/fetchCourse";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import type { PlanSlot } from "@/types";
+
+const PLAN_COLORS: Record<PlanSlot, string> = {
+  A: "#1B6B3A",
+  B: "#2563eb",
+  C: "#6b7280",
+};
+
+const PLAN_SLOTS: PlanSlot[] = ["A", "B", "C"];
 
 interface MeetingTime {
   days: string | null;
@@ -47,7 +56,7 @@ export default function PreCheckModal({
 }: {
   course: Course;
   onClose: () => void;
-  onAddToPlan: () => void;
+  onAddToPlan: (slot: PlanSlot) => void;
 }) {
   const { audit } = useAudit();
   const { plans, isInPlan } = usePlans();
@@ -166,18 +175,24 @@ export default function PreCheckModal({
       : "No conflicts with current plan",
   });
 
-  const alreadyTaken = allCourses.some(
-    (c) =>
-      c.subject === course.subject &&
-      c.courseNumber === course.courseNumber &&
-      c.status === "completed",
-  );
+  const completedTaken =
+    audit?.completedCourses.some(
+      (c) =>
+        c.subject === course.subject && c.courseNumber === course.courseNumber,
+    ) ?? false;
+  const inProgressTaken =
+    audit?.inProgressCourses.some(
+      (c) =>
+        c.subject === course.subject && c.courseNumber === course.courseNumber,
+    ) ?? false;
   checks.push({
     label: "Repeat Check",
-    passed: !alreadyTaken,
-    message: alreadyTaken
+    passed: !completedTaken && !inProgressTaken,
+    message: completedTaken
       ? "Course already completed"
-      : "Not previously taken",
+      : inProgressTaken
+        ? "Currently in progress this term"
+        : "Not previously taken",
   });
 
   const needsPermission = course.sections.some((s) => s.specialApproval);
@@ -277,13 +292,20 @@ export default function PreCheckModal({
             Close
           </button>
           {allPassed && !inPlan && (
-            <button
-              type="button"
-              onClick={onAddToPlan}
-              className="px-4 py-2 text-sm bg-[#1B6B3A] text-white rounded-lg font-medium hover:bg-[#155a2f] transition-colors"
-            >
-              Add to Plan A
-            </button>
+            <div className="flex items-center gap-1.5">
+              {PLAN_SLOTS.map((slot) => (
+                <button
+                  key={slot}
+                  type="button"
+                  onClick={() => onAddToPlan(slot)}
+                  aria-label={`Add to Plan ${slot}`}
+                  className="px-3 py-2 text-sm text-white rounded-lg font-medium hover:brightness-110 transition"
+                  style={{ backgroundColor: PLAN_COLORS[slot] }}
+                >
+                  + Plan {slot}
+                </button>
+              ))}
+            </div>
           )}
         </div>
       </div>

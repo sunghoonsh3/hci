@@ -286,12 +286,6 @@ export default function Sidebar() {
           <div className="text-xs text-gray-700">
             <div className="font-medium">{audit.major}</div>
             <div className="text-gray-500 mt-0.5">{audit.college}</div>
-            <Link
-              href="/onboarding"
-              className="text-[#1B6B3A] hover:underline mt-1 inline-block"
-            >
-              Retrieve What-if Audit
-            </Link>
           </div>
         ) : (
           <Link

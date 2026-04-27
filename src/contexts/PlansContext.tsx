@@ -9,6 +9,13 @@ import {
 import type { PlanEntry, PlanSlot } from "@/types";
 import { PlanEntriesSchema } from "@/lib/schemas";
 import { createLocalStore, useLocalStoreValue } from "@/lib/localStore";
+import {
+  addEntry,
+  removeEntry,
+  moveEntry,
+  findSlotsForCourse as findSlotsForCourseEntries,
+  findEntryInSlot as findEntryInSlotEntries,
+} from "@/lib/planEntries";
 
 const plansStore = createLocalStore<PlanEntry[]>(
   "registration-clarity-plans",
@@ -46,6 +53,8 @@ interface PlansContextValue {
   isInPlan: (courseId: number, slot?: PlanSlot) => boolean;
   isSectionInPlan: (sectionId: number, slot?: PlanSlot) => boolean;
   findSlotsForSection: (sectionId: number) => PlanSlot[];
+  findSlotsForCourse: (courseId: number) => PlanSlot[];
+  findEntryInSlot: (courseId: number, slot: PlanSlot) => PlanEntry | undefined;
   clearPlan: (slot: PlanSlot) => void;
   clearAll: () => void;
 }
@@ -63,45 +72,20 @@ export function PlansProvider({ children }: { children: ReactNode }) {
       hint?: CourseNameHint,
     ): AddToPlanResult => {
       const current = plansStore.getSnapshot();
-      const existingSlots = current
-        .filter((p) => p.sectionId === sectionId)
-        .map((p) => p.planSlot);
-      if (existingSlots.includes(slot)) {
-        return { added: false, alreadyInSlots: existingSlots };
-      }
-      plansStore.set([
-        ...current,
-        {
-          courseId,
-          sectionId,
-          planSlot: slot,
-          subject: hint?.subject,
-          courseNumber: hint?.courseNumber,
-          courseTitle: hint?.courseTitle,
-        },
-      ]);
-      return { added: true, alreadyInSlots: existingSlots };
+      const result = addEntry(current, courseId, sectionId, slot, hint);
+      if (result.added) plansStore.set(result.entries);
+      return { added: result.added, alreadyInSlots: result.alreadyInSlots };
     },
     [],
   );
 
   const removeFromPlan = useCallback((sectionId: number, slot: PlanSlot) => {
-    plansStore.update((prev) =>
-      prev.filter(
-        (p) => !(p.sectionId === sectionId && p.planSlot === slot),
-      ),
-    );
+    plansStore.update((prev) => removeEntry(prev, sectionId, slot));
   }, []);
 
   const moveToPlan = useCallback(
     (sectionId: number, fromSlot: PlanSlot, toSlot: PlanSlot) => {
-      plansStore.update((prev) =>
-        prev.map((p) =>
-          p.sectionId === sectionId && p.planSlot === fromSlot
-            ? { ...p, planSlot: toSlot }
-            : p,
-        ),
-      );
+      plansStore.update((prev) => moveEntry(prev, sectionId, fromSlot, toSlot));
     },
     [],
   );
@@ -134,6 +118,18 @@ export function PlansProvider({ children }: { children: ReactNode }) {
     [plans],
   );
 
+  const findSlotsForCourse = useCallback(
+    (courseId: number): PlanSlot[] =>
+      findSlotsForCourseEntries(plans, courseId),
+    [plans],
+  );
+
+  const findEntryInSlot = useCallback(
+    (courseId: number, slot: PlanSlot): PlanEntry | undefined =>
+      findEntryInSlotEntries(plans, courseId, slot),
+    [plans],
+  );
+
   const clearPlan = useCallback((slot: PlanSlot) => {
     plansStore.update((prev) => prev.filter((p) => p.planSlot !== slot));
   }, []);
@@ -154,6 +150,8 @@ export function PlansProvider({ children }: { children: ReactNode }) {
         isInPlan,
         isSectionInPlan,
         findSlotsForSection,
+        findSlotsForCourse,
+        findEntryInSlot,
         clearPlan,
         clearAll,
       }}

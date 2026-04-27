@@ -43,6 +43,7 @@ export type EligibilityStatus =
   | "restricted"
   | "needs-prereq"
   | "already-taken"
+  | "time-conflict"
   | "unknown";
 
 export interface PreCheckItem {

@@ -1,0 +1,77 @@
+- generic [active] [ref=e1]:
+  - navigation "Main navigation" [ref=e2]:
+    - link "PATH — Registration Clarity home" [ref=e3] [cursor=pointer]:
+      - /url: /search
+      - generic [ref=e4]: ☘️
+      - generic [ref=e5]: PATH
+    - generic [ref=e6]:
+      - link "Search" [ref=e7] [cursor=pointer]:
+        - /url: /search
+        - generic [ref=e8]: Search
+      - link "Plan" [ref=e9] [cursor=pointer]:
+        - /url: /plan
+        - generic [ref=e10]: Plan
+      - link "Export" [ref=e11] [cursor=pointer]:
+        - /url: /export
+        - generic [ref=e12]: Export
+    - generic [ref=e13]:
+      - generic [ref=e14]: Summer 2026
+      - generic [ref=e15]: AM
+      - generic [ref=e16]: Alex Murphy
+  - generic [ref=e17]:
+    - complementary "Plans and progress" [ref=e18]:
+      - generic [ref=e19]:
+        - generic [ref=e20]: Term
+        - generic [ref=e21]: Summer 2026
+      - generic [ref=e22]:
+        - generic [ref=e23]: My Plans
+        - tablist "Plan slots" [ref=e24]:
+          - tab "Plan A (0)" [selected] [ref=e25]
+          - tab "Plan B (0)" [ref=e26]
+          - tab "Plan C (0)" [ref=e27]
+        - tabpanel [ref=e28]:
+          - paragraph [ref=e29]: No courses in Plan A
+      - generic [ref=e30]:
+        - generic [ref=e31]:
+          - generic [ref=e32]: Progress
+          - generic [ref=e33]: On Track
+        - generic [ref=e34]:
+          - generic [ref=e35]:
+            - generic [ref=e36]:
+              - generic [ref=e37]: Credits
+              - generic [ref=e38]: 75/120
+            - progressbar "Credits progress" [ref=e39]
+          - generic [ref=e41]:
+            - generic [ref=e42]:
+              - generic [ref=e43]: Major (CS)
+              - generic [ref=e44]: 14/42
+            - progressbar "Major credits progress" [ref=e45]
+          - generic [ref=e47]:
+            - generic [ref=e48]:
+              - generic [ref=e49]: Degree
+              - generic [ref=e50]: 62.5%
+            - progressbar "Degree progress" [ref=e51]
+          - generic [ref=e53]: "GPA: 3.420 | Junior"
+      - generic [ref=e54]:
+        - generic [ref=e55]: My GPS
+        - generic [ref=e56]:
+          - generic [ref=e57]: Bachelor of Arts in Computer Science
+          - generic [ref=e58]: College of Arts and Letters
+    - main [ref=e59]:
+      - generic [ref=e60]:
+        - heading "Welcome back, Alex Murphy" [level=1] [ref=e61]
+        - generic [ref=e63]:
+          - generic [ref=e64]: "Major: Bachelor of Arts in Computer Science"
+          - generic [ref=e65]: "Classification: Junior"
+          - generic [ref=e66]:
+            - text: "Credits:"
+            - generic [ref=e67]: 75/120
+          - generic [ref=e68]: "GPA: 3.420"
+          - generic [ref=e69]: "Courses completed: 10"
+          - generic [ref=e70]: "In progress: 2"
+        - generic [ref=e71]:
+          - button "Continue to Search" [ref=e72]
+          - button "Re-paste Audit" [ref=e73]
+  - button "Open Next.js Dev Tools" [ref=e79] [cursor=pointer]:
+    - img [ref=e80]
+  - alert [ref=e83]

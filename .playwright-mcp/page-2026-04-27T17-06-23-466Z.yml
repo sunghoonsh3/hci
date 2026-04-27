@@ -1,0 +1,301 @@
+- generic [active] [ref=e1]:
+  - navigation "Main navigation" [ref=e2]:
+    - link "PATH — Registration Clarity home" [ref=e3] [cursor=pointer]:
+      - /url: /search
+      - generic [ref=e4]: ☘️
+      - generic [ref=e5]: PATH
+    - generic [ref=e6]:
+      - link "Search" [ref=e7] [cursor=pointer]:
+        - /url: /search
+        - generic [ref=e8]: Search
+      - link "Plan — 2 courses planned" [ref=e9] [cursor=pointer]:
+        - /url: /plan
+        - generic [ref=e10]: Plan
+        - generic [ref=e11]: "2"
+      - link "Export" [ref=e12] [cursor=pointer]:
+        - /url: /export
+        - generic [ref=e13]: Export
+    - generic [ref=e14]:
+      - generic [ref=e15]: Summer 2026
+      - generic [ref=e16]: AM
+      - generic [ref=e17]: Alex Murphy
+  - generic [ref=e18]:
+    - complementary "Plans and progress" [ref=e19]:
+      - generic [ref=e20]:
+        - generic [ref=e21]: Term
+        - generic [ref=e22]: Summer 2026
+      - generic [ref=e23]:
+        - generic [ref=e24]: My Plans
+        - tablist "Plan slots" [ref=e25]:
+          - tab "Plan A (2)" [selected] [ref=e26]
+          - tab "Plan B (0)" [ref=e27]
+          - tab "Plan C (0)" [ref=e28]
+        - tabpanel [ref=e29]:
+          - list [ref=e30]:
+            - listitem [ref=e31]:
+              - link "CSE 20312" [ref=e32] [cursor=pointer]:
+                - /url: /course/1708
+              - button "Remove CSE 20312 from Plan A" [ref=e33]: ×
+            - listitem [ref=e34]:
+              - link "UGED 10421" [ref=e35] [cursor=pointer]:
+                - /url: /course/1704
+              - button "Remove UGED 10421 from Plan A" [ref=e36]: ×
+      - generic [ref=e37]:
+        - generic [ref=e38]:
+          - generic [ref=e39]: Progress
+          - generic [ref=e40]: On Track
+        - generic [ref=e41]:
+          - generic [ref=e42]:
+            - generic [ref=e43]:
+              - generic [ref=e44]: Credits
+              - generic [ref=e45]: 75/120
+            - progressbar "Credits progress" [ref=e46]
+          - generic [ref=e48]:
+            - generic [ref=e49]:
+              - generic [ref=e50]: Major (CS)
+              - generic [ref=e51]: 14/42
+            - progressbar "Major credits progress" [ref=e52]
+          - generic [ref=e54]:
+            - generic [ref=e55]:
+              - generic [ref=e56]: Degree
+              - generic [ref=e57]: 62.5%
+            - progressbar "Degree progress" [ref=e58]
+          - generic [ref=e60]: "GPA: 3.420 | Junior"
+      - generic [ref=e61]:
+        - generic [ref=e62]: My GPS
+        - generic [ref=e63]:
+          - generic [ref=e64]: Bachelor of Arts in Computer Science
+          - generic [ref=e65]: College of Arts and Letters
+    - main [ref=e66]:
+      - generic [ref=e67]:
+        - heading "Search Results — 6 courses" [level=1] [ref=e69]:
+          - text: Search Results
+          - generic [ref=e70]: — 6 courses
+        - generic [ref=e71]:
+          - combobox "Subject" [ref=e72]:
+            - option "All Subjects"
+            - option "ACCT"
+            - option "ACMS"
+            - option "AFST"
+            - option "AL"
+            - option "AME"
+            - option "AMST"
+            - option "ANTH"
+            - option "ARCH"
+            - option "ARHI"
+            - option "ARST"
+            - option "BAEG"
+            - option "BALW"
+            - option "BASC"
+            - option "BAUG"
+            - option "BES"
+            - option "BIOS"
+            - option "BPHY"
+            - option "CBE"
+            - option "CDT"
+            - option "CE"
+            - option "CHEM"
+            - option "CLAS"
+            - option "CLGR"
+            - option "CLLA"
+            - option "CNST"
+            - option "CSE"
+            - option "CSEM"
+            - option "DESN"
+            - option "DMA"
+            - option "DS"
+            - option "EALJ"
+            - option "ECON"
+            - option "EDU"
+            - option "EE"
+            - option "EG"
+            - option "ENGL"
+            - option "ESS"
+            - option "ESTM"
+            - option "FIN"
+            - option "FTT"
+            - option "GE"
+            - option "GH"
+            - option "GLAF"
+            - option "GRED"
+            - option "GSC"
+            - option "HIST"
+            - option "HPS"
+            - option "IBMS"
+            - option "IIPS"
+            - option "ILS"
+            - option "ISS"
+            - option "ITAO"
+            - option "KSGA"
+            - option "LLRO"
+            - option "MARK"
+            - option "MATH" [selected]
+            - option "MBA"
+            - option "MBAE"
+            - option "MDMK"
+            - option "MDSC"
+            - option "MEAR"
+            - option "MGA"
+            - option "MGTO"
+            - option "MI"
+            - option "MNAE"
+            - option "MSA"
+            - option "MSBR"
+            - option "MSF"
+            - option "MSFR"
+            - option "MSM"
+            - option "MSMG"
+            - option "MUS"
+            - option "NSCI"
+            - option "PCSE"
+            - option "PHIL"
+            - option "PHYS"
+            - option "POLS"
+            - option "PSY"
+            - option "RE"
+            - option "REG"
+            - option "ROFR"
+            - option "ROIT"
+            - option "ROPO"
+            - option "ROSP"
+            - option "SC"
+            - option "SMAC"
+            - option "SOC"
+            - option "SOCO"
+            - option "STV"
+            - option "SUSD"
+            - option "THEO"
+            - option "UGED"
+          - generic [ref=e73]:
+            - img [ref=e74]
+            - textbox "Keyword" [ref=e76]:
+              - /placeholder: Search courses...
+          - generic [ref=e77]:
+            - checkbox "Open seats only" [ref=e78]: Open seats only
+            - checkbox "Core requirements" [ref=e80]: Core requirements
+            - checkbox "My major courses" [ref=e82]: My major courses
+          - button "Search" [ref=e84]
+        - generic [ref=e85]:
+          - table [ref=e87]:
+            - rowgroup [ref=e88]:
+              - row "Course Title Status Seats Reqs Actions" [ref=e89]:
+                - columnheader "Course" [ref=e90]
+                - columnheader "Title" [ref=e91]
+                - columnheader "Status" [ref=e92]
+                - columnheader "Seats" [ref=e93]
+                - columnheader "Reqs" [ref=e94]
+                - columnheader "Actions" [ref=e95]
+            - rowgroup [ref=e96]:
+              - 'row "MATH 10360 Calculus B Eligibility: Restricted 37/70 2 of 2 sections open —" [ref=e97] [cursor=pointer]':
+                - cell "MATH 10360" [ref=e98]:
+                  - generic [ref=e99]: MATH 10360
+                - cell "Calculus B" [ref=e100]
+                - 'cell "Eligibility: Restricted" [ref=e101]':
+                  - 'status "Eligibility: Restricted" [ref=e102]': Restricted
+                - cell "37/70 2 of 2 sections open" [ref=e103]:
+                  - generic [ref=e104]:
+                    - generic [ref=e105]: 37/70
+                    - generic [ref=e106]: 2 of 2 sections open
+                - cell [ref=e107]
+                - cell "—" [ref=e108]
+              - 'row "MATH 10550 Calculus I Eligibility: Taken 6/30 1 of 1 section open Math Req —" [ref=e109] [cursor=pointer]':
+                - cell "MATH 10550" [ref=e110]:
+                  - generic [ref=e111]: MATH 10550
+                - cell "Calculus I" [ref=e112]
+                - 'cell "Eligibility: Taken" [ref=e113]':
+                  - 'status "Eligibility: Taken" [ref=e114]': Taken
+                - cell "6/30 1 of 1 section open" [ref=e115]:
+                  - generic [ref=e116]:
+                    - generic [ref=e117]: 6/30
+                    - generic [ref=e118]: 1 of 1 section open
+                - cell "Math Req" [ref=e119]:
+                  - generic [ref=e121]: Math Req
+                - cell "—" [ref=e122]
+              - 'row "MATH 10560 Calculus II Eligibility: Taken 41/60 2 of 2 sections open Math Req —" [ref=e123] [cursor=pointer]':
+                - cell "MATH 10560" [ref=e124]:
+                  - generic [ref=e125]: MATH 10560
+                - cell "Calculus II" [ref=e126]
+                - 'cell "Eligibility: Taken" [ref=e127]':
+                  - 'status "Eligibility: Taken" [ref=e128]': Taken
+                - cell "41/60 2 of 2 sections open" [ref=e129]:
+                  - generic [ref=e130]:
+                    - generic [ref=e131]: 41/60
+                    - generic [ref=e132]: 2 of 2 sections open
+                - cell "Math Req" [ref=e133]:
+                  - generic [ref=e135]: Math Req
+                - cell "—" [ref=e136]
+              - 'row "MATH 20550 Calculus III Eligibility: Eligible 42/60 2 of 2 sections open Math Req Add MATH 20550 to Plan A Add MATH 20550 to Plan B Add MATH 20550 to Plan C" [ref=e137] [cursor=pointer]':
+                - cell "MATH 20550" [ref=e138]:
+                  - generic [ref=e139]: MATH 20550
+                - cell "Calculus III" [ref=e140]
+                - 'cell "Eligibility: Eligible" [ref=e141]':
+                  - 'status "Eligibility: Eligible" [ref=e142]': Eligible
+                - cell "42/60 2 of 2 sections open" [ref=e143]:
+                  - generic [ref=e144]:
+                    - generic [ref=e145]: 42/60
+                    - generic [ref=e146]: 2 of 2 sections open
+                - cell "Math Req" [ref=e147]:
+                  - generic [ref=e149]: Math Req
+                - cell "Add MATH 20550 to Plan A Add MATH 20550 to Plan B Add MATH 20550 to Plan C" [ref=e150]:
+                  - generic [ref=e151]:
+                    - button "Add MATH 20550 to Plan A" [ref=e152]: + A
+                    - button "Add MATH 20550 to Plan B" [ref=e153]: + B
+                    - button "Add MATH 20550 to Plan C" [ref=e154]: + C
+              - 'row "MATH 20580 Introduction to Linear Algebra and Differential Equations Eligibility: Restricted 49/60 2 of 2 sections open Math Req —" [ref=e155] [cursor=pointer]':
+                - cell "MATH 20580" [ref=e156]:
+                  - generic [ref=e157]: MATH 20580
+                - cell "Introduction to Linear Algebra and Differential Equations" [ref=e158]
+                - 'cell "Eligibility: Restricted" [ref=e159]':
+                  - 'status "Eligibility: Restricted" [ref=e160]': Restricted
+                - cell "49/60 2 of 2 sections open" [ref=e161]:
+                  - generic [ref=e162]:
+                    - generic [ref=e163]: 49/60
+                    - generic [ref=e164]: 2 of 2 sections open
+                - cell "Math Req" [ref=e165]:
+                  - generic [ref=e167]: Math Req
+                - cell "—" [ref=e168]
+              - 'row "MATH 67890 Independent Summer Research Eligibility: Eligible 47/65 1 of 1 section open Add MATH 67890 to Plan A Add MATH 67890 to Plan B Add MATH 67890 to Plan C" [ref=e169] [cursor=pointer]':
+                - cell "MATH 67890" [ref=e170]:
+                  - generic [ref=e171]: MATH 67890
+                - cell "Independent Summer Research" [ref=e172]
+                - 'cell "Eligibility: Eligible" [ref=e173]':
+                  - 'status "Eligibility: Eligible" [ref=e174]': Eligible
+                - cell "47/65 1 of 1 section open" [ref=e175]:
+                  - generic [ref=e176]:
+                    - generic [ref=e177]: 47/65
+                    - generic [ref=e178]: 1 of 1 section open
+                - cell [ref=e179]
+                - cell "Add MATH 67890 to Plan A Add MATH 67890 to Plan B Add MATH 67890 to Plan C" [ref=e180]:
+                  - generic [ref=e181]:
+                    - button "Add MATH 67890 to Plan A" [ref=e182]: + A
+                    - button "Add MATH 67890 to Plan B" [ref=e183]: + B
+                    - button "Add MATH 67890 to Plan C" [ref=e184]: + C
+          - generic [ref=e185]:
+            - heading "Weekly Schedule" [level=2] [ref=e187]
+            - generic [ref=e188]:
+              - note:
+                - paragraph [ref=e189]: Add courses to your plan to see them on the schedule.
+              - generic [ref=e190]:
+                - generic [ref=e192]: Mon
+                - generic [ref=e193]: Tue
+                - generic [ref=e194]: Wed
+                - generic [ref=e195]: Thu
+                - generic [ref=e196]: Fri
+              - generic [ref=e198]:
+                - generic [ref=e199]: 8a
+                - generic [ref=e200]: 9a
+                - generic [ref=e201]: 10a
+                - generic [ref=e202]: 11a
+                - generic [ref=e203]: 12p
+                - generic [ref=e204]: 1p
+                - generic [ref=e205]: 2p
+                - generic [ref=e206]: 3p
+                - generic [ref=e207]: 4p
+                - generic [ref=e208]: 5p
+                - generic [ref=e209]: 6p
+                - generic [ref=e210]: 7p
+                - generic [ref=e211]: 8p
+                - generic [ref=e212]: 9p
+  - button "Open Next.js Dev Tools" [ref=e293] [cursor=pointer]:
+    - img [ref=e294]
+  - alert [ref=e297]

@@ -10,6 +10,7 @@ import {
   isRegisterable,
   registrationBlockedReason,
 } from "@/lib/eligibility";
+import { sectionsConflict } from "@/lib/conflicts";
 import {
   fetchCoursesReport,
   toCourseMap,
@@ -125,7 +126,7 @@ export default function ExportPage() {
   }, [slotEntries]);
 
   const items: ExportItem[] = useMemo(() => {
-    const out: ExportItem[] = [];
+    const base: ExportItem[] = [];
     const allCourses = audit
       ? [...audit.completedCourses, ...audit.inProgressCourses]
       : [];
@@ -141,7 +142,7 @@ export default function ExportPage() {
         !!audit,
       );
       const blocked = !isRegisterable(status);
-      out.push({
+      base.push({
         course,
         sectionId: entry.sectionId,
         status,
@@ -149,7 +150,34 @@ export default function ExportPage() {
         reason: registrationBlockedReason(status) ?? undefined,
       });
     }
-    return out;
+
+    // Conflict pass: if two items share a meeting time, mark both blocked.
+    // Only run on items that aren't already blocked for another reason — a
+    // course that's already missing prereqs doesn't also need a conflict tag.
+    return base.map((item) => {
+      if (item.result === "blocked") return item;
+      const mySection = item.course.sections.find(
+        (s) => s.id === item.sectionId,
+      );
+      if (!mySection) return item;
+      for (const other of base) {
+        if (other.sectionId === item.sectionId) continue;
+        if (other.result === "blocked") continue;
+        const otherSection = other.course.sections.find(
+          (s) => s.id === other.sectionId,
+        );
+        if (!otherSection) continue;
+        if (sectionsConflict(mySection.meetings, otherSection.meetings)) {
+          return {
+            ...item,
+            status: "time-conflict",
+            result: "blocked",
+            reason: `Time conflict with ${other.course.subject} ${other.course.courseNumber}`,
+          };
+        }
+      }
+      return item;
+    });
   }, [slotEntries, courseMap, audit]);
 
   const calendarEvents: CalendarEvent[] = useMemo(() => {
@@ -528,7 +556,6 @@ export default function ExportPage() {
                             onClick={() =>
                               show(
                                 "Waitlist request submitted via NOVO (demo)",
-                                { trackUnread: false },
                               )
                             }
                             className="bg-gray-100 text-gray-800 px-2 py-1 rounded font-medium hover:bg-gray-200 transition-colors"

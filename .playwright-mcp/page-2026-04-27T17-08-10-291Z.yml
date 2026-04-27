@@ -1,0 +1,162 @@
+- generic [active] [ref=e1]:
+  - navigation "Main navigation" [ref=e2]:
+    - link "PATH — Registration Clarity home" [ref=e3] [cursor=pointer]:
+      - /url: /search
+      - generic [ref=e4]: ☘️
+      - generic [ref=e5]: PATH
+    - generic [ref=e6]:
+      - link "Search" [ref=e7] [cursor=pointer]:
+        - /url: /search
+        - generic [ref=e8]: Search
+      - link "Plan — 3 courses planned" [ref=e9] [cursor=pointer]:
+        - /url: /plan
+        - generic [ref=e10]: Plan
+        - generic [ref=e11]: "3"
+      - link "Export" [ref=e12] [cursor=pointer]:
+        - /url: /export
+        - generic [ref=e13]: Export
+    - generic [ref=e14]:
+      - generic [ref=e15]: Summer 2026
+      - generic [ref=e16]: AM
+      - generic [ref=e17]: Alex Murphy
+  - generic [ref=e18]:
+    - complementary "Plans and progress" [ref=e19]:
+      - generic [ref=e20]:
+        - generic [ref=e21]: Term
+        - generic [ref=e22]: Summer 2026
+      - generic [ref=e23]:
+        - generic [ref=e24]: My Plans
+        - tablist "Plan slots" [ref=e25]:
+          - tab "Plan A (2)" [selected] [ref=e26]
+          - tab "Plan B (1)" [ref=e27]
+          - tab "Plan C (0)" [ref=e28]
+        - tabpanel [ref=e29]:
+          - list [ref=e30]:
+            - listitem [ref=e31]:
+              - link "CSE 20312" [ref=e32] [cursor=pointer]:
+                - /url: /course/1708
+              - button "Remove CSE 20312 from Plan A" [ref=e33]: ×
+            - listitem [ref=e34]:
+              - link "UGED 10421" [ref=e35] [cursor=pointer]:
+                - /url: /course/1704
+              - button "Remove UGED 10421 from Plan A" [ref=e36]: ×
+      - generic [ref=e37]:
+        - generic [ref=e38]:
+          - generic [ref=e39]: Progress
+          - generic [ref=e40]: On Track
+        - generic [ref=e41]:
+          - generic [ref=e42]:
+            - generic [ref=e43]:
+              - generic [ref=e44]: Credits
+              - generic [ref=e45]: 75/120
+            - progressbar "Credits progress" [ref=e46]
+          - generic [ref=e48]:
+            - generic [ref=e49]:
+              - generic [ref=e50]: Major (CS)
+              - generic [ref=e51]: 14/42
+            - progressbar "Major credits progress" [ref=e52]
+          - generic [ref=e54]:
+            - generic [ref=e55]:
+              - generic [ref=e56]: Degree
+              - generic [ref=e57]: 62.5%
+            - progressbar "Degree progress" [ref=e58]
+          - generic [ref=e60]: "GPA: 3.420 | Junior"
+      - generic [ref=e61]:
+        - generic [ref=e62]: My GPS
+        - generic [ref=e63]:
+          - generic [ref=e64]: Bachelor of Arts in Computer Science
+          - generic [ref=e65]: College of Arts and Letters
+    - main [ref=e66]:
+      - generic [ref=e67]:
+        - generic [ref=e68]:
+          - heading "My Plan" [level=1] [ref=e69]
+          - link "Export to NOVO" [ref=e70] [cursor=pointer]:
+            - /url: /export
+        - tablist "Plan slots" [ref=e71]:
+          - tab "Plan A (2)" [selected] [ref=e72]
+          - tab "Plan B (1)" [ref=e73]
+          - tab "Plan C (0)" [ref=e74]
+          - generic [ref=e75]:
+            - checkbox "Show all plans on calendar" [ref=e76]
+            - text: Show all plans on calendar
+        - generic [ref=e77]:
+          - generic [ref=e79]:
+            - table [ref=e80]:
+              - rowgroup [ref=e81]:
+                - row "Course Title Credits Status Reqs Actions" [ref=e82]:
+                  - columnheader "Course" [ref=e83]
+                  - columnheader "Title" [ref=e84]
+                  - columnheader "Credits" [ref=e85]
+                  - columnheader "Status" [ref=e86]
+                  - columnheader "Reqs" [ref=e87]
+                  - columnheader "Actions" [ref=e88]
+              - rowgroup [ref=e89]:
+                - 'row "CSE 20312 Programming Paradigms Sec 01 3 Eligibility: Eligible CS Core Remove CSE 20312 from Plan A Actions for CSE 20312" [ref=e90]':
+                  - cell "CSE 20312" [ref=e91]:
+                    - link "CSE 20312" [ref=e92] [cursor=pointer]:
+                      - /url: /course/1708
+                  - cell "Programming Paradigms Sec 01" [ref=e93]:
+                    - link "Programming Paradigms" [ref=e94] [cursor=pointer]:
+                      - /url: /course/1708
+                    - text: Sec 01
+                  - cell "3" [ref=e95]
+                  - 'cell "Eligibility: Eligible" [ref=e96]':
+                    - 'status "Eligibility: Eligible" [ref=e97]': Eligible
+                  - cell "CS Core" [ref=e98]:
+                    - generic [ref=e100]: CS Core
+                  - cell "Remove CSE 20312 from Plan A Actions for CSE 20312" [ref=e101]:
+                    - generic [ref=e102]:
+                      - button "Remove CSE 20312 from Plan A" [ref=e103]: Remove
+                      - button "Actions for CSE 20312" [ref=e105]:
+                        - img [ref=e106]
+                - 'row "UGED 10421 Promoting Academic Resilience Sec 02 1 Eligibility: Eligible Remove UGED 10421 from Plan A Actions for UGED 10421" [ref=e110]':
+                  - cell "UGED 10421" [ref=e111]:
+                    - link "UGED 10421" [ref=e112] [cursor=pointer]:
+                      - /url: /course/1704
+                  - cell "Promoting Academic Resilience Sec 02" [ref=e113]:
+                    - link "Promoting Academic Resilience" [ref=e114] [cursor=pointer]:
+                      - /url: /course/1704
+                    - text: Sec 02
+                  - cell "1" [ref=e115]
+                  - 'cell "Eligibility: Eligible" [ref=e116]':
+                    - 'status "Eligibility: Eligible" [ref=e117]': Eligible
+                  - cell [ref=e118]
+                  - cell "Remove UGED 10421 from Plan A Actions for UGED 10421" [ref=e119]:
+                    - generic [ref=e120]:
+                      - button "Remove UGED 10421 from Plan A" [ref=e121]: Remove
+                      - button "Actions for UGED 10421" [ref=e123]:
+                        - img [ref=e124]
+            - generic [ref=e128]: "Total: 4 credits · 2 courses"
+          - generic [ref=e129]:
+            - heading "Weekly Schedule" [level=2] [ref=e130]
+            - generic [ref=e131]:
+              - generic [ref=e132]:
+                - generic [ref=e134]: Mon
+                - generic [ref=e135]: Tue
+                - generic [ref=e136]: Wed
+                - generic [ref=e137]: Thu
+                - generic [ref=e138]: Fri
+              - generic [ref=e139]:
+                - generic [ref=e140]:
+                  - generic [ref=e141]: 8a
+                  - generic [ref=e142]: 9a
+                  - generic [ref=e143]: 10a
+                  - generic [ref=e144]: 11a
+                  - generic [ref=e145]: 12p
+                  - generic [ref=e146]: 1p
+                  - generic [ref=e147]: 2p
+                  - generic [ref=e148]: 3p
+                  - generic [ref=e149]: 4p
+                  - generic [ref=e150]: 5p
+                  - generic [ref=e151]: 6p
+                  - generic [ref=e152]: 7p
+                  - generic [ref=e153]: 8p
+                  - generic [ref=e154]: 9p
+                - generic [ref=e155]:
+                  - generic "CSE 20312 10:30-11:20 ⚠ CONFLICT" [ref=e170] [cursor=pointer]: CSE 20312
+                  - generic "UGED 10421 10:30-12:00 ⚠ CONFLICT" [ref=e171] [cursor=pointer]: UGED 10421
+                - generic "CSE 20312 10:30-11:20" [ref=e202] [cursor=pointer]: CSE 20312
+                - generic "CSE 20312 10:30-11:20" [ref=e233] [cursor=pointer]: CSE 20312
+  - button "Open Next.js Dev Tools" [ref=e239] [cursor=pointer]:
+    - img [ref=e240]
+  - alert [ref=e243]

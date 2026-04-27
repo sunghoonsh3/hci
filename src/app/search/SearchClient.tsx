@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useAudit } from "@/contexts/AuditContext";
 import { usePlans } from "@/contexts/PlansContext";
-import { computeEligibility } from "@/lib/eligibility";
+import { computeEligibility, isRegisterable } from "@/lib/eligibility";
 import { getRequirementBadges } from "@/lib/requirements";
 import { fetchCourses } from "@/lib/fetchCourse";
 import type { CourseDTO } from "@/lib/schemas";
@@ -118,8 +118,16 @@ export default function SearchClient({
 }) {
   const router = useRouter();
   const { audit } = useAudit();
-  const { plans, addToPlan, removeFromPlan, isInPlan, findSlotsForSection } =
-    usePlans();
+  const {
+    plans,
+    addToPlan,
+    removeFromPlan,
+    isInPlan,
+    isSectionInPlan,
+    findSlotsForSection,
+  } = usePlans();
+
+  const PLAN_SLOTS: PlanSlot[] = ["A", "B", "C"];
 
   const [subject, setSubject] = useState(initialSubject);
   const [keyword, setKeyword] = useState(initialKeyword);
@@ -264,32 +272,7 @@ export default function SearchClient({
   const visibleCourses = displayCourses.slice(0, visibleCount);
   const remaining = displayCourses.length - visibleCourses.length;
 
-  function handleRemoveFromAllPlans(course: Course) {
-    const entries = plans.filter((p) => p.courseId === course.id);
-    if (entries.length === 0) return;
-    const slotsLabel = [...new Set(entries.map((e) => e.planSlot))]
-      .sort()
-      .join(", ");
-    for (const entry of entries) {
-      removeFromPlan(entry.sectionId, entry.planSlot);
-    }
-    show(
-      `Removed ${course.subject} ${course.courseNumber} from Plan ${slotsLabel}`,
-      {
-        undo: () => {
-          for (const entry of entries) {
-            addToPlan(entry.courseId, entry.sectionId, entry.planSlot, {
-              subject: course.subject,
-              courseNumber: course.courseNumber,
-              courseTitle: course.courseTitle,
-            });
-          }
-        },
-      },
-    );
-  }
-
-  function handleAddToPlan(course: Course) {
+  function handleAddToPlan(course: Course, slot: PlanSlot) {
     const openSection = course.sections.find(
       (s) => s.seatsAvailable === null || s.seatsAvailable > 0,
     );
@@ -300,24 +283,44 @@ export default function SearchClient({
       return;
     }
     const existing = findSlotsForSection(openSection.id);
-    const result = addToPlan(course.id, openSection.id, "A", {
+    const result = addToPlan(course.id, openSection.id, slot, {
       subject: course.subject,
       courseNumber: course.courseNumber,
       courseTitle: course.courseTitle,
     });
     if (!result.added) {
       show(
-        `${course.subject} ${course.courseNumber} already in Plan A`,
+        `${course.subject} ${course.courseNumber} already in Plan ${slot}`,
         { variant: "warning" },
       );
       return;
     }
-    const alsoIn = existing.filter((s) => s !== "A");
+    const alsoIn = existing.filter((s) => s !== slot);
     const extra = alsoIn.length
       ? ` (also in Plan ${alsoIn.join(", ")})`
       : "";
-    show(`${course.subject} ${course.courseNumber} added to Plan A${extra}`, {
-      undo: () => removeFromPlan(openSection.id, "A"),
+    show(
+      `${course.subject} ${course.courseNumber} added to Plan ${slot}${extra}`,
+      { undo: () => removeFromPlan(openSection.id, slot) },
+    );
+  }
+
+  function handleRemoveSlot(course: Course, slot: PlanSlot) {
+    const entries = plans.filter(
+      (p) => p.courseId === course.id && p.planSlot === slot,
+    );
+    if (entries.length === 0) return;
+    for (const e of entries) removeFromPlan(e.sectionId, slot);
+    show(`${course.subject} ${course.courseNumber} removed from Plan ${slot}`, {
+      undo: () => {
+        for (const e of entries) {
+          addToPlan(course.id, e.sectionId, slot, {
+            subject: course.subject,
+            courseNumber: course.courseNumber,
+            courseTitle: course.courseTitle,
+          });
+        }
+      },
     });
   }
 
@@ -495,35 +498,72 @@ export default function SearchClient({
                       </div>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      {inPlan ? (
-                        <div className="flex flex-col items-end gap-1 text-xs">
-                          <span className="text-green-700 font-medium">
-                            In Plan ✓
-                          </span>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleRemoveFromAllPlans(course);
-                            }}
-                            aria-label={`Remove ${course.subject} ${course.courseNumber} from plan`}
-                            className="text-red-700 hover:text-red-900 font-medium hover:underline"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleAddToPlan(course);
-                          }}
-                          aria-label={`Add ${course.subject} ${course.courseNumber} to Plan A`}
-                          className="text-xs bg-[#1B6B3A] text-white px-3 py-1.5 rounded font-medium hover:bg-[#155a2f] transition-colors"
+                      {!isRegisterable(status) && !inPlan ? (
+                        <span
+                          className="text-xs text-gray-500"
+                          title="Cannot add to plan while blocked"
                         >
-                          + Plan A
-                        </button>
+                          —
+                        </span>
+                      ) : (
+                        <div
+                          className="flex justify-end gap-1.5"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {PLAN_SLOTS.map((slot) => {
+                            const openSection = course.sections.find(
+                              (s) =>
+                                s.seatsAvailable === null ||
+                                s.seatsAvailable > 0,
+                            );
+                            const inThisSlot = openSection
+                              ? isSectionInPlan(openSection.id, slot)
+                              : false;
+                            if (inThisSlot && openSection) {
+                              return (
+                                <button
+                                  key={slot}
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRemoveSlot(course, slot);
+                                  }}
+                                  aria-label={`Remove ${course.subject} ${course.courseNumber} from Plan ${slot}`}
+                                  title={`Remove from Plan ${slot}`}
+                                  className="group text-xs px-2.5 py-1.5 rounded font-medium text-white inline-flex items-center whitespace-nowrap hover:brightness-110 transition"
+                                  style={{
+                                    backgroundColor: PLAN_COLORS[slot],
+                                  }}
+                                >
+                                  <span className="group-hover:hidden">
+                                    ✓ {slot}
+                                  </span>
+                                  <span className="hidden group-hover:inline">
+                                    × {slot}
+                                  </span>
+                                </button>
+                              );
+                            }
+                            return (
+                              <button
+                                key={slot}
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleAddToPlan(course, slot);
+                                }}
+                                disabled={!isRegisterable(status)}
+                                aria-label={`Add ${course.subject} ${course.courseNumber} to Plan ${slot}`}
+                                className="text-xs px-2.5 py-1.5 rounded font-medium text-white whitespace-nowrap hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                                style={{
+                                  backgroundColor: PLAN_COLORS[slot],
+                                }}
+                              >
+                                + {slot}
+                              </button>
+                            );
+                          })}
+                        </div>
                       )}
                     </td>
                   </tr>

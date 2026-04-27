@@ -1,0 +1,68 @@
+[    1931ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    1977ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    2071ms] Error: Hydration failed because the server rendered text didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <InnerScrollAndFocusHandlerOld focusAndScrollRef={{scrollRef:null, ...}} cacheNode={{rsc:{...}, ...}}>
+      <ErrorBoundary errorComponent={function CourseError} errorStyles={{...}} errorScripts={[...]}>
+        <ErrorBoundaryHandler pathname="/course/1140" errorComponent={function CourseError} errorStyles={{...}} ...>
+          <LoadingBoundary name="1140/" loading={null}>
+            <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <InnerLayoutRouter url="/course/1140" tree={[...]} params={{id:"1140"}} cacheNode={{rsc:{...}, ...}} ...>
+                    <SegmentViewNode type="page" pagePath="course/[id...">
+                      <SegmentTrieNode>
+                      <CourseDetailPage>
+                        <CourseDetailClient course={{id:1140, ...}} courseTitleMap={{...}}>
+                          <div>
+                            <button>
+                            <div>
+                            <div className="grid grid-...">
+                              <div>
+                                <div>
+                                <div
++                                 className="flex flex-wrap gap-2 mb-6"
+-                                 className="flex gap-3 mb-6"
+                                >
+                                  <button
+                                    type="button"
+                                    onClick={function onClick}
++                                   aria-label="Add ACCT 20200 to Plan A"
+-                                   aria-label={null}
++                                   className="text-white px-4 py-2 rounded-lg text-sm font-medium hover:brightness-11..."
+-                                   className="bg-[#1B6B3A] text-white px-4 py-2 rounded-lg text-sm font-medium hover:..."
++                                   style={{backgroundColor:"#1B6B3A"}}
+-                                   style={{}}
+                                  >
++                                   {"+ Plan "}
+-                                   Register
+                                    ...
+                                  ...
+                                  ...
+                                ...
+                              ...
+                    ...
+                  ...
+      ...
+
+    at throwOnHydrationMismatch (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:3318:56)
+    at completeWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:7021:36)
+    at runWithFiberInDEV (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)
+    at completeUnitOfWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9622:23)
+    at performUnitOfWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9557:28)
+    at workLoopConcurrentByScheduler (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9551:58)
+    at renderRootConcurrent (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9534:71)
+    at performWorkOnRoot (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9061:150)
+    at performWorkOnRootViaSchedulerTask (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10255:9)
+    at MessagePort.performWorkUntilDeadline (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_0rpq4pf._.js:2647:64)

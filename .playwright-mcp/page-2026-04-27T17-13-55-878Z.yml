@@ -1,0 +1,176 @@
+- generic [active] [ref=e1]:
+  - navigation "Main navigation" [ref=e2]:
+    - link "PATH — Registration Clarity home" [ref=e3] [cursor=pointer]:
+      - /url: /search
+      - generic [ref=e4]: ☘️
+      - generic [ref=e5]: PATH
+    - generic [ref=e6]:
+      - link "Search" [ref=e7] [cursor=pointer]:
+        - /url: /search
+        - generic [ref=e8]: Search
+      - link "Plan — 3 courses planned" [ref=e9] [cursor=pointer]:
+        - /url: /plan
+        - generic [ref=e10]: Plan
+        - generic [ref=e11]: "3"
+      - link "Export" [ref=e12] [cursor=pointer]:
+        - /url: /export
+        - generic [ref=e13]: Export
+    - generic [ref=e14]:
+      - generic [ref=e15]: Summer 2026
+      - generic [ref=e16]: AM
+      - generic [ref=e17]: Alex Murphy
+  - generic [ref=e18]:
+    - complementary "Plans and progress" [ref=e19]:
+      - generic [ref=e20]:
+        - generic [ref=e21]: Term
+        - generic [ref=e22]: Summer 2026
+      - generic [ref=e23]:
+        - generic [ref=e24]: My Plans
+        - tablist "Plan slots" [ref=e25]:
+          - tab "Plan A (2)" [selected] [ref=e26]
+          - tab "Plan B (1)" [ref=e27]
+          - tab "Plan C (0)" [ref=e28]
+        - tabpanel [ref=e29]:
+          - list [ref=e30]:
+            - listitem [ref=e31]:
+              - link "CSE 20312" [ref=e32] [cursor=pointer]:
+                - /url: /course/1708
+              - button "Remove CSE 20312 from Plan A" [ref=e33]: ×
+            - listitem [ref=e34]:
+              - link "UGED 10421" [ref=e35] [cursor=pointer]:
+                - /url: /course/1704
+              - button "Remove UGED 10421 from Plan A" [ref=e36]: ×
+      - generic [ref=e37]:
+        - generic [ref=e38]:
+          - generic [ref=e39]: Progress
+          - generic [ref=e40]: On Track
+        - generic [ref=e41]:
+          - generic [ref=e42]:
+            - generic [ref=e43]:
+              - generic [ref=e44]: Credits
+              - generic [ref=e45]: 75/120
+            - progressbar "Credits progress" [ref=e46]
+          - generic [ref=e48]:
+            - generic [ref=e49]:
+              - generic [ref=e50]: Major (CS)
+              - generic [ref=e51]: 14/42
+            - progressbar "Major credits progress" [ref=e52]
+          - generic [ref=e54]:
+            - generic [ref=e55]:
+              - generic [ref=e56]: Degree
+              - generic [ref=e57]: 62.5%
+            - progressbar "Degree progress" [ref=e58]
+          - generic [ref=e60]: "GPA: 3.420 | Junior"
+      - generic [ref=e61]:
+        - generic [ref=e62]: My GPS
+        - generic [ref=e63]:
+          - generic [ref=e64]: Bachelor of Arts in Computer Science
+          - generic [ref=e65]: College of Arts and Letters
+    - main [ref=e66]:
+      - generic [ref=e67]:
+        - button "Go back to previous page" [ref=e68]: ← Back
+        - generic [ref=e69]:
+          - link "Search" [ref=e70] [cursor=pointer]:
+            - /url: /search
+          - text: / MATH 20550
+        - generic [ref=e71]:
+          - generic [ref=e72]:
+            - generic [ref=e74]:
+              - 'heading "MATH 20550: Calculus III" [level=1] [ref=e75]'
+              - generic [ref=e76]:
+                - generic [ref=e77]: Brian Mulholland
+                - generic [ref=e78]: ·
+                - generic [ref=e79]: — credits
+                - generic [ref=e80]: ·
+                - generic [ref=e81]: Summer 2026
+                - 'status "Eligibility: Eligible" [ref=e82]': Eligible
+            - generic [ref=e83]:
+              - button "Add MATH 20550 to Plan A" [ref=e84]: + Plan A
+              - button "Add MATH 20550 to Plan B" [ref=e85]: + Plan B
+              - button "Add MATH 20550 to Plan C" [ref=e86]: + Plan C
+              - button "Pre-check" [ref=e87]
+            - generic [ref=e88]:
+              - heading "Description" [level=2] [ref=e89]
+              - paragraph [ref=e90]: A comprehensive treatment of differential and integral calculus of several variables. Topics include space curves, surfaces, functions of several variables, partial derivatives, multiple integrals, line integrals, surface integrals, Stokes theorem, and applications.
+            - generic [ref=e91]:
+              - heading "Availability" [level=2] [ref=e92]
+              - generic [ref=e93]:
+                - generic [ref=e94]: 42/60 seats
+                - progressbar "Seat availability" [ref=e95]
+                - generic [ref=e97]: Available
+            - generic [ref=e98]:
+              - heading "Prerequisites" [level=2] [ref=e99]
+              - generic [ref=e101]:
+                - generic [ref=e102]: ✓
+                - generic [ref=e103]: "MATH 10560: Calculus II"
+                - generic [ref=e104]: — completed Spring 2024 (B)
+                - generic [ref=e105]: (satisfies 2-way prereq, or 1 alternative)
+            - generic [ref=e106]:
+              - heading "Restrictions" [level=2] [ref=e107]
+              - list [ref=e108]:
+                - listitem [ref=e109]: "Prerequisites required — Prerequisites: MATH 10560, 10092, 10860, 10360 or EG 10560."
+                - listitem [ref=e110]: Employee Non-Degree, Graduate, Graduate Non-Degree, St. Mary's College, Undergraduate or Undergraduate Non-Degree level only — Enrollment is limited to Employee Non-Degree, Graduate, Graduate Non-Degree, St. Mary's College, Undergraduate or Undergraduate Non-Degree level students.
+                - listitem [ref=e111]: Main campus only — Enrollment limited to students in the Main campus.
+            - generic [ref=e112]:
+              - heading "Requirements Fulfilled" [level=2] [ref=e113]
+              - generic [ref=e115]: Math Req
+            - generic [ref=e116]:
+              - heading "Course Path" [level=2] [ref=e117]
+              - paragraph [ref=e118]: Course path data not yet available for this course.
+            - generic [ref=e119]:
+              - heading "Guidance" [level=2] [ref=e120]
+              - paragraph [ref=e121]: No advisor guidance available for this course yet.
+            - generic [ref=e122]:
+              - heading "Sections" [level=2] [ref=e123]
+              - table [ref=e125]:
+                - rowgroup [ref=e126]:
+                  - row "Sec Time Room Seats" [ref=e127]:
+                    - columnheader "Sec" [ref=e128]
+                    - columnheader "Time" [ref=e129]
+                    - columnheader "Room" [ref=e130]
+                    - columnheader "Seats" [ref=e131]
+                    - columnheader [ref=e132]
+                - rowgroup [ref=e133]:
+                  - row "01 MW 10:00-12:00 ONLINE COURSE 17/30 Add section 01 to Plan A Add section 01 to Plan B Add section 01 to Plan C" [ref=e134]:
+                    - cell "01" [ref=e135]
+                    - cell "MW 10:00-12:00" [ref=e136]
+                    - cell "ONLINE COURSE" [ref=e137]
+                    - cell "17/30" [ref=e138]:
+                      - generic [ref=e139]: 17/30
+                    - cell "Add section 01 to Plan A Add section 01 to Plan B Add section 01 to Plan C" [ref=e140]:
+                      - generic [ref=e141]:
+                        - button "Add section 01 to Plan A" [ref=e142]: + A
+                        - button "Add section 01 to Plan B" [ref=e143]: + B
+                        - button "Add section 01 to Plan C" [ref=e144]: + C
+                  - row "02 MW 19:00-21:00 ONLINE COURSE 25/30 Add section 02 to Plan A Add section 02 to Plan B Add section 02 to Plan C" [ref=e145]:
+                    - cell "02" [ref=e146]
+                    - cell "MW 19:00-21:00" [ref=e147]
+                    - cell "ONLINE COURSE" [ref=e148]
+                    - cell "25/30" [ref=e149]:
+                      - generic [ref=e150]: 25/30
+                    - cell "Add section 02 to Plan A Add section 02 to Plan B Add section 02 to Plan C" [ref=e151]:
+                      - generic [ref=e152]:
+                        - button "Add section 02 to Plan A" [ref=e153]: + A
+                        - button "Add section 02 to Plan B" [ref=e154]: + B
+                        - button "Add section 02 to Plan C" [ref=e155]: + C
+          - generic [ref=e157]:
+            - heading "Quick Info — MATH 20550" [level=3] [ref=e158]
+            - generic [ref=e159]:
+              - generic [ref=e160]:
+                - generic [ref=e161]: Seats
+                - generic [ref=e162]: 42/60
+              - generic [ref=e163]:
+                - generic [ref=e164]: Instructor
+                - generic [ref=e165]: Brian Mulholland
+              - generic [ref=e166]:
+                - generic [ref=e167]: Credits
+                - generic [ref=e168]: —
+              - generic [ref=e169]:
+                - generic [ref=e170]: Term
+                - generic [ref=e171]: Summer 2026
+              - generic [ref=e172]:
+                - generic [ref=e173]: Sections
+                - generic [ref=e174]: "2"
+  - button "Open Next.js Dev Tools" [ref=e180] [cursor=pointer]:
+    - img [ref=e181]
+  - alert [ref=e184]

@@ -37,10 +37,17 @@ export function computeEligibility(
   if (hasAudit) {
     const groups = extractPrereqGroups(registrationRestrictions);
     if (groups.length > 0) {
-      const completedCodes = completedCourses
-        .filter((c) => c.status === "completed")
+      // In-progress prereqs count: registration happens before the term in
+      // which the prereq finishes, so a student currently taking the prereq
+      // is allowed to register for the next-term course. Real registration
+      // systems allow this; matches PreCheckModal's satisfyingCodes.
+      const satisfyingCodes = completedCourses
+        .filter(
+          (c) => c.status === "completed" || c.status === "in-progress",
+        )
         .map((c) => `${c.subject} ${c.courseNumber}`);
-      if (!prereqGroupsSatisfied(groups, completedCodes)) return "needs-prereq";
+      if (!prereqGroupsSatisfied(groups, satisfyingCodes))
+        return "needs-prereq";
     }
   }
 
@@ -73,6 +80,8 @@ export function registrationBlockedReason(
       return "Special approval required";
     case "already-taken":
       return "Already taken";
+    case "time-conflict":
+      return "Time conflict with another planned course";
     case "unknown":
       return "Course data unavailable";
   }

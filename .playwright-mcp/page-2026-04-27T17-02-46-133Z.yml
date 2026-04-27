@@ -1,0 +1,98 @@
+- generic [active] [ref=e1]:
+  - navigation "Main navigation" [ref=e2]:
+    - link "PATH — Registration Clarity home" [ref=e3] [cursor=pointer]:
+      - /url: /search
+      - generic [ref=e4]: ☘️
+      - generic [ref=e5]: PATH
+    - generic [ref=e6]:
+      - link "Search" [ref=e7] [cursor=pointer]:
+        - /url: /search
+        - generic [ref=e8]: Search
+      - link "Plan — 2 courses planned" [ref=e9] [cursor=pointer]:
+        - /url: /plan
+        - generic [ref=e10]: Plan
+        - generic [ref=e11]: "2"
+      - link "Export" [ref=e12] [cursor=pointer]:
+        - /url: /export
+        - generic [ref=e13]: Export
+    - generic [ref=e14]:
+      - generic [ref=e15]: Summer 2026
+      - generic [ref=e16]: AM
+      - generic [ref=e17]: Alex Murphy
+  - generic [ref=e18]:
+    - complementary "Plans and progress" [ref=e19]:
+      - generic [ref=e20]:
+        - generic [ref=e21]: Term
+        - generic [ref=e22]: Summer 2026
+      - generic [ref=e23]:
+        - generic [ref=e24]: My Plans
+        - tablist "Plan slots" [ref=e25]:
+          - tab "Plan A (2)" [selected] [ref=e26]
+          - tab "Plan B (0)" [ref=e27]
+          - tab "Plan C (0)" [ref=e28]
+        - tabpanel [ref=e29]:
+          - list [ref=e30]:
+            - listitem [ref=e31]:
+              - link "CSE 20312" [ref=e32] [cursor=pointer]:
+                - /url: /course/1708
+              - button "Remove CSE 20312 from Plan A" [ref=e33]: ×
+            - listitem [ref=e34]:
+              - link "UGED 10421" [ref=e35] [cursor=pointer]:
+                - /url: /course/1704
+              - button "Remove UGED 10421 from Plan A" [ref=e36]: ×
+      - generic [ref=e37]:
+        - generic [ref=e38]:
+          - generic [ref=e39]: Progress
+          - generic [ref=e40]: On Track
+        - generic [ref=e41]:
+          - generic [ref=e42]:
+            - generic [ref=e43]:
+              - generic [ref=e44]: Credits
+              - generic [ref=e45]: 75/120
+            - progressbar "Credits progress" [ref=e46]
+          - generic [ref=e48]:
+            - generic [ref=e49]:
+              - generic [ref=e50]: Major (CS)
+              - generic [ref=e51]: 14/42
+            - progressbar "Major credits progress" [ref=e52]
+          - generic [ref=e54]:
+            - generic [ref=e55]:
+              - generic [ref=e56]: Degree
+              - generic [ref=e57]: 62.5%
+            - progressbar "Degree progress" [ref=e58]
+          - generic [ref=e60]: "GPA: 3.420 | Junior"
+      - generic [ref=e61]:
+        - generic [ref=e62]: My GPS
+        - generic [ref=e63]:
+          - generic [ref=e64]: Bachelor of Arts in Computer Science
+          - generic [ref=e65]: College of Arts and Letters
+    - main [ref=e66]:
+      - generic [ref=e67]:
+        - heading "Export to NOVO" [level=1] [ref=e68]
+        - list "Export progress" [ref=e69]:
+          - listitem [ref=e70]:
+            - generic [ref=e71]: "1"
+            - generic [ref=e72]: "Step 1: Review"
+            - generic [ref=e73]: →
+          - listitem [ref=e74]:
+            - generic [ref=e75]: "2"
+            - generic [ref=e76]: "Step 2: Pre-check"
+            - generic [ref=e77]: →
+          - listitem [ref=e78]:
+            - generic [ref=e79]: "3"
+            - generic [ref=e80]: "Step 3: Results"
+        - tablist "Plan slots" [ref=e81]:
+          - tab "Plan A (2)" [selected] [ref=e82]
+          - tab "Plan B (0)" [ref=e83]
+          - tab "Plan C (0)" [ref=e84]
+        - paragraph [ref=e85]: Review your Plan A courses below. When ready, run the pre-check to see which courses are eligible to transfer to NOVO.
+        - table [ref=e87]:
+          - rowgroup [ref=e88]:
+            - row "Course Section" [ref=e89]:
+              - columnheader "Course" [ref=e90]
+              - columnheader "Section" [ref=e91]
+          - rowgroup
+        - button "Run Pre-check" [ref=e92]
+  - button "Open Next.js Dev Tools" [ref=e98] [cursor=pointer]:
+    - img [ref=e99]
+  - alert [ref=e102]

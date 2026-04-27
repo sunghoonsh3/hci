@@ -442,6 +442,7 @@ test.describe("Flow 4: Register — Export plan to NOVO", () => {
 
 // =============================================================================
 // FLOW 5: RECOVER
+// (Detailed move/swap behavior lives in recovery-flow.spec.ts.)
 // =============================================================================
 
 test.describe("Flow 5: Recover — Handle blocked courses", () => {
@@ -457,26 +458,23 @@ test.describe("Flow 5: Recover — Handle blocked courses", () => {
       await fullRow.click();
       await page.waitForSelector("h1", { timeout: 10000 });
 
-      const btn = page.locator('button:has-text("Recovery Options")');
+      const btn = page.locator('button:has-text("See recovery options")');
       if (await btn.isVisible()) {
         await btn.click();
-        await page.waitForTimeout(500);
-
-        await expect(page.locator("text=Swap Section").first()).toBeVisible();
+        await expect(page.getByTestId("recovery-drawer")).toBeVisible();
+        await expect(page.getByTestId("recovery-swap")).toBeVisible();
         await expect(
-          page.locator("text=Find Alternatives").first()
+          page.getByTestId("recovery-find-alternatives"),
         ).toBeVisible();
+        await expect(page.getByTestId("recovery-move")).toBeVisible();
         await expect(
-          page.locator("text=Move to Plan B").first()
-        ).toBeVisible();
-        await expect(
-          page.locator("text=Request Permission").first()
+          page.getByTestId("recovery-request-permission"),
         ).toBeVisible();
       }
     }
   });
 
-  test("5.2 Swap Section shows sections table", async ({ page }) => {
+  test("5.2 Request Permission shows email draft", async ({ page }) => {
     await goToSearch(page);
 
     const fullRow = page
@@ -486,92 +484,16 @@ test.describe("Flow 5: Recover — Handle blocked courses", () => {
       await fullRow.click();
       await page.waitForSelector("h1", { timeout: 10000 });
 
-      const btn = page.locator('button:has-text("Recovery Options")');
+      const btn = page.locator('button:has-text("See recovery options")');
       if (await btn.isVisible()) {
         await btn.click();
-        await page.waitForTimeout(500);
-
-        // Click "Swap Section" card
-        await page
-          .locator("button", { hasText: "Swap Section" })
-          .first()
-          .click();
-        await page.waitForTimeout(500);
-
-        expect(await page.locator("table tbody tr").count()).toBeGreaterThan(0);
-      }
-    }
-  });
-
-  test("5.3 Request Permission shows email draft", async ({ page }) => {
-    await goToSearch(page);
-
-    const fullRow = page
-      .locator("tr", { has: page.locator('.rounded-full:has-text("Full")') })
-      .first();
-    if (await fullRow.isVisible()) {
-      await fullRow.click();
-      await page.waitForSelector("h1", { timeout: 10000 });
-
-      const btn = page.locator('button:has-text("Recovery Options")');
-      if (await btn.isVisible()) {
-        await btn.click();
-        await page.waitForTimeout(500);
-
-        await page
-          .locator("button", { hasText: "Request Permission" })
-          .first()
-          .click();
-        await page.waitForTimeout(500);
-
+        await page.getByTestId("recovery-request-permission").click();
         await expect(
-          page.locator("text=Permission Request Draft")
+          page.locator("text=Permission Request Draft"),
         ).toBeVisible();
         await expect(
-          page.locator('input[value*="Permission to enroll"]')
+          page.locator('input[value*="Permission to enroll"]'),
         ).toBeVisible();
-      }
-    }
-  });
-
-  test("5.4 Blocked banner — Move to Plan B shows toast", async ({
-    page,
-  }) => {
-    await goToSearch(page);
-
-    const fullRow = page
-      .locator("tr", { has: page.locator('.rounded-full:has-text("Full")') })
-      .first();
-    if (await fullRow.isVisible()) {
-      await fullRow.click();
-      await page.waitForSelector("h1", { timeout: 10000 });
-
-      const moveBtn = page.locator('button:has-text("Move to Plan B")');
-      if (await moveBtn.isVisible()) {
-        await moveBtn.click();
-        await expect(page.locator("text=/moved to Plan B/")).toBeVisible({
-          timeout: 5000,
-        });
-      }
-    }
-  });
-
-  test("5.5 Blocked banner — Find Alternatives navigates to search", async ({
-    page,
-  }) => {
-    await goToSearch(page);
-
-    const fullRow = page
-      .locator("tr", { has: page.locator('.rounded-full:has-text("Full")') })
-      .first();
-    if (await fullRow.isVisible()) {
-      await fullRow.click();
-      await page.waitForSelector("h1", { timeout: 10000 });
-
-      const link = page.locator('a:has-text("Find Alternatives")');
-      if (await link.isVisible()) {
-        await link.click();
-        await expect(page).toHaveURL(/\/search\?subject=/);
       }
     }
   });

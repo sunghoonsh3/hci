@@ -1,0 +1,224 @@
+- generic [active] [ref=e1]:
+  - navigation "Main navigation" [ref=e2]:
+    - link "PATH — Registration Clarity home" [ref=e3] [cursor=pointer]:
+      - /url: /search
+      - generic [ref=e4]: ☘️
+      - generic [ref=e5]: PATH
+    - generic [ref=e6]:
+      - link "Search" [ref=e7] [cursor=pointer]:
+        - /url: /search
+        - generic [ref=e8]: Search
+      - link "Plan" [ref=e9] [cursor=pointer]:
+        - /url: /plan
+        - generic [ref=e10]: Plan
+      - link "Export" [ref=e11] [cursor=pointer]:
+        - /url: /export
+        - generic [ref=e12]: Export
+    - generic [ref=e13]:
+      - generic [ref=e14]: Summer 2026
+      - generic [ref=e15]: AM
+      - generic [ref=e16]: Alex Murphy
+  - generic [ref=e17]:
+    - complementary "Plans and progress" [ref=e18]:
+      - generic [ref=e19]:
+        - generic [ref=e20]: Term
+        - generic [ref=e21]: Summer 2026
+      - generic [ref=e22]:
+        - generic [ref=e23]: My Plans
+        - tablist "Plan slots" [ref=e24]:
+          - tab "Plan A (0)" [selected] [ref=e25]
+          - tab "Plan B (0)" [ref=e26]
+          - tab "Plan C (0)" [ref=e27]
+        - tabpanel [ref=e28]:
+          - paragraph [ref=e29]: No courses in Plan A
+      - generic [ref=e30]:
+        - generic [ref=e31]:
+          - generic [ref=e32]: Progress
+          - generic [ref=e33]: On Track
+        - generic [ref=e34]:
+          - generic [ref=e35]:
+            - generic [ref=e36]:
+              - generic [ref=e37]: Credits
+              - generic [ref=e38]: 30/122
+            - progressbar "Credits progress" [ref=e39]
+          - generic [ref=e41]:
+            - generic [ref=e42]:
+              - generic [ref=e43]: Major (CS)
+              - generic [ref=e44]: 3/42
+            - progressbar "Major credits progress" [ref=e45]
+          - generic [ref=e47]:
+            - generic [ref=e48]:
+              - generic [ref=e49]: Degree
+              - generic [ref=e50]: 25%
+            - progressbar "Degree progress" [ref=e51]
+          - generic [ref=e53]: "GPA: 3.500 | Sophomore"
+      - generic [ref=e54]:
+        - generic [ref=e55]: My GPS
+        - generic [ref=e56]:
+          - generic [ref=e57]: Computer Science
+          - generic [ref=e58]: College of Engineering
+          - link "Retrieve What-if Audit" [ref=e59] [cursor=pointer]:
+            - /url: /onboarding
+    - main [ref=e60]:
+      - generic [ref=e61]:
+        - heading "Search Results — 1 course" [level=1] [ref=e63]:
+          - text: Search Results
+          - generic [ref=e64]: — 1 course
+        - generic [ref=e65]:
+          - combobox "Subject" [ref=e66]:
+            - option "All Subjects"
+            - option "ACCT" [selected]
+            - option "ACMS"
+            - option "AFST"
+            - option "AL"
+            - option "AME"
+            - option "AMST"
+            - option "ANTH"
+            - option "ARCH"
+            - option "ARHI"
+            - option "ARST"
+            - option "BAEG"
+            - option "BALW"
+            - option "BASC"
+            - option "BAUG"
+            - option "BES"
+            - option "BIOS"
+            - option "BPHY"
+            - option "CBE"
+            - option "CDT"
+            - option "CE"
+            - option "CHEM"
+            - option "CLAS"
+            - option "CLGR"
+            - option "CLLA"
+            - option "CNST"
+            - option "CSE"
+            - option "CSEM"
+            - option "DESN"
+            - option "DMA"
+            - option "DS"
+            - option "EALJ"
+            - option "ECON"
+            - option "EDU"
+            - option "EE"
+            - option "EG"
+            - option "ENGL"
+            - option "ESS"
+            - option "ESTM"
+            - option "FIN"
+            - option "FTT"
+            - option "GE"
+            - option "GH"
+            - option "GLAF"
+            - option "GRED"
+            - option "GSC"
+            - option "HIST"
+            - option "HPS"
+            - option "IBMS"
+            - option "IIPS"
+            - option "ILS"
+            - option "ISS"
+            - option "ITAO"
+            - option "KSGA"
+            - option "LLRO"
+            - option "MARK"
+            - option "MATH"
+            - option "MBA"
+            - option "MBAE"
+            - option "MDMK"
+            - option "MDSC"
+            - option "MEAR"
+            - option "MGA"
+            - option "MGTO"
+            - option "MI"
+            - option "MNAE"
+            - option "MSA"
+            - option "MSBR"
+            - option "MSF"
+            - option "MSFR"
+            - option "MSM"
+            - option "MSMG"
+            - option "MUS"
+            - option "NSCI"
+            - option "PCSE"
+            - option "PHIL"
+            - option "PHYS"
+            - option "POLS"
+            - option "PSY"
+            - option "RE"
+            - option "REG"
+            - option "ROFR"
+            - option "ROIT"
+            - option "ROPO"
+            - option "ROSP"
+            - option "SC"
+            - option "SMAC"
+            - option "SOC"
+            - option "SOCO"
+            - option "STV"
+            - option "SUSD"
+            - option "THEO"
+            - option "UGED"
+          - generic [ref=e67]:
+            - img [ref=e68]
+            - textbox "Keyword" [ref=e70]:
+              - /placeholder: Search courses...
+              - text: "20200"
+          - generic [ref=e71]:
+            - checkbox "Open seats only" [ref=e72]: Open seats only
+            - checkbox "Core requirements" [ref=e74]: Core requirements
+            - checkbox "My major courses" [ref=e76]: My major courses
+          - button "Search" [ref=e78]
+        - generic [ref=e79]:
+          - table [ref=e81]:
+            - rowgroup [ref=e82]:
+              - row "Course Title Status Seats Reqs Actions" [ref=e83]:
+                - columnheader "Course" [ref=e84]
+                - columnheader "Title" [ref=e85]
+                - columnheader "Status" [ref=e86]
+                - columnheader "Seats" [ref=e87]
+                - columnheader "Reqs" [ref=e88]
+                - columnheader "Actions" [ref=e89]
+            - rowgroup [ref=e90]:
+              - 'row "ACCT 20200 Accounting Analysis for Planning and Control Eligibility: Restricted 24/50 1 of 1 section open Add ACCT 20200 to Plan A" [ref=e91] [cursor=pointer]':
+                - cell "ACCT 20200" [ref=e92]:
+                  - generic [ref=e93]: ACCT 20200
+                - cell "Accounting Analysis for Planning and Control" [ref=e94]
+                - 'cell "Eligibility: Restricted" [ref=e95]':
+                  - 'status "Eligibility: Restricted" [ref=e96]': Restricted
+                - cell "24/50 1 of 1 section open" [ref=e97]:
+                  - generic [ref=e98]:
+                    - generic [ref=e99]: 24/50
+                    - generic [ref=e100]: 1 of 1 section open
+                - cell [ref=e101]
+                - cell "Add ACCT 20200 to Plan A" [ref=e102]:
+                  - button "Add ACCT 20200 to Plan A" [ref=e103]: + Plan A
+          - generic [ref=e104]:
+            - heading "Weekly Schedule" [level=2] [ref=e106]
+            - generic [ref=e107]:
+              - note:
+                - paragraph [ref=e108]: Add courses to your plan to see them on the schedule.
+              - generic [ref=e109]:
+                - generic [ref=e111]: Mon
+                - generic [ref=e112]: Tue
+                - generic [ref=e113]: Wed
+                - generic [ref=e114]: Thu
+                - generic [ref=e115]: Fri
+              - generic [ref=e117]:
+                - generic [ref=e118]: 8a
+                - generic [ref=e119]: 9a
+                - generic [ref=e120]: 10a
+                - generic [ref=e121]: 11a
+                - generic [ref=e122]: 12p
+                - generic [ref=e123]: 1p
+                - generic [ref=e124]: 2p
+                - generic [ref=e125]: 3p
+                - generic [ref=e126]: 4p
+                - generic [ref=e127]: 5p
+                - generic [ref=e128]: 6p
+                - generic [ref=e129]: 7p
+                - generic [ref=e130]: 8p
+                - generic [ref=e131]: 9p
+  - button "Open Next.js Dev Tools" [ref=e212] [cursor=pointer]:
+    - img [ref=e213]
+  - alert [ref=e216]

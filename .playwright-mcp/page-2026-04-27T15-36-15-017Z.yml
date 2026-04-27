@@ -1,0 +1,164 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e6] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e7]:
+      - img [ref=e8]
+    - generic [ref=e11]:
+      - button "Open issues overlay" [ref=e12]:
+        - generic [ref=e13]:
+          - generic [ref=e14]: "0"
+          - generic [ref=e15]: "1"
+        - generic [ref=e16]: Issue
+      - button "Collapse issues badge" [ref=e17]:
+        - img [ref=e18]
+  - navigation "Main navigation" [ref=e20]:
+    - link "PATH — Registration Clarity home" [ref=e21] [cursor=pointer]:
+      - /url: /search
+      - generic [ref=e22]: ☘️
+      - generic [ref=e23]: PATH
+    - generic [ref=e24]:
+      - link "Search" [ref=e25] [cursor=pointer]:
+        - /url: /search
+        - generic [ref=e26]: Search
+      - link "Plan" [ref=e27] [cursor=pointer]:
+        - /url: /plan
+        - generic [ref=e28]: Plan
+      - link "Export" [ref=e29] [cursor=pointer]:
+        - /url: /export
+        - generic [ref=e30]: Export
+    - generic [ref=e31]:
+      - generic [ref=e32]: Summer 2026
+      - generic [ref=e33]: AM
+      - generic [ref=e34]: Alex Murphy
+  - generic [ref=e35]:
+    - complementary "Plans and progress" [ref=e36]:
+      - generic [ref=e37]:
+        - generic [ref=e38]: Term
+        - generic [ref=e39]: Summer 2026
+      - generic [ref=e40]:
+        - generic [ref=e41]: My Plans
+        - tablist "Plan slots" [ref=e42]:
+          - tab "Plan A (0)" [selected] [ref=e43]
+          - tab "Plan B (0)" [ref=e44]
+          - tab "Plan C (0)" [ref=e45]
+        - tabpanel [ref=e46]:
+          - paragraph [ref=e47]: No courses in Plan A
+      - generic [ref=e48]:
+        - generic [ref=e49]:
+          - generic [ref=e50]: Progress
+          - generic [ref=e51]: On Track
+        - generic [ref=e52]:
+          - generic [ref=e53]:
+            - generic [ref=e54]:
+              - generic [ref=e55]: Credits
+              - generic [ref=e56]: 30/122
+            - progressbar "Credits progress" [ref=e57]
+          - generic [ref=e59]:
+            - generic [ref=e60]:
+              - generic [ref=e61]: Major (CS)
+              - generic [ref=e62]: 0/42
+            - progressbar "Major credits progress" [ref=e63]
+          - generic [ref=e64]:
+            - generic [ref=e65]:
+              - generic [ref=e66]: Degree
+              - generic [ref=e67]: 25%
+            - progressbar "Degree progress" [ref=e68]
+          - generic [ref=e70]: "GPA: 3.500 | Sophomore"
+      - generic [ref=e71]:
+        - generic [ref=e72]: My GPS
+        - generic [ref=e73]:
+          - generic [ref=e74]: BA
+          - generic [ref=e75]: Mendoza
+          - link "Retrieve What-if Audit" [ref=e76] [cursor=pointer]:
+            - /url: /onboarding
+    - main [ref=e77]:
+      - generic [ref=e78]:
+        - button "Go back to previous page" [ref=e79]: ← Back
+        - generic [ref=e80]:
+          - link "Search" [ref=e81] [cursor=pointer]:
+            - /url: /search
+          - text: / ACCT 20200
+        - generic [ref=e82]:
+          - generic [ref=e83]:
+            - generic [ref=e85]:
+              - 'heading "ACCT 20200: Accounting Analysis for Planning and Control" [level=1] [ref=e86]'
+              - generic [ref=e87]:
+                - generic [ref=e88]: Mike Favorite
+                - generic [ref=e89]: ·
+                - generic [ref=e90]: 3 credits
+                - generic [ref=e91]: ·
+                - generic [ref=e92]: Summer 2026
+                - 'status "Eligibility: Eligible" [ref=e93]': Eligible
+            - generic [ref=e94]:
+              - button "Add ACCT 20200 to Plan A" [ref=e95]: + Plan A
+              - button "Add ACCT 20200 to Plan B" [ref=e96]: + Plan B
+              - button "Add ACCT 20200 to Plan C" [ref=e97]: + Plan C
+              - button "Pre-check" [ref=e98]
+            - generic [ref=e99]:
+              - heading "Description" [level=2] [ref=e100]
+              - paragraph [ref=e101]: An introduction to the use of accounting information and analysis for management decisions and control of an organization. The purpose of the course is to learn techniques necessary to understand an organization's costs to allow for the preparation and analysis of an organization's budget. Further, the course provides techniques to analyze cost-volume-profit relationships and the use of a company's contribution margin to evaluate sales volumes, set appropriate selling prices, and determine appropriate sales mixes necessary to achieve desired profit levels. The course uses cost analysis to understand managerial decisions such as whether to outsource, eliminate or add a business segment, and accept special orders. The course also introduces US taxation by examining different entity types and various taxes that impact individuals and corporations. Course cannot be taken Pass/Fail.
+            - generic [ref=e102]:
+              - heading "Availability" [level=2] [ref=e103]
+              - generic [ref=e104]:
+                - generic [ref=e105]: 24/50 seats
+                - progressbar "Seat availability" [ref=e106]
+                - generic [ref=e108]: Available
+            - generic [ref=e109]:
+              - heading "Prerequisites" [level=2] [ref=e110]
+              - generic [ref=e112]:
+                - generic [ref=e113]: ✓
+                - generic [ref=e114]: "ACCT 20100: Foundations of Accountancy"
+                - generic [ref=e115]: — completed Fall 2025 (A)
+                - generic [ref=e116]: (satisfies 6-way prereq, or 5 alternatives)
+            - generic [ref=e117]:
+              - heading "Restrictions" [level=2] [ref=e118]
+              - list [ref=e119]:
+                - listitem [ref=e120]: "Prerequisites required — Prerequisites: (ACCT 20100, BAUG 20001, BAAL 20100, BAEG 20100, BASC 20100 or ACTG 20100)."
+                - listitem [ref=e121]: Employee Non-Degree, Holy Cross College, St. Mary's College, Undergraduate or Undergraduate Non-Degree level only — Enrollment is limited to Employee Non-Degree, Holy Cross College, St. Mary's College, Undergraduate or Undergraduate Non-Degree level students.
+                - listitem [ref=e122]: Main campus only — Enrollment limited to students in the Main campus.
+            - generic [ref=e123]:
+              - heading "Course Path" [level=2] [ref=e124]
+              - paragraph [ref=e125]: Course path data not yet available for this course.
+            - generic [ref=e126]:
+              - heading "Guidance" [level=2] [ref=e127]
+              - paragraph [ref=e128]: No advisor guidance available for this course yet.
+            - generic [ref=e129]:
+              - heading "Sections" [level=2] [ref=e130]
+              - table [ref=e132]:
+                - rowgroup [ref=e133]:
+                  - row "Sec Time Room Seats" [ref=e134]:
+                    - columnheader "Sec" [ref=e135]
+                    - columnheader "Time" [ref=e136]
+                    - columnheader "Room" [ref=e137]
+                    - columnheader "Seats" [ref=e138]
+                    - columnheader [ref=e139]
+                - rowgroup [ref=e140]:
+                  - row "01 MTWTh 17:30-19:20 ONLINE COURSE 24/50 Add section 01 to Plan A Add section 01 to Plan B Add section 01 to Plan C" [ref=e141]:
+                    - cell "01" [ref=e142]
+                    - cell "MTWTh 17:30-19:20" [ref=e143]
+                    - cell "ONLINE COURSE" [ref=e144]
+                    - cell "24/50" [ref=e145]:
+                      - generic [ref=e146]: 24/50
+                    - cell "Add section 01 to Plan A Add section 01 to Plan B Add section 01 to Plan C" [ref=e147]:
+                      - generic [ref=e148]:
+                        - button "Add section 01 to Plan A" [ref=e149]: + A
+                        - button "Add section 01 to Plan B" [ref=e150]: + B
+                        - button "Add section 01 to Plan C" [ref=e151]: + C
+          - generic [ref=e153]:
+            - heading "Quick Info — ACCT 20200" [level=3] [ref=e154]
+            - generic [ref=e155]:
+              - generic [ref=e156]:
+                - generic [ref=e157]: Seats
+                - generic [ref=e158]: 24/50
+              - generic [ref=e159]:
+                - generic [ref=e160]: Instructor
+                - generic [ref=e161]: Mike Favorite
+              - generic [ref=e162]:
+                - generic [ref=e163]: Credits
+                - generic [ref=e164]: "3"
+              - generic [ref=e165]:
+                - generic [ref=e166]: Term
+                - generic [ref=e167]: Summer 2026
+              - generic [ref=e168]:
+                - generic [ref=e169]: Sections
+                - generic [ref=e170]: "1"
+  - alert [ref=e171]

@@ -1,0 +1,142 @@
+- generic [active] [ref=e1]:
+  - navigation "Main navigation" [ref=e2]:
+    - link "PATH — Registration Clarity home" [ref=e3] [cursor=pointer]:
+      - /url: /search
+      - generic [ref=e4]: ☘️
+      - generic [ref=e5]: PATH
+    - generic [ref=e6]:
+      - link "Search" [ref=e7] [cursor=pointer]:
+        - /url: /search
+        - generic [ref=e8]: Search
+      - link "Plan" [ref=e9] [cursor=pointer]:
+        - /url: /plan
+        - generic [ref=e10]: Plan
+      - link "Export" [ref=e11] [cursor=pointer]:
+        - /url: /export
+        - generic [ref=e12]: Export
+    - generic [ref=e13]:
+      - generic [ref=e14]: Summer 2026
+      - generic [ref=e15]: AM
+      - generic [ref=e16]: Alex Murphy
+  - generic [ref=e17]:
+    - complementary "Plans and progress" [ref=e18]:
+      - generic [ref=e19]:
+        - generic [ref=e20]: Term
+        - generic [ref=e21]: Summer 2026
+      - generic [ref=e22]:
+        - generic [ref=e23]: My Plans
+        - tablist "Plan slots" [ref=e24]:
+          - tab "Plan A (0)" [selected] [ref=e25]
+          - tab "Plan B (0)" [ref=e26]
+          - tab "Plan C (0)" [ref=e27]
+        - tabpanel [ref=e28]:
+          - paragraph [ref=e29]: No courses in Plan A
+      - generic [ref=e30]:
+        - generic [ref=e31]: My GPS
+        - link "Import Degree Audit" [ref=e32] [cursor=pointer]:
+          - /url: /onboarding
+    - main [ref=e33]:
+      - generic [ref=e34]:
+        - button "Go back to previous page" [ref=e35]: ← Back
+        - generic [ref=e36]:
+          - link "Search" [ref=e37] [cursor=pointer]:
+            - /url: /search
+          - text: / ACCT 20100
+        - generic [ref=e38]:
+          - generic [ref=e39]:
+            - generic [ref=e41]:
+              - 'heading "ACCT 20100: Foundations of Accountancy" [level=1] [ref=e42]'
+              - generic [ref=e43]:
+                - generic [ref=e44]: Keith Urtel
+                - generic [ref=e45]: ·
+                - generic [ref=e46]: 3 credits
+                - generic [ref=e47]: ·
+                - generic [ref=e48]: Summer 2026
+                - 'status "Eligibility: Full" [ref=e49]': Full
+            - generic [ref=e50]:
+              - button "Add to Plan (Blocked)" [disabled] [ref=e51]
+              - button "Pre-check" [ref=e52]
+            - status [ref=e53]:
+              - generic [ref=e54]:
+                - generic [ref=e55]:
+                  - generic [ref=e56]: Registration Blocked
+                  - generic [ref=e57]: This course is full (0 seats remaining)
+                - button "See recovery options" [ref=e58]
+            - generic [ref=e59]:
+              - heading "Description" [level=2] [ref=e60]
+              - paragraph [ref=e61]: An introduction to financial accounting and the accounting profession, with an emphasis on the decision-usefulness of accounting information. The course stresses the relation of accounting to economic activity, organizing information for decision-making, the resource acquisition decision, the uses of cash and noncash resources, the accounting for selling and manufacturing activities, and the information needs of multiple owners, lenders and equity holders. A prerequisite of all accountancy and finance courses. Course cannot be taken Pass/Fail.
+            - generic [ref=e62]:
+              - heading "Availability" [level=2] [ref=e63]
+              - generic [ref=e64]:
+                - generic [ref=e65]: 0/50 seats
+                - progressbar "Seat availability" [ref=e66]
+                - generic [ref=e68]: Filled
+            - generic [ref=e69]:
+              - heading "Restrictions" [level=2] [ref=e70]
+              - list [ref=e71]:
+                - listitem [ref=e72]: Employee Non-Degree, St. Mary's College, Undergraduate or Undergraduate Non-Degree level only — Enrollment is limited to Employee Non-Degree, St. Mary's College, Undergraduate or Undergraduate Non-Degree level students.
+                - listitem [ref=e73]: Main campus only — Enrollment limited to students in the Main campus.
+            - generic [ref=e74]:
+              - heading "Course Path" [level=2] [ref=e75]
+              - generic [ref=e76]:
+                - generic [ref=e77]: No prerequisites
+                - generic [ref=e78]: →
+                - generic [ref=e79]: ACCT 20100
+                - generic [ref=e80]: →
+                - generic [ref=e81]: ACCT 20210
+                - generic [ref=e82]: →
+                - generic [ref=e83]: ACCT 30100
+            - generic [ref=e84]:
+              - heading "Guidance" [level=2] [ref=e85]
+              - generic [ref=e87]:
+                - generic [ref=e88]:
+                  - text: Common Pairings
+                  - generic [ref=e89]: FIN 20100, ECON 10010
+                - generic [ref=e90]:
+                  - text: Typical Semester
+                  - generic [ref=e91]: Sophomore Fall
+                - generic [ref=e92]:
+                  - text: Fill Speed
+                  - generic [ref=e93]: Usually fills by Week 1
+                - generic [ref=e94]:
+                  - text: Major Take Rate
+                  - generic [ref=e95]: 95% sophomore year
+            - generic [ref=e96]:
+              - heading "Sections" [level=2] [ref=e97]
+              - table [ref=e99]:
+                - rowgroup [ref=e100]:
+                  - row "Sec Time Room Seats" [ref=e101]:
+                    - columnheader "Sec" [ref=e102]
+                    - columnheader "Time" [ref=e103]
+                    - columnheader "Room" [ref=e104]
+                    - columnheader "Seats" [ref=e105]
+                    - columnheader [ref=e106]
+                - rowgroup [ref=e107]:
+                  - row "01 MTWTh 18:00-19:50 ONLINE COURSE 0/50 Full" [ref=e108]:
+                    - cell "01" [ref=e109]
+                    - cell "MTWTh 18:00-19:50" [ref=e110]
+                    - cell "ONLINE COURSE" [ref=e111]
+                    - cell "0/50" [ref=e112]:
+                      - generic [ref=e113]: 0/50
+                    - cell "Full" [ref=e114]
+          - generic [ref=e116]:
+            - heading "Quick Info — ACCT 20100" [level=3] [ref=e117]
+            - generic [ref=e118]:
+              - generic [ref=e119]:
+                - generic [ref=e120]: Seats
+                - generic [ref=e121]: 0/50
+              - generic [ref=e122]:
+                - generic [ref=e123]: Instructor
+                - generic [ref=e124]: Keith Urtel
+              - generic [ref=e125]:
+                - generic [ref=e126]: Credits
+                - generic [ref=e127]: "3"
+              - generic [ref=e128]:
+                - generic [ref=e129]: Term
+                - generic [ref=e130]: Summer 2026
+              - generic [ref=e131]:
+                - generic [ref=e132]: Sections
+                - generic [ref=e133]: "1"
+  - button "Open Next.js Dev Tools" [ref=e139] [cursor=pointer]:
+    - img [ref=e140]
+  - alert [ref=e143]

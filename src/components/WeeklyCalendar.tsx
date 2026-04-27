@@ -18,6 +18,13 @@ const START_HOUR = 8;
 const END_HOUR = 22;
 const HOURS = Array.from({ length: END_HOUR - START_HOUR }, (_, i) => START_HOUR + i);
 
+// Course data stores Thursday as "Th"; the grid keys it under "R".
+// Weekend codes ("Sa", "Su") have no column and are dropped.
+const DAY_ALIASES: Record<string, string> = { Th: "R" };
+function canonicalDay(d: string): string {
+  return DAY_ALIASES[d] ?? d;
+}
+
 function timeToMinutes(time: string): number {
   const [h, m] = time.split(":").map(Number);
   return h * 60 + m;
@@ -114,7 +121,8 @@ export default function WeeklyCalendar({
     for (const day of DAYS) map[day] = [];
     for (const ev of events) {
       for (const d of ev.days) {
-        if (map[d]) map[d].push(ev);
+        const code = canonicalDay(d);
+        if (map[code]) map[code].push(ev);
       }
     }
     const result: Record<string, LayoutSlot[]> = {};

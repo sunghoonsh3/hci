@@ -1,0 +1,154 @@
+- generic [active] [ref=e1]:
+  - navigation "Main navigation" [ref=e2]:
+    - link "PATH — Registration Clarity home" [ref=e3] [cursor=pointer]:
+      - /url: /search
+      - generic [ref=e4]: ☘️
+      - generic [ref=e5]: PATH
+    - generic [ref=e6]:
+      - link "Search" [ref=e7] [cursor=pointer]:
+        - /url: /search
+        - generic [ref=e8]: Search
+      - link "Plan — 2 courses planned" [ref=e9] [cursor=pointer]:
+        - /url: /plan
+        - generic [ref=e10]: Plan
+        - generic [ref=e11]: "2"
+      - link "Export" [ref=e12] [cursor=pointer]:
+        - /url: /export
+        - generic [ref=e13]: Export
+    - generic [ref=e14]:
+      - generic [ref=e15]: Summer 2026
+      - generic [ref=e16]: AM
+      - generic [ref=e17]: Alex Murphy
+  - generic [ref=e18]:
+    - complementary "Plans and progress" [ref=e19]:
+      - generic [ref=e20]:
+        - generic [ref=e21]: Term
+        - generic [ref=e22]: Summer 2026
+      - generic [ref=e23]:
+        - generic [ref=e24]: My Plans
+        - tablist "Plan slots" [ref=e25]:
+          - tab "Plan A (2)" [selected] [ref=e26]
+          - tab "Plan B (0)" [ref=e27]
+          - tab "Plan C (0)" [ref=e28]
+        - tabpanel [ref=e29]:
+          - list [ref=e30]:
+            - listitem [ref=e31]:
+              - link "CSE 20312" [ref=e32] [cursor=pointer]:
+                - /url: /course/1708
+              - button "Remove CSE 20312 from Plan A" [ref=e33]: ×
+            - listitem [ref=e34]:
+              - link "UGED 10421" [ref=e35] [cursor=pointer]:
+                - /url: /course/1704
+              - button "Remove UGED 10421 from Plan A" [ref=e36]: ×
+      - generic [ref=e37]:
+        - generic [ref=e38]:
+          - generic [ref=e39]: Progress
+          - generic [ref=e40]: On Track
+        - generic [ref=e41]:
+          - generic [ref=e42]:
+            - generic [ref=e43]:
+              - generic [ref=e44]: Credits
+              - generic [ref=e45]: 75/120
+            - progressbar "Credits progress" [ref=e46]
+          - generic [ref=e48]:
+            - generic [ref=e49]:
+              - generic [ref=e50]: Major (CS)
+              - generic [ref=e51]: 14/42
+            - progressbar "Major credits progress" [ref=e52]
+          - generic [ref=e54]:
+            - generic [ref=e55]:
+              - generic [ref=e56]: Degree
+              - generic [ref=e57]: 62.5%
+            - progressbar "Degree progress" [ref=e58]
+          - generic [ref=e60]: "GPA: 3.420 | Junior"
+      - generic [ref=e61]:
+        - generic [ref=e62]: My GPS
+        - generic [ref=e63]:
+          - generic [ref=e64]: Bachelor of Arts in Computer Science
+          - generic [ref=e65]: College of Arts and Letters
+    - main [ref=e66]:
+      - generic [ref=e67]:
+        - button "Go back to previous page" [ref=e68]: ← Back
+        - generic [ref=e69]:
+          - link "Search" [ref=e70] [cursor=pointer]:
+            - /url: /search
+          - text: / ENGL 30060
+        - generic [ref=e71]:
+          - generic [ref=e72]:
+            - generic [ref=e74]:
+              - 'heading "ENGL 30060: Shakespeare and Film" [level=1] [ref=e75]'
+              - generic [ref=e76]:
+                - generic [ref=e77]: Nathaniel Myers
+                - generic [ref=e78]: ·
+                - generic [ref=e79]: 3 credits
+                - generic [ref=e80]: ·
+                - generic [ref=e81]: Summer 2026
+                - 'status "Eligibility: Full" [ref=e82]': Full
+            - generic [ref=e83]:
+              - button "Add to Plan (Blocked)" [disabled] [ref=e84]
+              - button "Pre-check" [ref=e85]
+            - status [ref=e86]:
+              - generic [ref=e87]:
+                - generic [ref=e88]:
+                  - generic [ref=e89]: Registration Blocked
+                  - generic [ref=e90]: This course is full (0 seats remaining)
+                - button "See recovery options" [ref=e91]
+            - generic [ref=e92]:
+              - heading "Description" [level=2] [ref=e93]
+              - paragraph [ref=e94]: "This course explores the phenomenon of Shakespeare and film, concentrating on the ranges of meaning provoked by the conjunction. We shall be looking at examples of films of Shakespeare plays both early and recent, both in English and in other languages, and both ones that stick close to the conventionalized and historicized conceptualizations of Shakespeare and adaptations at varying degrees of distance toward the erasure of Shakespeare from the text. The transportation of different forms of Shakespearean textualities (printed, theatrical, filmic) and the confrontation with the specificities of film produce a cultural phenomenon whose cultural meanings - meanings as Shakespeare and meanings as film - will be the subject of our investigations. Students will be required to view screenings of films on a regular basis during the semester. Note: this course is delivered fully online. The course design combines required live weekly meetings online with self-scheduled lectures, problems, assignments, and interactive learning materials. To participate, students will need to have a computer with webcam, reliable internet connection, and a quiet place to participate in live sessions. Cannot have taken: FTT 40600 , FTT 44600, FTT 60600"
+            - generic [ref=e95]:
+              - heading "Availability" [level=2] [ref=e96]
+              - generic [ref=e97]:
+                - generic [ref=e98]: 0/3 seats
+                - progressbar "Seat availability" [ref=e99]
+                - generic [ref=e101]: Filled
+            - generic [ref=e102]:
+              - heading "Restrictions" [level=2] [ref=e103]
+              - list [ref=e104]:
+                - listitem [ref=e105]: Employee Non-Degree, Graduate Non-Degree, Holy Cross College, St. Mary's College, Undergraduate or Undergraduate Non-Degree level only — Enrollment is limited to Employee Non-Degree, Graduate Non-Degree, Holy Cross College, St. Mary's College, Undergraduate or Undergraduate Non-Degree level students.
+                - listitem [ref=e106]: Main campus only — Enrollment limited to students in the Main campus.
+            - generic [ref=e107]:
+              - heading "Course Path" [level=2] [ref=e108]
+              - paragraph [ref=e109]: Course path data not yet available for this course.
+            - generic [ref=e110]:
+              - heading "Guidance" [level=2] [ref=e111]
+              - paragraph [ref=e112]: No advisor guidance available for this course yet.
+            - generic [ref=e113]:
+              - heading "Sections" [level=2] [ref=e114]
+              - table [ref=e116]:
+                - rowgroup [ref=e117]:
+                  - row "Sec Time Room Seats" [ref=e118]:
+                    - columnheader "Sec" [ref=e119]
+                    - columnheader "Time" [ref=e120]
+                    - columnheader "Room" [ref=e121]
+                    - columnheader "Seats" [ref=e122]
+                    - columnheader [ref=e123]
+                - rowgroup [ref=e124]:
+                  - row "01 MW 19:00-20:30 ONLINE COURSE 0/3 Full" [ref=e125]:
+                    - cell "01" [ref=e126]
+                    - cell "MW 19:00-20:30" [ref=e127]
+                    - cell "ONLINE COURSE" [ref=e128]
+                    - cell "0/3" [ref=e129]:
+                      - generic [ref=e130]: 0/3
+                    - cell "Full" [ref=e131]
+          - generic [ref=e133]:
+            - heading "Quick Info — ENGL 30060" [level=3] [ref=e134]
+            - generic [ref=e135]:
+              - generic [ref=e136]:
+                - generic [ref=e137]: Seats
+                - generic [ref=e138]: 0/3
+              - generic [ref=e139]:
+                - generic [ref=e140]: Instructor
+                - generic [ref=e141]: Nathaniel Myers
+              - generic [ref=e142]:
+                - generic [ref=e143]: Credits
+                - generic [ref=e144]: "3"
+              - generic [ref=e145]:
+                - generic [ref=e146]: Term
+                - generic [ref=e147]: Summer 2026
+              - generic [ref=e148]:
+                - generic [ref=e149]: Sections
+                - generic [ref=e150]: "1"
+  - button "Open Next.js Dev Tools" [ref=e156] [cursor=pointer]:
+    - img [ref=e157]
+  - alert [ref=e160]

@@ -1,0 +1,115 @@
+- generic [active] [ref=e1]:
+  - navigation "Main navigation" [ref=e2]:
+    - link "PATH — Registration Clarity home" [ref=e3] [cursor=pointer]:
+      - /url: /search
+      - generic [ref=e4]: ☘️
+      - generic [ref=e5]: PATH
+    - generic [ref=e6]:
+      - link "Search" [ref=e7] [cursor=pointer]:
+        - /url: /search
+        - generic [ref=e8]: Search
+      - link "Plan — 2 courses planned" [ref=e9] [cursor=pointer]:
+        - /url: /plan
+        - generic [ref=e10]: Plan
+        - generic [ref=e11]: "2"
+      - link "Export" [ref=e12] [cursor=pointer]:
+        - /url: /export
+        - generic [ref=e13]: Export
+    - generic [ref=e14]:
+      - generic [ref=e15]: Summer 2026
+      - generic [ref=e16]: AM
+      - generic [ref=e17]: Alex Murphy
+  - generic [ref=e18]:
+    - complementary "Plans and progress" [ref=e19]:
+      - generic [ref=e20]:
+        - generic [ref=e21]: Term
+        - generic [ref=e22]: Summer 2026
+      - generic [ref=e23]:
+        - generic [ref=e24]: My Plans
+        - tablist "Plan slots" [ref=e25]:
+          - tab "Plan A (1)" [selected] [ref=e26]
+          - tab "Plan B (0)" [ref=e27]
+          - tab "Plan C (1)" [ref=e28]
+        - tabpanel [ref=e29]:
+          - list [ref=e30]:
+            - listitem [ref=e31]:
+              - link "ACMS 20215" [ref=e32] [cursor=pointer]:
+                - /url: /course/1142
+              - button "Remove ACMS 20215 from Plan A" [ref=e33]: ×
+      - generic [ref=e34]:
+        - generic [ref=e35]: My GPS
+        - link "Import Degree Audit" [ref=e36] [cursor=pointer]:
+          - /url: /onboarding
+    - main [ref=e37]:
+      - generic [ref=e38]:
+        - generic [ref=e39]:
+          - heading "My Plan" [level=1] [ref=e40]
+          - link "Export to NOVO" [ref=e41] [cursor=pointer]:
+            - /url: /export
+        - tablist "Plan slots" [ref=e42]:
+          - tab "Plan A (1)" [selected] [ref=e43]
+          - tab "Plan B (0)" [ref=e44]
+          - tab "Plan C (1)" [ref=e45]
+          - generic [ref=e46]:
+            - checkbox "Show all plans on calendar" [ref=e47]
+            - text: Show all plans on calendar
+        - generic [ref=e48]:
+          - generic [ref=e50]:
+            - table [ref=e51]:
+              - rowgroup [ref=e52]:
+                - row "Course Title Credits Status Reqs Actions" [ref=e53]:
+                  - columnheader "Course" [ref=e54]
+                  - columnheader "Title" [ref=e55]
+                  - columnheader "Credits" [ref=e56]
+                  - columnheader "Status" [ref=e57]
+                  - columnheader "Reqs" [ref=e58]
+                  - columnheader "Actions" [ref=e59]
+              - rowgroup [ref=e60]:
+                - row "ACMS 20215 R Programming Loading credits Loading status Loading requirements Remove ACMS 20215 from Plan A Actions for ACMS 20215" [ref=e61]:
+                  - cell "ACMS 20215" [ref=e62]:
+                    - link "ACMS 20215" [ref=e63] [cursor=pointer]:
+                      - /url: /course/1142
+                  - cell "R Programming" [ref=e64]:
+                    - link "R Programming" [ref=e65] [cursor=pointer]:
+                      - /url: /course/1142
+                  - cell "Loading credits" [ref=e66]:
+                    - generic "Loading credits" [ref=e67]
+                  - cell "Loading status" [ref=e68]:
+                    - generic "Loading status" [ref=e69]
+                  - cell "Loading requirements" [ref=e70]:
+                    - generic "Loading requirements" [ref=e71]
+                  - cell "Remove ACMS 20215 from Plan A Actions for ACMS 20215" [ref=e72]:
+                    - generic [ref=e73]:
+                      - button "Remove ACMS 20215 from Plan A" [ref=e74]: Remove
+                      - button "Actions for ACMS 20215" [ref=e76]:
+                        - img [ref=e77]
+            - generic [ref=e81]: "Total: 0 credits · 1 course"
+          - generic [ref=e82]:
+            - heading "Weekly Schedule" [level=2] [ref=e83]
+            - generic [ref=e84]:
+              - note:
+                - paragraph [ref=e85]: No courses in Plan A yet.
+              - generic [ref=e86]:
+                - generic [ref=e88]: Mon
+                - generic [ref=e89]: Tue
+                - generic [ref=e90]: Wed
+                - generic [ref=e91]: Thu
+                - generic [ref=e92]: Fri
+              - generic [ref=e94]:
+                - generic [ref=e95]: 8a
+                - generic [ref=e96]: 9a
+                - generic [ref=e97]: 10a
+                - generic [ref=e98]: 11a
+                - generic [ref=e99]: 12p
+                - generic [ref=e100]: 1p
+                - generic [ref=e101]: 2p
+                - generic [ref=e102]: 3p
+                - generic [ref=e103]: 4p
+                - generic [ref=e104]: 5p
+                - generic [ref=e105]: 6p
+                - generic [ref=e106]: 7p
+                - generic [ref=e107]: 8p
+                - generic [ref=e108]: 9p
+  - button "Open Next.js Dev Tools" [ref=e189] [cursor=pointer]:
+    - img [ref=e190]
+  - alert [ref=e193]

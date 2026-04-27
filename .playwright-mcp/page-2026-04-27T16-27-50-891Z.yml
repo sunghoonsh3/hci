@@ -1,0 +1,867 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e6] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e7]:
+      - img [ref=e8]
+    - generic [ref=e11]:
+      - button "Open issues overlay" [ref=e12]:
+        - generic [ref=e13]:
+          - generic [ref=e14]: "0"
+          - generic [ref=e15]: "1"
+        - generic [ref=e16]: Issue
+      - button "Collapse issues badge" [ref=e17]:
+        - img [ref=e18]
+  - navigation "Main navigation" [ref=e20]:
+    - link "PATH — Registration Clarity home" [ref=e21] [cursor=pointer]:
+      - /url: /search
+      - generic [ref=e22]: ☘️
+      - generic [ref=e23]: PATH
+    - generic [ref=e24]:
+      - link "Search" [ref=e25] [cursor=pointer]:
+        - /url: /search
+        - generic [ref=e26]: Search
+      - link "Plan" [ref=e27] [cursor=pointer]:
+        - /url: /plan
+        - generic [ref=e28]: Plan
+      - link "Export" [ref=e29] [cursor=pointer]:
+        - /url: /export
+        - generic [ref=e30]: Export
+    - generic [ref=e31]:
+      - generic [ref=e32]: Summer 2026
+      - generic [ref=e33]: AM
+      - generic [ref=e34]: Alex Murphy
+  - generic [ref=e35]:
+    - complementary "Plans and progress" [ref=e36]:
+      - generic [ref=e37]:
+        - generic [ref=e38]: Term
+        - generic [ref=e39]: Summer 2026
+      - generic [ref=e40]:
+        - generic [ref=e41]: My Plans
+        - tablist "Plan slots" [ref=e42]:
+          - tab "Plan A (0)" [selected] [ref=e43]
+          - tab "Plan B (0)" [ref=e44]
+          - tab "Plan C (0)" [ref=e45]
+        - tabpanel [ref=e46]:
+          - paragraph [ref=e47]: No courses in Plan A
+      - generic [ref=e48]:
+        - generic [ref=e49]: My GPS
+        - link "Import Degree Audit" [ref=e50] [cursor=pointer]:
+          - /url: /onboarding
+    - main [ref=e51]:
+      - generic [ref=e52]:
+        - heading "Search Results — 571 courses" [level=1] [ref=e54]:
+          - text: Search Results
+          - generic [ref=e55]: — 571 courses
+        - generic [ref=e56]:
+          - combobox "Subject" [ref=e57]:
+            - option "All Subjects" [selected]
+            - option "ACCT"
+            - option "ACMS"
+            - option "AFST"
+            - option "AL"
+            - option "AME"
+            - option "AMST"
+            - option "ANTH"
+            - option "ARCH"
+            - option "ARHI"
+            - option "ARST"
+            - option "BAEG"
+            - option "BALW"
+            - option "BASC"
+            - option "BAUG"
+            - option "BES"
+            - option "BIOS"
+            - option "BPHY"
+            - option "CBE"
+            - option "CDT"
+            - option "CE"
+            - option "CHEM"
+            - option "CLAS"
+            - option "CLGR"
+            - option "CLLA"
+            - option "CNST"
+            - option "CSE"
+            - option "CSEM"
+            - option "DESN"
+            - option "DMA"
+            - option "DS"
+            - option "EALJ"
+            - option "ECON"
+            - option "EDU"
+            - option "EE"
+            - option "EG"
+            - option "ENGL"
+            - option "ESS"
+            - option "ESTM"
+            - option "FIN"
+            - option "FTT"
+            - option "GE"
+            - option "GH"
+            - option "GLAF"
+            - option "GRED"
+            - option "GSC"
+            - option "HIST"
+            - option "HPS"
+            - option "IBMS"
+            - option "IIPS"
+            - option "ILS"
+            - option "ISS"
+            - option "ITAO"
+            - option "KSGA"
+            - option "LLRO"
+            - option "MARK"
+            - option "MATH"
+            - option "MBA"
+            - option "MBAE"
+            - option "MDMK"
+            - option "MDSC"
+            - option "MEAR"
+            - option "MGA"
+            - option "MGTO"
+            - option "MI"
+            - option "MNAE"
+            - option "MSA"
+            - option "MSBR"
+            - option "MSF"
+            - option "MSFR"
+            - option "MSM"
+            - option "MSMG"
+            - option "MUS"
+            - option "NSCI"
+            - option "PCSE"
+            - option "PHIL"
+            - option "PHYS"
+            - option "POLS"
+            - option "PSY"
+            - option "RE"
+            - option "REG"
+            - option "ROFR"
+            - option "ROIT"
+            - option "ROPO"
+            - option "ROSP"
+            - option "SC"
+            - option "SMAC"
+            - option "SOC"
+            - option "SOCO"
+            - option "STV"
+            - option "SUSD"
+            - option "THEO"
+            - option "UGED"
+          - generic [ref=e58]:
+            - img [ref=e59]
+            - textbox "Keyword" [ref=e61]:
+              - /placeholder: Search courses...
+          - generic [ref=e62]:
+            - checkbox "Open seats only" [ref=e63]: Open seats only
+            - checkbox "Core requirements" [ref=e65]: Core requirements
+            - checkbox "My major courses" [ref=e67]: My major courses
+          - button "Search" [ref=e69]
+        - generic [ref=e70]:
+          - generic [ref=e71]:
+            - table [ref=e72]:
+              - rowgroup [ref=e73]:
+                - row "Course Title Status Seats Reqs Actions" [ref=e74]:
+                  - columnheader "Course" [ref=e75]
+                  - columnheader "Title" [ref=e76]
+                  - columnheader "Status" [ref=e77]
+                  - columnheader "Seats" [ref=e78]
+                  - columnheader "Reqs" [ref=e79]
+                  - columnheader "Actions" [ref=e80]
+              - rowgroup [ref=e81]:
+                - 'row "ACCT 20100 Foundations of Accountancy Eligibility: Full 0/50 0 of 1 section open —" [ref=e82] [cursor=pointer]':
+                  - cell "ACCT 20100" [ref=e83]:
+                    - generic [ref=e84]: ACCT 20100
+                  - cell "Foundations of Accountancy" [ref=e85]
+                  - 'cell "Eligibility: Full" [ref=e86]':
+                    - 'status "Eligibility: Full" [ref=e87]': Full
+                  - cell "0/50 0 of 1 section open" [ref=e88]:
+                    - generic [ref=e89]:
+                      - generic [ref=e90]: 0/50
+                      - generic [ref=e91]: 0 of 1 section open
+                  - cell [ref=e92]
+                  - cell "—" [ref=e93]
+                - 'row "ACCT 20200 Accounting Analysis for Planning and Control Eligibility: Eligible 24/50 1 of 1 section open Add ACCT 20200 to Plan A Add ACCT 20200 to Plan B Add ACCT 20200 to Plan C" [ref=e94] [cursor=pointer]':
+                  - cell "ACCT 20200" [ref=e95]:
+                    - generic [ref=e96]: ACCT 20200
+                  - cell "Accounting Analysis for Planning and Control" [ref=e97]
+                  - 'cell "Eligibility: Eligible" [ref=e98]':
+                    - 'status "Eligibility: Eligible" [ref=e99]': Eligible
+                  - cell "24/50 1 of 1 section open" [ref=e100]:
+                    - generic [ref=e101]:
+                      - generic [ref=e102]: 24/50
+                      - generic [ref=e103]: 1 of 1 section open
+                  - cell [ref=e104]
+                  - cell "Add ACCT 20200 to Plan A Add ACCT 20200 to Plan B Add ACCT 20200 to Plan C" [ref=e105]:
+                    - generic [ref=e106]:
+                      - button "Add ACCT 20200 to Plan A" [ref=e107]: + A
+                      - button "Add ACCT 20200 to Plan B" [ref=e108]: + B
+                      - button "Add ACCT 20200 to Plan C" [ref=e109]: + C
+                - 'row "ACCT 20300 Personal Financial Management for Entrepreneurs Eligibility: Restricted 34/42 1 of 1 section open —" [ref=e110] [cursor=pointer]':
+                  - cell "ACCT 20300" [ref=e111]:
+                    - generic [ref=e112]: ACCT 20300
+                  - cell "Personal Financial Management for Entrepreneurs" [ref=e113]
+                  - 'cell "Eligibility: Restricted" [ref=e114]':
+                    - 'status "Eligibility: Restricted" [ref=e115]': Restricted
+                  - cell "34/42 1 of 1 section open" [ref=e116]:
+                    - generic [ref=e117]:
+                      - generic [ref=e118]: 34/42
+                      - generic [ref=e119]: 1 of 1 section open
+                  - cell [ref=e120]
+                  - cell "—" [ref=e121]
+                - 'row "ACMS 20215 R Programming Eligibility: Eligible 13/15 1 of 1 section open Add ACMS 20215 to Plan A Add ACMS 20215 to Plan B Add ACMS 20215 to Plan C" [ref=e122] [cursor=pointer]':
+                  - cell "ACMS 20215" [ref=e123]:
+                    - generic [ref=e124]: ACMS 20215
+                  - cell "R Programming" [ref=e125]
+                  - 'cell "Eligibility: Eligible" [ref=e126]':
+                    - 'status "Eligibility: Eligible" [ref=e127]': Eligible
+                  - cell "13/15 1 of 1 section open" [ref=e128]:
+                    - generic [ref=e129]:
+                      - generic [ref=e130]: 13/15
+                      - generic [ref=e131]: 1 of 1 section open
+                  - cell [ref=e132]
+                  - cell "Add ACMS 20215 to Plan A Add ACMS 20215 to Plan B Add ACMS 20215 to Plan C" [ref=e133]:
+                    - generic [ref=e134]:
+                      - button "Add ACMS 20215 to Plan A" [ref=e135]: + A
+                      - button "Add ACMS 20215 to Plan B" [ref=e136]: + B
+                      - button "Add ACMS 20215 to Plan C" [ref=e137]: + C
+                - 'row "ACMS 20216 Python Programming Eligibility: Eligible 11/15 1 of 1 section open Add ACMS 20216 to Plan A Add ACMS 20216 to Plan B Add ACMS 20216 to Plan C" [ref=e138] [cursor=pointer]':
+                  - cell "ACMS 20216" [ref=e139]:
+                    - generic [ref=e140]: ACMS 20216
+                  - cell "Python Programming" [ref=e141]
+                  - 'cell "Eligibility: Eligible" [ref=e142]':
+                    - 'status "Eligibility: Eligible" [ref=e143]': Eligible
+                  - cell "11/15 1 of 1 section open" [ref=e144]:
+                    - generic [ref=e145]:
+                      - generic [ref=e146]: 11/15
+                      - generic [ref=e147]: 1 of 1 section open
+                  - cell [ref=e148]
+                  - cell "Add ACMS 20216 to Plan A Add ACMS 20216 to Plan B Add ACMS 20216 to Plan C" [ref=e149]:
+                    - generic [ref=e150]:
+                      - button "Add ACMS 20216 to Plan A" [ref=e151]: + A
+                      - button "Add ACMS 20216 to Plan B" [ref=e152]: + B
+                      - button "Add ACMS 20216 to Plan C" [ref=e153]: + C
+                - 'row "ACMS 30617 SQL For Data Science Eligibility: Eligible 27/30 1 of 1 section open Add ACMS 30617 to Plan A Add ACMS 30617 to Plan B Add ACMS 30617 to Plan C" [ref=e154] [cursor=pointer]':
+                  - cell "ACMS 30617" [ref=e155]:
+                    - generic [ref=e156]: ACMS 30617
+                  - cell "SQL For Data Science" [ref=e157]
+                  - 'cell "Eligibility: Eligible" [ref=e158]':
+                    - 'status "Eligibility: Eligible" [ref=e159]': Eligible
+                  - cell "27/30 1 of 1 section open" [ref=e160]:
+                    - generic [ref=e161]:
+                      - generic [ref=e162]: 27/30
+                      - generic [ref=e163]: 1 of 1 section open
+                  - cell [ref=e164]
+                  - cell "Add ACMS 30617 to Plan A Add ACMS 30617 to Plan B Add ACMS 30617 to Plan C" [ref=e165]:
+                    - generic [ref=e166]:
+                      - button "Add ACMS 30617 to Plan A" [ref=e167]: + A
+                      - button "Add ACMS 30617 to Plan B" [ref=e168]: + B
+                      - button "Add ACMS 30617 to Plan C" [ref=e169]: + C
+                - 'row "ACMS 60051 R Programming Eligibility: Eligible 13/15 1 of 1 section open Add ACMS 60051 to Plan A Add ACMS 60051 to Plan B Add ACMS 60051 to Plan C" [ref=e170] [cursor=pointer]':
+                  - cell "ACMS 60051" [ref=e171]:
+                    - generic [ref=e172]: ACMS 60051
+                  - cell "R Programming" [ref=e173]
+                  - 'cell "Eligibility: Eligible" [ref=e174]':
+                    - 'status "Eligibility: Eligible" [ref=e175]': Eligible
+                  - cell "13/15 1 of 1 section open" [ref=e176]:
+                    - generic [ref=e177]:
+                      - generic [ref=e178]: 13/15
+                      - generic [ref=e179]: 1 of 1 section open
+                  - cell [ref=e180]
+                  - cell "Add ACMS 60051 to Plan A Add ACMS 60051 to Plan B Add ACMS 60051 to Plan C" [ref=e181]:
+                    - generic [ref=e182]:
+                      - button "Add ACMS 60051 to Plan A" [ref=e183]: + A
+                      - button "Add ACMS 60051 to Plan B" [ref=e184]: + B
+                      - button "Add ACMS 60051 to Plan C" [ref=e185]: + C
+                - 'row "ACMS 60052 Python Programming Eligibility: Eligible 25/35 1 of 1 section open Add ACMS 60052 to Plan A Add ACMS 60052 to Plan B Add ACMS 60052 to Plan C" [ref=e186] [cursor=pointer]':
+                  - cell "ACMS 60052" [ref=e187]:
+                    - generic [ref=e188]: ACMS 60052
+                  - cell "Python Programming" [ref=e189]
+                  - 'cell "Eligibility: Eligible" [ref=e190]':
+                    - 'status "Eligibility: Eligible" [ref=e191]': Eligible
+                  - cell "25/35 1 of 1 section open" [ref=e192]:
+                    - generic [ref=e193]:
+                      - generic [ref=e194]: 25/35
+                      - generic [ref=e195]: 1 of 1 section open
+                  - cell [ref=e196]
+                  - cell "Add ACMS 60052 to Plan A Add ACMS 60052 to Plan B Add ACMS 60052 to Plan C" [ref=e197]:
+                    - generic [ref=e198]:
+                      - button "Add ACMS 60052 to Plan A" [ref=e199]: + A
+                      - button "Add ACMS 60052 to Plan B" [ref=e200]: + B
+                      - button "Add ACMS 60052 to Plan C" [ref=e201]: + C
+                - 'row "ACMS 60617 SQL For Data Science Eligibility: Eligible 11/15 1 of 1 section open Add ACMS 60617 to Plan A Add ACMS 60617 to Plan B Add ACMS 60617 to Plan C" [ref=e202] [cursor=pointer]':
+                  - cell "ACMS 60617" [ref=e203]:
+                    - generic [ref=e204]: ACMS 60617
+                  - cell "SQL For Data Science" [ref=e205]
+                  - 'cell "Eligibility: Eligible" [ref=e206]':
+                    - 'status "Eligibility: Eligible" [ref=e207]': Eligible
+                  - cell "11/15 1 of 1 section open" [ref=e208]:
+                    - generic [ref=e209]:
+                      - generic [ref=e210]: 11/15
+                      - generic [ref=e211]: 1 of 1 section open
+                  - cell [ref=e212]
+                  - cell "Add ACMS 60617 to Plan A Add ACMS 60617 to Plan B Add ACMS 60617 to Plan C" [ref=e213]:
+                    - generic [ref=e214]:
+                      - button "Add ACMS 60617 to Plan A" [ref=e215]: + A
+                      - button "Add ACMS 60617 to Plan B" [ref=e216]: + B
+                      - button "Add ACMS 60617 to Plan C" [ref=e217]: + C
+                - 'row "ACMS 67695 Directed Master''s Project Eligibility: Restricted 9/9 1 of 1 section open —" [ref=e218] [cursor=pointer]':
+                  - cell "ACMS 67695" [ref=e219]:
+                    - generic [ref=e220]: ACMS 67695
+                  - cell "Directed Master's Project" [ref=e221]
+                  - 'cell "Eligibility: Restricted" [ref=e222]':
+                    - 'status "Eligibility: Restricted" [ref=e223]': Restricted
+                  - cell "9/9 1 of 1 section open" [ref=e224]:
+                    - generic [ref=e225]:
+                      - generic [ref=e226]: 9/9
+                      - generic [ref=e227]: 1 of 1 section open
+                  - cell [ref=e228]
+                  - cell "—" [ref=e229]
+                - 'row "ACMS 67890 Independent Summer Research Eligibility: Eligible 97/100 1 of 1 section open Add ACMS 67890 to Plan A Add ACMS 67890 to Plan B Add ACMS 67890 to Plan C" [ref=e230] [cursor=pointer]':
+                  - cell "ACMS 67890" [ref=e231]:
+                    - generic [ref=e232]: ACMS 67890
+                  - cell "Independent Summer Research" [ref=e233]
+                  - 'cell "Eligibility: Eligible" [ref=e234]':
+                    - 'status "Eligibility: Eligible" [ref=e235]': Eligible
+                  - cell "97/100 1 of 1 section open" [ref=e236]:
+                    - generic [ref=e237]:
+                      - generic [ref=e238]: 97/100
+                      - generic [ref=e239]: 1 of 1 section open
+                  - cell [ref=e240]
+                  - cell "Add ACMS 67890 to Plan A Add ACMS 67890 to Plan B Add ACMS 67890 to Plan C" [ref=e241]:
+                    - generic [ref=e242]:
+                      - button "Add ACMS 67890 to Plan A" [ref=e243]: + A
+                      - button "Add ACMS 67890 to Plan B" [ref=e244]: + B
+                      - button "Add ACMS 67890 to Plan C" [ref=e245]: + C
+                - 'row "ACMS 88900 Research & Dissertation Eligibility: Restricted 9/9 1 of 1 section open —" [ref=e246] [cursor=pointer]':
+                  - cell "ACMS 88900" [ref=e247]:
+                    - generic [ref=e248]: ACMS 88900
+                  - cell "Research & Dissertation" [ref=e249]
+                  - 'cell "Eligibility: Restricted" [ref=e250]':
+                    - 'status "Eligibility: Restricted" [ref=e251]': Restricted
+                  - cell "9/9 1 of 1 section open" [ref=e252]:
+                    - generic [ref=e253]:
+                      - generic [ref=e254]: 9/9
+                      - generic [ref=e255]: 1 of 1 section open
+                  - cell [ref=e256]
+                  - cell "—" [ref=e257]
+                - 'row "ACMS 98900 Nonresident Dissertation Research Eligibility: Restricted 52/54 6 of 6 sections open —" [ref=e258] [cursor=pointer]':
+                  - cell "ACMS 98900" [ref=e259]:
+                    - generic [ref=e260]: ACMS 98900
+                  - cell "Nonresident Dissertation Research" [ref=e261]
+                  - 'cell "Eligibility: Restricted" [ref=e262]':
+                    - 'status "Eligibility: Restricted" [ref=e263]': Restricted
+                  - cell "52/54 6 of 6 sections open" [ref=e264]:
+                    - generic [ref=e265]:
+                      - generic [ref=e266]: 52/54
+                      - generic [ref=e267]: 6 of 6 sections open
+                  - cell [ref=e268]
+                  - cell "—" [ref=e269]
+                - 'row "AFST 13181 Social Science University Seminar Eligibility: Restricted 16/16 2 of 2 sections open —" [ref=e270] [cursor=pointer]':
+                  - cell "AFST 13181" [ref=e271]:
+                    - generic [ref=e272]: AFST 13181
+                  - cell "Social Science University Seminar" [ref=e273]
+                  - 'cell "Eligibility: Restricted" [ref=e274]':
+                    - 'status "Eligibility: Restricted" [ref=e275]': Restricted
+                  - cell "16/16 2 of 2 sections open" [ref=e276]:
+                    - generic [ref=e277]:
+                      - generic [ref=e278]: 16/16
+                      - generic [ref=e279]: 2 of 2 sections open
+                  - cell [ref=e280]
+                  - cell "—" [ref=e281]
+                - 'row "AFST 45100 Internship Eligibility: Restricted 2/2 1 of 1 section open —" [ref=e282] [cursor=pointer]':
+                  - cell "AFST 45100" [ref=e283]:
+                    - generic [ref=e284]: AFST 45100
+                  - cell "Internship" [ref=e285]
+                  - 'cell "Eligibility: Restricted" [ref=e286]':
+                    - 'status "Eligibility: Restricted" [ref=e287]': Restricted
+                  - cell "2/2 1 of 1 section open" [ref=e288]:
+                    - generic [ref=e289]:
+                      - generic [ref=e290]: 2/2
+                      - generic [ref=e291]: 1 of 1 section open
+                  - cell [ref=e292]
+                  - cell "—" [ref=e293]
+                - 'row "AL 20002 Pre-Departure Summer Study Abroad Eligibility: Restricted 400/400 1 of 1 section open —" [ref=e294] [cursor=pointer]':
+                  - cell "AL 20002" [ref=e295]:
+                    - generic [ref=e296]: AL 20002
+                  - cell "Pre-Departure Summer Study Abroad" [ref=e297]
+                  - 'cell "Eligibility: Restricted" [ref=e298]':
+                    - 'status "Eligibility: Restricted" [ref=e299]': Restricted
+                  - cell "400/400 1 of 1 section open" [ref=e300]:
+                    - generic [ref=e301]:
+                      - generic [ref=e302]: 400/400
+                      - generic [ref=e303]: 1 of 1 section open
+                  - cell [ref=e304]
+                  - cell "—" [ref=e305]
+                - 'row "AL 23000 Life Beyond College Eligibility: Restricted 28/28 1 of 1 section open —" [ref=e306] [cursor=pointer]':
+                  - cell "AL 23000" [ref=e307]:
+                    - generic [ref=e308]: AL 23000
+                  - cell "Life Beyond College" [ref=e309]
+                  - 'cell "Eligibility: Restricted" [ref=e310]':
+                    - 'status "Eligibility: Restricted" [ref=e311]': Restricted
+                  - cell "28/28 1 of 1 section open" [ref=e312]:
+                    - generic [ref=e313]:
+                      - generic [ref=e314]: 28/28
+                      - generic [ref=e315]: 1 of 1 section open
+                  - cell [ref=e316]
+                  - cell "—" [ref=e317]
+                - 'row "AL 30125 Mapping Your Career Development Journey Eligibility: Restricted 20/20 1 of 1 section open —" [ref=e318] [cursor=pointer]':
+                  - cell "AL 30125" [ref=e319]:
+                    - generic [ref=e320]: AL 30125
+                  - cell "Mapping Your Career Development Journey" [ref=e321]
+                  - 'cell "Eligibility: Restricted" [ref=e322]':
+                    - 'status "Eligibility: Restricted" [ref=e323]': Restricted
+                  - cell "20/20 1 of 1 section open" [ref=e324]:
+                    - generic [ref=e325]:
+                      - generic [ref=e326]: 20/20
+                      - generic [ref=e327]: 1 of 1 section open
+                  - cell [ref=e328]
+                  - cell "—" [ref=e329]
+                - 'row "AL 45998 International Internship Eligibility: Restricted 20/20 1 of 1 section open —" [ref=e330] [cursor=pointer]':
+                  - cell "AL 45998" [ref=e331]:
+                    - generic [ref=e332]: AL 45998
+                  - cell "International Internship" [ref=e333]
+                  - 'cell "Eligibility: Restricted" [ref=e334]':
+                    - 'status "Eligibility: Restricted" [ref=e335]': Restricted
+                  - cell "20/20 1 of 1 section open" [ref=e336]:
+                    - generic [ref=e337]:
+                      - generic [ref=e338]: 20/20
+                      - generic [ref=e339]: 1 of 1 section open
+                  - cell [ref=e340]
+                  - cell "—" [ref=e341]
+                - 'row "AL 45999 Summer Internship Eligibility: Restricted 28/30 1 of 1 section open —" [ref=e342] [cursor=pointer]':
+                  - cell "AL 45999" [ref=e343]:
+                    - generic [ref=e344]: AL 45999
+                  - cell "Summer Internship" [ref=e345]
+                  - 'cell "Eligibility: Restricted" [ref=e346]':
+                    - 'status "Eligibility: Restricted" [ref=e347]': Restricted
+                  - cell "28/30 1 of 1 section open" [ref=e348]:
+                    - generic [ref=e349]:
+                      - generic [ref=e350]: 28/30
+                      - generic [ref=e351]: 1 of 1 section open
+                  - cell [ref=e352]
+                  - cell "—" [ref=e353]
+                - 'row "AL 48999 Research Experience for Undergraduates Eligibility: Restricted 62/100 1 of 1 section open —" [ref=e354] [cursor=pointer]':
+                  - cell "AL 48999" [ref=e355]:
+                    - generic [ref=e356]: AL 48999
+                  - cell "Research Experience for Undergraduates" [ref=e357]
+                  - 'cell "Eligibility: Restricted" [ref=e358]':
+                    - 'status "Eligibility: Restricted" [ref=e359]': Restricted
+                  - cell "62/100 1 of 1 section open" [ref=e360]:
+                    - generic [ref=e361]:
+                      - generic [ref=e362]: 62/100
+                      - generic [ref=e363]: 1 of 1 section open
+                  - cell [ref=e364]
+                  - cell "—" [ref=e365]
+                - 'row "AME 20241 Solid Mechanics Eligibility: Eligible 15/20 1 of 1 section open Add AME 20241 to Plan A Add AME 20241 to Plan B Add AME 20241 to Plan C" [ref=e366] [cursor=pointer]':
+                  - cell "AME 20241" [ref=e367]:
+                    - generic [ref=e368]: AME 20241
+                  - cell "Solid Mechanics" [ref=e369]
+                  - 'cell "Eligibility: Eligible" [ref=e370]':
+                    - 'status "Eligibility: Eligible" [ref=e371]': Eligible
+                  - cell "15/20 1 of 1 section open" [ref=e372]:
+                    - generic [ref=e373]:
+                      - generic [ref=e374]: 15/20
+                      - generic [ref=e375]: 1 of 1 section open
+                  - cell [ref=e376]
+                  - cell "Add AME 20241 to Plan A Add AME 20241 to Plan B Add AME 20241 to Plan C" [ref=e377]:
+                    - generic [ref=e378]:
+                      - button "Add AME 20241 to Plan A" [ref=e379]: + A
+                      - button "Add AME 20241 to Plan B" [ref=e380]: + B
+                      - button "Add AME 20241 to Plan C" [ref=e381]: + C
+                - 'row "AME 38491 Undergraduate Research Eligibility: Restricted 3/3 1 of 1 section open —" [ref=e382] [cursor=pointer]':
+                  - cell "AME 38491" [ref=e383]:
+                    - generic [ref=e384]: AME 38491
+                  - cell "Undergraduate Research" [ref=e385]
+                  - 'cell "Eligibility: Restricted" [ref=e386]':
+                    - 'status "Eligibility: Restricted" [ref=e387]': Restricted
+                  - cell "3/3 1 of 1 section open" [ref=e388]:
+                    - generic [ref=e389]:
+                      - generic [ref=e390]: 3/3
+                      - generic [ref=e391]: 1 of 1 section open
+                  - cell [ref=e392]
+                  - cell "—" [ref=e393]
+                - 'row "AME 47560 Independent Undergraduate Design Project Eligibility: Restricted 10/10 1 of 1 section open —" [ref=e394] [cursor=pointer]':
+                  - cell "AME 47560" [ref=e395]:
+                    - generic [ref=e396]: AME 47560
+                  - cell "Independent Undergraduate Design Project" [ref=e397]
+                  - 'cell "Eligibility: Restricted" [ref=e398]':
+                    - 'status "Eligibility: Restricted" [ref=e399]': Restricted
+                  - cell "10/10 1 of 1 section open" [ref=e400]:
+                    - generic [ref=e401]:
+                      - generic [ref=e402]: 10/10
+                      - generic [ref=e403]: 1 of 1 section open
+                  - cell [ref=e404]
+                  - cell "—" [ref=e405]
+                - 'row "AME 48491 Undergraduate Research Eligibility: Restricted 15/15 1 of 1 section open —" [ref=e406] [cursor=pointer]':
+                  - cell "AME 48491" [ref=e407]:
+                    - generic [ref=e408]: AME 48491
+                  - cell "Undergraduate Research" [ref=e409]
+                  - 'cell "Eligibility: Restricted" [ref=e410]':
+                    - 'status "Eligibility: Restricted" [ref=e411]': Restricted
+                  - cell "15/15 1 of 1 section open" [ref=e412]:
+                    - generic [ref=e413]:
+                      - generic [ref=e414]: 15/15
+                      - generic [ref=e415]: 1 of 1 section open
+                  - cell [ref=e416]
+                  - cell "—" [ref=e417]
+                - 'row "AME 67099 Special Studies Eligibility: Restricted 5/5 1 of 1 section open —" [ref=e418] [cursor=pointer]':
+                  - cell "AME 67099" [ref=e419]:
+                    - generic [ref=e420]: AME 67099
+                  - cell "Special Studies" [ref=e421]
+                  - 'cell "Eligibility: Restricted" [ref=e422]':
+                    - 'status "Eligibility: Restricted" [ref=e423]': Restricted
+                  - cell "5/5 1 of 1 section open" [ref=e424]:
+                    - generic [ref=e425]:
+                      - generic [ref=e426]: 5/5
+                      - generic [ref=e427]: 1 of 1 section open
+                  - cell [ref=e428]
+                  - cell "—" [ref=e429]
+                - 'row "AME 67890 Independent Summer Research Eligibility: Eligible 146/150 1 of 1 section open Add AME 67890 to Plan A Add AME 67890 to Plan B Add AME 67890 to Plan C" [ref=e430] [cursor=pointer]':
+                  - cell "AME 67890" [ref=e431]:
+                    - generic [ref=e432]: AME 67890
+                  - cell "Independent Summer Research" [ref=e433]
+                  - 'cell "Eligibility: Eligible" [ref=e434]':
+                    - 'status "Eligibility: Eligible" [ref=e435]': Eligible
+                  - cell "146/150 1 of 1 section open" [ref=e436]:
+                    - generic [ref=e437]:
+                      - generic [ref=e438]: 146/150
+                      - generic [ref=e439]: 1 of 1 section open
+                  - cell [ref=e440]
+                  - cell "Add AME 67890 to Plan A Add AME 67890 to Plan B Add AME 67890 to Plan C" [ref=e441]:
+                    - generic [ref=e442]:
+                      - button "Add AME 67890 to Plan A" [ref=e443]: + A
+                      - button "Add AME 67890 to Plan B" [ref=e444]: + B
+                      - button "Add AME 67890 to Plan C" [ref=e445]: + C
+                - 'row "AME 68691 Thesis Research Eligibility: Eligible 195/195 34 of 34 sections open Add AME 68691 to Plan A Add AME 68691 to Plan B Add AME 68691 to Plan C" [ref=e446] [cursor=pointer]':
+                  - cell "AME 68691" [ref=e447]:
+                    - generic [ref=e448]: AME 68691
+                  - cell "Thesis Research" [ref=e449]
+                  - 'cell "Eligibility: Eligible" [ref=e450]':
+                    - 'status "Eligibility: Eligible" [ref=e451]': Eligible
+                  - cell "195/195 34 of 34 sections open" [ref=e452]:
+                    - generic [ref=e453]:
+                      - generic [ref=e454]: 195/195
+                      - generic [ref=e455]: 34 of 34 sections open
+                  - cell [ref=e456]
+                  - cell "Add AME 68691 to Plan A Add AME 68691 to Plan B Add AME 68691 to Plan C" [ref=e457]:
+                    - generic [ref=e458]:
+                      - button "Add AME 68691 to Plan A" [ref=e459]: + A
+                      - button "Add AME 68691 to Plan B" [ref=e460]: + B
+                      - button "Add AME 68691 to Plan C" [ref=e461]: + C
+                - 'row "AME 68697 Nonresident Thesis Research Eligibility: Eligible 180/180 34 of 34 sections open Add AME 68697 to Plan A Add AME 68697 to Plan B Add AME 68697 to Plan C" [ref=e462] [cursor=pointer]':
+                  - cell "AME 68697" [ref=e463]:
+                    - generic [ref=e464]: AME 68697
+                  - cell "Nonresident Thesis Research" [ref=e465]
+                  - 'cell "Eligibility: Eligible" [ref=e466]':
+                    - 'status "Eligibility: Eligible" [ref=e467]': Eligible
+                  - cell "180/180 34 of 34 sections open" [ref=e468]:
+                    - generic [ref=e469]:
+                      - generic [ref=e470]: 180/180
+                      - generic [ref=e471]: 34 of 34 sections open
+                  - cell [ref=e472]
+                  - cell "Add AME 68697 to Plan A Add AME 68697 to Plan B Add AME 68697 to Plan C" [ref=e473]:
+                    - generic [ref=e474]:
+                      - button "Add AME 68697 to Plan A" [ref=e475]: + A
+                      - button "Add AME 68697 to Plan B" [ref=e476]: + B
+                      - button "Add AME 68697 to Plan C" [ref=e477]: + C
+                - 'row "AME 87101 Center for Civic Innovation: Bioengineering RET Eligibility: Eligible 40/40 1 of 1 section open Add AME 87101 to Plan A Add AME 87101 to Plan B Add AME 87101 to Plan C" [ref=e478] [cursor=pointer]':
+                  - cell "AME 87101" [ref=e479]:
+                    - generic [ref=e480]: AME 87101
+                  - 'cell "Center for Civic Innovation: Bioengineering RET" [ref=e481]'
+                  - 'cell "Eligibility: Eligible" [ref=e482]':
+                    - 'status "Eligibility: Eligible" [ref=e483]': Eligible
+                  - cell "40/40 1 of 1 section open" [ref=e484]:
+                    - generic [ref=e485]:
+                      - generic [ref=e486]: 40/40
+                      - generic [ref=e487]: 1 of 1 section open
+                  - cell [ref=e488]
+                  - cell "Add AME 87101 to Plan A Add AME 87101 to Plan B Add AME 87101 to Plan C" [ref=e489]:
+                    - generic [ref=e490]:
+                      - button "Add AME 87101 to Plan A" [ref=e491]: + A
+                      - button "Add AME 87101 to Plan B" [ref=e492]: + B
+                      - button "Add AME 87101 to Plan C" [ref=e493]: + C
+                - 'row "AME 98991 Dissertation Research Eligibility: Eligible 194/194 34 of 34 sections open Add AME 98991 to Plan A Add AME 98991 to Plan B Add AME 98991 to Plan C" [ref=e494] [cursor=pointer]':
+                  - cell "AME 98991" [ref=e495]:
+                    - generic [ref=e496]: AME 98991
+                  - cell "Dissertation Research" [ref=e497]
+                  - 'cell "Eligibility: Eligible" [ref=e498]':
+                    - 'status "Eligibility: Eligible" [ref=e499]': Eligible
+                  - cell "194/194 34 of 34 sections open" [ref=e500]:
+                    - generic [ref=e501]:
+                      - generic [ref=e502]: 194/194
+                      - generic [ref=e503]: 34 of 34 sections open
+                  - cell [ref=e504]
+                  - cell "Add AME 98991 to Plan A Add AME 98991 to Plan B Add AME 98991 to Plan C" [ref=e505]:
+                    - generic [ref=e506]:
+                      - button "Add AME 98991 to Plan A" [ref=e507]: + A
+                      - button "Add AME 98991 to Plan B" [ref=e508]: + B
+                      - button "Add AME 98991 to Plan C" [ref=e509]: + C
+                - 'row "AME 98998 Nonresident Dissertation Research Eligibility: Eligible 228/228 34 of 34 sections open Add AME 98998 to Plan A Add AME 98998 to Plan B Add AME 98998 to Plan C" [ref=e510] [cursor=pointer]':
+                  - cell "AME 98998" [ref=e511]:
+                    - generic [ref=e512]: AME 98998
+                  - cell "Nonresident Dissertation Research" [ref=e513]
+                  - 'cell "Eligibility: Eligible" [ref=e514]':
+                    - 'status "Eligibility: Eligible" [ref=e515]': Eligible
+                  - cell "228/228 34 of 34 sections open" [ref=e516]:
+                    - generic [ref=e517]:
+                      - generic [ref=e518]: 228/228
+                      - generic [ref=e519]: 34 of 34 sections open
+                  - cell [ref=e520]
+                  - cell "Add AME 98998 to Plan A Add AME 98998 to Plan B Add AME 98998 to Plan C" [ref=e521]:
+                    - generic [ref=e522]:
+                      - button "Add AME 98998 to Plan A" [ref=e523]: + A
+                      - button "Add AME 98998 to Plan B" [ref=e524]: + B
+                      - button "Add AME 98998 to Plan C" [ref=e525]: + C
+                - 'row "AMST 30147 America''s Culture Wars Eligibility: Full 0/18 All sections full —" [ref=e526] [cursor=pointer]':
+                  - cell "AMST 30147" [ref=e527]:
+                    - generic [ref=e528]: AMST 30147
+                  - cell "America's Culture Wars" [ref=e529]
+                  - 'cell "Eligibility: Full" [ref=e530]':
+                    - 'status "Eligibility: Full" [ref=e531]': Full
+                  - cell "0/18 All sections full" [ref=e532]:
+                    - generic [ref=e533]:
+                      - generic [ref=e534]: 0/18
+                      - generic [ref=e535]: All sections full
+                  - cell [ref=e536]
+                  - cell "—" [ref=e537]
+                - 'row "AMST 30468 American Politics Eligibility: Eligible 3/3 1 of 1 section open Add AMST 30468 to Plan A Add AMST 30468 to Plan B Add AMST 30468 to Plan C" [ref=e538] [cursor=pointer]':
+                  - cell "AMST 30468" [ref=e539]:
+                    - generic [ref=e540]: AMST 30468
+                  - cell "American Politics" [ref=e541]
+                  - 'cell "Eligibility: Eligible" [ref=e542]':
+                    - 'status "Eligibility: Eligible" [ref=e543]': Eligible
+                  - cell "3/3 1 of 1 section open" [ref=e544]:
+                    - generic [ref=e545]:
+                      - generic [ref=e546]: 3/3
+                      - generic [ref=e547]: 1 of 1 section open
+                  - cell [ref=e548]
+                  - cell "Add AMST 30468 to Plan A Add AMST 30468 to Plan B Add AMST 30468 to Plan C" [ref=e549]:
+                    - generic [ref=e550]:
+                      - button "Add AMST 30468 to Plan A" [ref=e551]: + A
+                      - button "Add AMST 30468 to Plan B" [ref=e552]: + B
+                      - button "Add AMST 30468 to Plan C" [ref=e553]: + C
+                - 'row "ANTH 46100 Directed Readings in Biological Anthropology Eligibility: Restricted 2/2 1 of 1 section open —" [ref=e554] [cursor=pointer]':
+                  - cell "ANTH 46100" [ref=e555]:
+                    - generic [ref=e556]: ANTH 46100
+                  - cell "Directed Readings in Biological Anthropology" [ref=e557]
+                  - 'cell "Eligibility: Restricted" [ref=e558]':
+                    - 'status "Eligibility: Restricted" [ref=e559]': Restricted
+                  - cell "2/2 1 of 1 section open" [ref=e560]:
+                    - generic [ref=e561]:
+                      - generic [ref=e562]: 2/2
+                      - generic [ref=e563]: 1 of 1 section open
+                  - cell [ref=e564]
+                  - cell "—" [ref=e565]
+                - 'row "ANTH 46200 Directed Readings - Medical Anthropology Eligibility: Restricted 2/2 1 of 1 section open —" [ref=e566] [cursor=pointer]':
+                  - cell "ANTH 46200" [ref=e567]:
+                    - generic [ref=e568]: ANTH 46200
+                  - cell "Directed Readings - Medical Anthropology" [ref=e569]
+                  - 'cell "Eligibility: Restricted" [ref=e570]':
+                    - 'status "Eligibility: Restricted" [ref=e571]': Restricted
+                  - cell "2/2 1 of 1 section open" [ref=e572]:
+                    - generic [ref=e573]:
+                      - generic [ref=e574]: 2/2
+                      - generic [ref=e575]: 1 of 1 section open
+                  - cell [ref=e576]
+                  - cell "—" [ref=e577]
+                - 'row "ANTH 46300 Directed Readings in Sociocultural Anthropology Eligibility: Restricted 2/2 1 of 1 section open —" [ref=e578] [cursor=pointer]':
+                  - cell "ANTH 46300" [ref=e579]:
+                    - generic [ref=e580]: ANTH 46300
+                  - cell "Directed Readings in Sociocultural Anthropology" [ref=e581]
+                  - 'cell "Eligibility: Restricted" [ref=e582]':
+                    - 'status "Eligibility: Restricted" [ref=e583]': Restricted
+                  - cell "2/2 1 of 1 section open" [ref=e584]:
+                    - generic [ref=e585]:
+                      - generic [ref=e586]: 2/2
+                      - generic [ref=e587]: 1 of 1 section open
+                  - cell [ref=e588]
+                  - cell "—" [ref=e589]
+                - 'row "ANTH 46400 Directed Readings - Linguistic Anthropology Eligibility: Restricted 2/2 1 of 1 section open —" [ref=e590] [cursor=pointer]':
+                  - cell "ANTH 46400" [ref=e591]:
+                    - generic [ref=e592]: ANTH 46400
+                  - cell "Directed Readings - Linguistic Anthropology" [ref=e593]
+                  - 'cell "Eligibility: Restricted" [ref=e594]':
+                    - 'status "Eligibility: Restricted" [ref=e595]': Restricted
+                  - cell "2/2 1 of 1 section open" [ref=e596]:
+                    - generic [ref=e597]:
+                      - generic [ref=e598]: 2/2
+                      - generic [ref=e599]: 1 of 1 section open
+                  - cell [ref=e600]
+                  - cell "—" [ref=e601]
+                - 'row "ANTH 46500 Directed Readings in Archaeology Eligibility: Restricted 2/2 1 of 1 section open —" [ref=e602] [cursor=pointer]':
+                  - cell "ANTH 46500" [ref=e603]:
+                    - generic [ref=e604]: ANTH 46500
+                  - cell "Directed Readings in Archaeology" [ref=e605]
+                  - 'cell "Eligibility: Restricted" [ref=e606]':
+                    - 'status "Eligibility: Restricted" [ref=e607]': Restricted
+                  - cell "2/2 1 of 1 section open" [ref=e608]:
+                    - generic [ref=e609]:
+                      - generic [ref=e610]: 2/2
+                      - generic [ref=e611]: 1 of 1 section open
+                  - cell [ref=e612]
+                  - cell "—" [ref=e613]
+                - 'row "ANTH 46700 Directed Readings in Anthropology Eligibility: Restricted 2/2 1 of 1 section open —" [ref=e614] [cursor=pointer]':
+                  - cell "ANTH 46700" [ref=e615]:
+                    - generic [ref=e616]: ANTH 46700
+                  - cell "Directed Readings in Anthropology" [ref=e617]
+                  - 'cell "Eligibility: Restricted" [ref=e618]':
+                    - 'status "Eligibility: Restricted" [ref=e619]': Restricted
+                  - cell "2/2 1 of 1 section open" [ref=e620]:
+                    - generic [ref=e621]:
+                      - generic [ref=e622]: 2/2
+                      - generic [ref=e623]: 1 of 1 section open
+                  - cell [ref=e624]
+                  - cell "—" [ref=e625]
+                - 'row "ANTH 48100 Directed Research in Biological Anthropology Eligibility: Restricted 2/2 1 of 1 section open —" [ref=e626] [cursor=pointer]':
+                  - cell "ANTH 48100" [ref=e627]:
+                    - generic [ref=e628]: ANTH 48100
+                  - cell "Directed Research in Biological Anthropology" [ref=e629]
+                  - 'cell "Eligibility: Restricted" [ref=e630]':
+                    - 'status "Eligibility: Restricted" [ref=e631]': Restricted
+                  - cell "2/2 1 of 1 section open" [ref=e632]:
+                    - generic [ref=e633]:
+                      - generic [ref=e634]: 2/2
+                      - generic [ref=e635]: 1 of 1 section open
+                  - cell [ref=e636]
+                  - cell "—" [ref=e637]
+                - 'row "ANTH 48200 Directed Research - Medical Anthropology Eligibility: Restricted 2/2 1 of 1 section open —" [ref=e638] [cursor=pointer]':
+                  - cell "ANTH 48200" [ref=e639]:
+                    - generic [ref=e640]: ANTH 48200
+                  - cell "Directed Research - Medical Anthropology" [ref=e641]
+                  - 'cell "Eligibility: Restricted" [ref=e642]':
+                    - 'status "Eligibility: Restricted" [ref=e643]': Restricted
+                  - cell "2/2 1 of 1 section open" [ref=e644]:
+                    - generic [ref=e645]:
+                      - generic [ref=e646]: 2/2
+                      - generic [ref=e647]: 1 of 1 section open
+                  - cell [ref=e648]
+                  - cell "—" [ref=e649]
+                - 'row "ANTH 48300 Directed Research in Socio-cultural Anthropology Eligibility: Restricted 2/2 1 of 1 section open —" [ref=e650] [cursor=pointer]':
+                  - cell "ANTH 48300" [ref=e651]:
+                    - generic [ref=e652]: ANTH 48300
+                  - cell "Directed Research in Socio-cultural Anthropology" [ref=e653]
+                  - 'cell "Eligibility: Restricted" [ref=e654]':
+                    - 'status "Eligibility: Restricted" [ref=e655]': Restricted
+                  - cell "2/2 1 of 1 section open" [ref=e656]:
+                    - generic [ref=e657]:
+                      - generic [ref=e658]: 2/2
+                      - generic [ref=e659]: 1 of 1 section open
+                  - cell [ref=e660]
+                  - cell "—" [ref=e661]
+                - 'row "ANTH 48400 Directed Research - Linguistic Anthropology Eligibility: Restricted 2/2 1 of 1 section open —" [ref=e662] [cursor=pointer]':
+                  - cell "ANTH 48400" [ref=e663]:
+                    - generic [ref=e664]: ANTH 48400
+                  - cell "Directed Research - Linguistic Anthropology" [ref=e665]
+                  - 'cell "Eligibility: Restricted" [ref=e666]':
+                    - 'status "Eligibility: Restricted" [ref=e667]': Restricted
+                  - cell "2/2 1 of 1 section open" [ref=e668]:
+                    - generic [ref=e669]:
+                      - generic [ref=e670]: 2/2
+                      - generic [ref=e671]: 1 of 1 section open
+                  - cell [ref=e672]
+                  - cell "—" [ref=e673]
+                - 'row "ANTH 48500 Directed Research in Archaeology Eligibility: Restricted 4/4 1 of 1 section open —" [ref=e674] [cursor=pointer]':
+                  - cell "ANTH 48500" [ref=e675]:
+                    - generic [ref=e676]: ANTH 48500
+                  - cell "Directed Research in Archaeology" [ref=e677]
+                  - 'cell "Eligibility: Restricted" [ref=e678]':
+                    - 'status "Eligibility: Restricted" [ref=e679]': Restricted
+                  - cell "4/4 1 of 1 section open" [ref=e680]:
+                    - generic [ref=e681]:
+                      - generic [ref=e682]: 4/4
+                      - generic [ref=e683]: 1 of 1 section open
+                  - cell [ref=e684]
+                  - cell "—" [ref=e685]
+                - 'row "ANTH 48700 Directed Reasearch in Anthropology Eligibility: Restricted 2/2 1 of 1 section open —" [ref=e686] [cursor=pointer]':
+                  - cell "ANTH 48700" [ref=e687]:
+                    - generic [ref=e688]: ANTH 48700
+                  - cell "Directed Reasearch in Anthropology" [ref=e689]
+                  - 'cell "Eligibility: Restricted" [ref=e690]':
+                    - 'status "Eligibility: Restricted" [ref=e691]': Restricted
+                  - cell "2/2 1 of 1 section open" [ref=e692]:
+                    - generic [ref=e693]:
+                      - generic [ref=e694]: 2/2
+                      - generic [ref=e695]: 1 of 1 section open
+                  - cell [ref=e696]
+                  - cell "—" [ref=e697]
+                - 'row "ANTH 48711 Independent Summer Research Eligibility: Restricted 1/1 1 of 1 section open —" [ref=e698] [cursor=pointer]':
+                  - cell "ANTH 48711" [ref=e699]:
+                    - generic [ref=e700]: ANTH 48711
+                  - cell "Independent Summer Research" [ref=e701]
+                  - 'cell "Eligibility: Restricted" [ref=e702]':
+                    - 'status "Eligibility: Restricted" [ref=e703]': Restricted
+                  - cell "1/1 1 of 1 section open" [ref=e704]:
+                    - generic [ref=e705]:
+                      - generic [ref=e706]: 1/1
+                      - generic [ref=e707]: 1 of 1 section open
+                  - cell [ref=e708]
+                  - cell "—" [ref=e709]
+                - 'row "ANTH 66200 Directed Readings - Medical Anthropology Eligibility: Restricted 2/2 1 of 1 section open —" [ref=e710] [cursor=pointer]':
+                  - cell "ANTH 66200" [ref=e711]:
+                    - generic [ref=e712]: ANTH 66200
+                  - cell "Directed Readings - Medical Anthropology" [ref=e713]
+                  - 'cell "Eligibility: Restricted" [ref=e714]':
+                    - 'status "Eligibility: Restricted" [ref=e715]': Restricted
+                  - cell "2/2 1 of 1 section open" [ref=e716]:
+                    - generic [ref=e717]:
+                      - generic [ref=e718]: 2/2
+                      - generic [ref=e719]: 1 of 1 section open
+                  - cell [ref=e720]
+                  - cell "—" [ref=e721]
+                - 'row "ANTH 66300 Directed Readings in Sociocultural Anthropology Eligibility: Restricted 2/2 1 of 1 section open —" [ref=e722] [cursor=pointer]':
+                  - cell "ANTH 66300" [ref=e723]:
+                    - generic [ref=e724]: ANTH 66300
+                  - cell "Directed Readings in Sociocultural Anthropology" [ref=e725]
+                  - 'cell "Eligibility: Restricted" [ref=e726]':
+                    - 'status "Eligibility: Restricted" [ref=e727]': Restricted
+                  - cell "2/2 1 of 1 section open" [ref=e728]:
+                    - generic [ref=e729]:
+                      - generic [ref=e730]: 2/2
+                      - generic [ref=e731]: 1 of 1 section open
+                  - cell [ref=e732]
+                  - cell "—" [ref=e733]
+                - 'row "ANTH 67111 Independent Summer Research Eligibility: Eligible 12/25 1 of 1 section open Add ANTH 67111 to Plan A Add ANTH 67111 to Plan B Add ANTH 67111 to Plan C" [ref=e734] [cursor=pointer]':
+                  - cell "ANTH 67111" [ref=e735]:
+                    - generic [ref=e736]: ANTH 67111
+                  - cell "Independent Summer Research" [ref=e737]
+                  - 'cell "Eligibility: Eligible" [ref=e738]':
+                    - 'status "Eligibility: Eligible" [ref=e739]': Eligible
+                  - cell "12/25 1 of 1 section open" [ref=e740]:
+                    - generic [ref=e741]:
+                      - generic [ref=e742]: 12/25
+                      - generic [ref=e743]: 1 of 1 section open
+                  - cell [ref=e744]
+                  - cell "Add ANTH 67111 to Plan A Add ANTH 67111 to Plan B Add ANTH 67111 to Plan C" [ref=e745]:
+                    - generic [ref=e746]:
+                      - button "Add ANTH 67111 to Plan A" [ref=e747]: + A
+                      - button "Add ANTH 67111 to Plan B" [ref=e748]: + B
+                      - button "Add ANTH 67111 to Plan C" [ref=e749]: + C
+            - generic [ref=e750]:
+              - generic [ref=e751]: Showing 50 of 571
+              - button "Load 50 more" [ref=e752]
+          - generic [ref=e753]:
+            - heading "Weekly Schedule" [level=2] [ref=e755]
+            - generic [ref=e756]:
+              - note:
+                - paragraph [ref=e757]: Add courses to your plan to see them on the schedule.
+              - generic [ref=e758]:
+                - generic [ref=e760]: Mon
+                - generic [ref=e761]: Tue
+                - generic [ref=e762]: Wed
+                - generic [ref=e763]: Thu
+                - generic [ref=e764]: Fri
+              - generic [ref=e766]:
+                - generic [ref=e767]: 8a
+                - generic [ref=e768]: 9a
+                - generic [ref=e769]: 10a
+                - generic [ref=e770]: 11a
+                - generic [ref=e771]: 12p
+                - generic [ref=e772]: 1p
+                - generic [ref=e773]: 2p
+                - generic [ref=e774]: 3p
+                - generic [ref=e775]: 4p
+                - generic [ref=e776]: 5p
+                - generic [ref=e777]: 6p
+                - generic [ref=e778]: 7p
+                - generic [ref=e779]: 8p
+                - generic [ref=e780]: 9p
+  - alert [ref=e856]

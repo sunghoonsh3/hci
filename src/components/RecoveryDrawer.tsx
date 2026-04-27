@@ -1,9 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { usePlans } from "@/contexts/PlansContext";
+import { useToast } from "@/contexts/ToastContext";
+import { useAudit } from "@/contexts/AuditContext";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { deriveName, formatStudentSelfDescription } from "@/lib/persona";
+import type { PlanSlot } from "@/types";
 
 interface Course {
   id: number;
@@ -25,6 +29,14 @@ interface Course {
   }[];
 }
 
+const ALL_SLOTS: PlanSlot[] = ["A", "B", "C"];
+
+const PLAN_COLORS: Record<PlanSlot, string> = {
+  A: "#1B6B3A",
+  B: "#2563eb",
+  C: "#6b7280",
+};
+
 function formatDays(daysJson: string | null): string {
   if (!daysJson) return "TBA";
   try {
@@ -44,8 +56,19 @@ export default function RecoveryDrawer({
   onClose: () => void;
 }) {
   const router = useRouter();
-  const { addToPlan } = usePlans();
+  const {
+    addToPlan,
+    removeFromPlan,
+    moveToPlan,
+    findSlotsForCourse,
+    findEntryInSlot,
+  } = usePlans();
+  const { show } = useToast();
+  const { audit } = useAudit();
+  const { display: signoffName } = deriveName(audit?.studentName);
+  const selfDescription = formatStudentSelfDescription(audit);
   const [showSwap, setShowSwap] = useState(false);
+  const [showMove, setShowMove] = useState(false);
   const [showPermission, setShowPermission] = useState(false);
   const [permissionSent, setPermissionSent] = useState(false);
   const sentTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -68,45 +91,114 @@ export default function RecoveryDrawer({
     courseTitle: course.courseTitle,
   };
 
-  function handleSwapSection(sectionId: number) {
-    addToPlan(course.id, sectionId, "A", nameHint);
-    onClose();
-  }
+  const courseLabel = `${course.subject} ${course.courseNumber}`;
 
-  function handleMoveToPlanB() {
-    const open = course.sections.find(
-      (s) => s.seatsAvailable === null || (s.seatsAvailable ?? 0) > 0,
-    );
-    if (open) {
-      addToPlan(course.id, open.id, "B", nameHint);
+  const currentSlots = useMemo(
+    () => findSlotsForCourse(course.id),
+    [findSlotsForCourse, course.id],
+  );
+  const inAnyPlan = currentSlots.length > 0;
+  const targetSlots = useMemo(
+    () => ALL_SLOTS.filter((s) => !currentSlots.includes(s)),
+    [currentSlots],
+  );
+
+  // (source, target) move pairs the user can take.
+  const movePairs = useMemo(
+    () =>
+      currentSlots.flatMap((from) =>
+        targetSlots.map((to) => ({ from, to })),
+      ),
+    [currentSlots, targetSlots],
+  );
+
+  function handleSwap(toSlot: PlanSlot, newSectionId: number) {
+    const entry = findEntryInSlot(course.id, toSlot);
+    if (!entry) return;
+    if (entry.sectionId === newSectionId) {
+      show(`${courseLabel} already uses that section in Plan ${toSlot}`, {
+        variant: "warning",
+      });
+      onClose();
+      return;
     }
+    const oldSectionId = entry.sectionId;
+    removeFromPlan(oldSectionId, toSlot);
+    addToPlan(course.id, newSectionId, toSlot, nameHint);
+    show(`${courseLabel} section swapped in Plan ${toSlot}`, {
+      undo: () => {
+        removeFromPlan(newSectionId, toSlot);
+        addToPlan(course.id, oldSectionId, toSlot, nameHint);
+      },
+    });
     onClose();
   }
 
-  const options = [
+  function handleMove(fromSlot: PlanSlot, toSlot: PlanSlot) {
+    const entry = findEntryInSlot(course.id, fromSlot);
+    if (!entry) return;
+    moveToPlan(entry.sectionId, fromSlot, toSlot);
+    show(`${courseLabel} moved Plan ${fromSlot} → Plan ${toSlot}`, {
+      undo: () => moveToPlan(entry.sectionId, toSlot, fromSlot),
+    });
+    onClose();
+  }
+
+  const planActionsAvailable = inAnyPlan;
+
+  const options: {
+    title: string;
+    desc: string;
+    action: () => void;
+    icon: string;
+    disabled?: boolean;
+    disabledReason?: string;
+    testId?: string;
+  }[] = [
     {
       title: "Swap Section",
-      desc: "Try a different section of this course",
+      desc: planActionsAvailable
+        ? `Choose a different section within ${currentSlots.map((s) => `Plan ${s}`).join(" / ")}`
+        : "Add this course to a plan first to swap sections",
       action: () => setShowSwap(true),
       icon: "↔",
+      disabled: !planActionsAvailable,
+      disabledReason: "Course is not in any plan yet",
+      testId: "recovery-swap",
     },
     {
       title: "Find Alternatives",
       desc: `Search for other ${course.subject} courses`,
       action: () => router.push(`/search?subject=${course.subject}`),
       icon: "🔍",
+      testId: "recovery-find-alternatives",
     },
     {
-      title: "Move to Plan B",
-      desc: "Keep as backup option",
-      action: handleMoveToPlanB,
+      title:
+        targetSlots.length === 0
+          ? "Move Between Plans"
+          : currentSlots.length === 0
+            ? "Move to Another Plan"
+            : `Move to ${targetSlots.map((s) => `Plan ${s}`).join(" or ")}`,
+      desc: !planActionsAvailable
+        ? "Add this course to a plan first to move it"
+        : targetSlots.length === 0
+          ? "Already in every plan"
+          : "Reassign to a different plan slot",
+      action: () => setShowMove(true),
       icon: "📋",
+      disabled: !planActionsAvailable || targetSlots.length === 0,
+      disabledReason: !planActionsAvailable
+        ? "Course is not in any plan yet"
+        : "Already in every plan",
+      testId: "recovery-move",
     },
     {
       title: "Request Permission",
       desc: "Draft an override request email",
       action: () => setShowPermission(true),
       icon: "✉",
+      testId: "recovery-request-permission",
     },
   ];
 
@@ -126,6 +218,7 @@ export default function RecoveryDrawer({
       <div
         ref={drawerRef}
         className="relative bg-white rounded-t-xl shadow-2xl max-h-[70vh] overflow-y-auto"
+        data-testid="recovery-drawer"
       >
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <h2 id="recovery-title" className="text-lg font-bold text-gray-900">
@@ -141,11 +234,23 @@ export default function RecoveryDrawer({
           </button>
         </div>
 
-        {showSwap && (
+        {!planActionsAvailable && (
+          <div className="mx-6 mt-4 px-4 py-2 rounded-lg text-xs bg-amber-50 text-amber-900 border border-amber-200">
+            This course is blocked and not in any plan, so you can&apos;t swap
+            sections or move it between plans. Try Find Alternatives or Request
+            Permission instead.
+          </div>
+        )}
+
+        {showSwap && planActionsAvailable && (
           <div className="p-6">
             <h3 className="text-sm font-semibold text-gray-800 mb-3">
-              Swap Section — {course.subject} {course.courseNumber}
+              Swap Section &mdash; {course.subject} {course.courseNumber}
             </h3>
+            <p className="text-xs text-gray-600 mb-3">
+              Pick a section to use in{" "}
+              {currentSlots.map((s) => `Plan ${s}`).join(" or ")}.
+            </p>
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200">
@@ -186,14 +291,31 @@ export default function RecoveryDrawer({
                         {isFull ? (
                           <span className="text-xs text-red-700">Full</span>
                         ) : (
-                          <button
-                            type="button"
-                            onClick={() => handleSwapSection(s.id)}
-                            aria-label={`Select section ${s.sectionNumber ?? s.id}`}
-                            className="text-xs bg-[#1B6B3A] text-white px-3 py-1 rounded font-medium"
-                          >
-                            Select
-                          </button>
+                          <div className="flex justify-end gap-1.5">
+                            {currentSlots.map((slot) => {
+                              const entry = findEntryInSlot(course.id, slot);
+                              const isCurrent = entry?.sectionId === s.id;
+                              return (
+                                <button
+                                  key={slot}
+                                  type="button"
+                                  onClick={() => handleSwap(slot, s.id)}
+                                  aria-label={`Use section ${s.sectionNumber ?? s.id} in Plan ${slot}`}
+                                  disabled={isCurrent}
+                                  className="text-xs px-2.5 py-1 rounded font-medium text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                                  style={{
+                                    backgroundColor: PLAN_COLORS[slot],
+                                  }}
+                                >
+                                  {isCurrent
+                                    ? `✓ ${slot}`
+                                    : currentSlots.length === 1
+                                      ? "Select"
+                                      : slot}
+                                </button>
+                              );
+                            })}
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -204,6 +326,54 @@ export default function RecoveryDrawer({
             <button
               type="button"
               onClick={() => setShowSwap(false)}
+              className="mt-3 text-sm text-gray-700 hover:text-gray-900"
+            >
+              ← Back to options
+            </button>
+          </div>
+        )}
+
+        {showMove && planActionsAvailable && targetSlots.length > 0 && (
+          <div className="p-6">
+            <h3 className="text-sm font-semibold text-gray-800 mb-3">
+              Move {courseLabel} between plans
+            </h3>
+            <p className="text-xs text-gray-600 mb-3">
+              Moving removes the course from the source plan and adds it to the
+              target plan. The same section is kept.
+            </p>
+            <ul className="space-y-2">
+              {movePairs.map(({ from, to }) => (
+                <li key={`${from}-${to}`}>
+                  <button
+                    type="button"
+                    onClick={() => handleMove(from, to)}
+                    aria-label={`Move ${courseLabel} from Plan ${from} to Plan ${to}`}
+                    data-testid={`recovery-move-${from}-${to}`}
+                    className="w-full text-left px-3 py-2 rounded border border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-sm flex items-center gap-3"
+                  >
+                    <span
+                      className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium text-white"
+                      style={{ backgroundColor: PLAN_COLORS[from] }}
+                    >
+                      Plan {from}
+                    </span>
+                    <span aria-hidden="true" className="text-gray-500">
+                      →
+                    </span>
+                    <span
+                      className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium text-white"
+                      style={{ backgroundColor: PLAN_COLORS[to] }}
+                    >
+                      Plan {to}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <button
+              type="button"
+              onClick={() => setShowMove(false)}
               className="mt-3 text-sm text-gray-700 hover:text-gray-900"
             >
               ← Back to options
@@ -242,7 +412,7 @@ export default function RecoveryDrawer({
                 <textarea
                   readOnly
                   rows={5}
-                  value={`Dear Professor,\n\nI am writing to request permission to enroll in ${course.subject} ${course.courseNumber}: ${course.courseTitle} for Summer 2026.\n\nI am a senior in the College of Arts and Letters, majoring in Computer Science (BA). I believe this course aligns with my academic goals.\n\nThank you for your consideration.\n\nBest regards,\nAlex Murphy`}
+                  value={`Dear Professor,\n\nI am writing to request permission to enroll in ${course.subject} ${course.courseNumber}: ${course.courseTitle} for Summer 2026.\n\n${selfDescription} I believe this course aligns with my academic goals.\n\nThank you for your consideration.\n\nBest regards,\n${signoffName}`}
                   className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-50 text-gray-700"
                 />
               </div>
@@ -276,14 +446,17 @@ export default function RecoveryDrawer({
           </div>
         )}
 
-        {!showSwap && !showPermission && (
+        {!showSwap && !showMove && !showPermission && (
           <div className="p-6 grid grid-cols-2 gap-3">
             {options.map((opt) => (
               <button
                 key={opt.title}
                 type="button"
                 onClick={opt.action}
-                className="text-left p-4 rounded-lg border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-colors"
+                disabled={opt.disabled}
+                title={opt.disabled ? opt.disabledReason : undefined}
+                data-testid={opt.testId}
+                className="text-left p-4 rounded-lg border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-white"
               >
                 <div className="text-xl mb-2" aria-hidden="true">
                   {opt.icon}

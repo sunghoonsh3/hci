@@ -1,0 +1,285 @@
+- generic [active] [ref=e1]:
+  - navigation "Main navigation" [ref=e2]:
+    - link "PATH — Registration Clarity home" [ref=e3] [cursor=pointer]:
+      - /url: /search
+      - generic [ref=e4]: ☘️
+      - generic [ref=e5]: PATH
+    - generic [ref=e6]:
+      - link "Search" [ref=e7] [cursor=pointer]:
+        - /url: /search
+        - generic [ref=e8]: Search
+      - link "Plan" [ref=e9] [cursor=pointer]:
+        - /url: /plan
+        - generic [ref=e10]: Plan
+      - link "Export" [ref=e11] [cursor=pointer]:
+        - /url: /export
+        - generic [ref=e12]: Export
+    - generic [ref=e13]:
+      - generic [ref=e14]: Summer 2026
+      - generic [ref=e15]: S
+      - generic [ref=e16]: Student
+  - generic [ref=e17]:
+    - complementary "Plans and progress" [ref=e18]:
+      - generic [ref=e19]:
+        - generic [ref=e20]: Term
+        - generic [ref=e21]: Summer 2026
+      - generic [ref=e22]:
+        - generic [ref=e23]: My Plans
+        - tablist "Plan slots" [ref=e24]:
+          - tab "Plan A (0)" [selected] [ref=e25]
+          - tab "Plan B (0)" [ref=e26]
+          - tab "Plan C (0)" [ref=e27]
+        - tabpanel [ref=e28]:
+          - paragraph [ref=e29]: No courses in Plan A
+      - generic [ref=e30]:
+        - generic [ref=e31]: My GPS
+        - link "Import Degree Audit" [ref=e32] [cursor=pointer]:
+          - /url: /onboarding
+    - main [ref=e33]:
+      - generic [ref=e34]:
+        - heading "Search Results — 6 courses" [level=1] [ref=e36]:
+          - text: Search Results
+          - generic [ref=e37]: — 6 courses
+        - generic [ref=e38]:
+          - combobox "Subject" [ref=e39]:
+            - option "All Subjects"
+            - option "ACCT"
+            - option "ACMS"
+            - option "AFST"
+            - option "AL"
+            - option "AME"
+            - option "AMST"
+            - option "ANTH"
+            - option "ARCH"
+            - option "ARHI"
+            - option "ARST"
+            - option "BAEG"
+            - option "BALW"
+            - option "BASC"
+            - option "BAUG"
+            - option "BES"
+            - option "BIOS"
+            - option "BPHY"
+            - option "CBE"
+            - option "CDT"
+            - option "CE"
+            - option "CHEM"
+            - option "CLAS"
+            - option "CLGR"
+            - option "CLLA"
+            - option "CNST"
+            - option "CSE"
+            - option "CSEM"
+            - option "DESN"
+            - option "DMA"
+            - option "DS"
+            - option "EALJ"
+            - option "ECON"
+            - option "EDU"
+            - option "EE"
+            - option "EG"
+            - option "ENGL"
+            - option "ESS"
+            - option "ESTM"
+            - option "FIN"
+            - option "FTT"
+            - option "GE"
+            - option "GH"
+            - option "GLAF"
+            - option "GRED"
+            - option "GSC"
+            - option "HIST"
+            - option "HPS"
+            - option "IBMS"
+            - option "IIPS"
+            - option "ILS"
+            - option "ISS"
+            - option "ITAO"
+            - option "KSGA"
+            - option "LLRO"
+            - option "MARK"
+            - option "MATH" [selected]
+            - option "MBA"
+            - option "MBAE"
+            - option "MDMK"
+            - option "MDSC"
+            - option "MEAR"
+            - option "MGA"
+            - option "MGTO"
+            - option "MI"
+            - option "MNAE"
+            - option "MSA"
+            - option "MSBR"
+            - option "MSF"
+            - option "MSFR"
+            - option "MSM"
+            - option "MSMG"
+            - option "MUS"
+            - option "NSCI"
+            - option "PCSE"
+            - option "PHIL"
+            - option "PHYS"
+            - option "POLS"
+            - option "PSY"
+            - option "RE"
+            - option "REG"
+            - option "ROFR"
+            - option "ROIT"
+            - option "ROPO"
+            - option "ROSP"
+            - option "SC"
+            - option "SMAC"
+            - option "SOC"
+            - option "SOCO"
+            - option "STV"
+            - option "SUSD"
+            - option "THEO"
+            - option "UGED"
+          - generic [ref=e40]:
+            - img [ref=e41]
+            - textbox "Keyword" [ref=e43]:
+              - /placeholder: Search courses...
+          - generic [ref=e44]:
+            - checkbox "Open seats only" [ref=e45]: Open seats only
+            - checkbox "Core requirements" [ref=e47]: Core requirements
+            - checkbox "My major courses" [ref=e49]: My major courses
+          - button "Search" [ref=e51]
+        - generic [ref=e52]:
+          - table [ref=e54]:
+            - rowgroup [ref=e55]:
+              - row "Course Title Status Seats Reqs Actions" [ref=e56]:
+                - columnheader "Course" [ref=e57]
+                - columnheader "Title" [ref=e58]
+                - columnheader "Status" [ref=e59]
+                - columnheader "Seats" [ref=e60]
+                - columnheader "Reqs" [ref=e61]
+                - columnheader "Actions" [ref=e62]
+            - rowgroup [ref=e63]:
+              - 'row "MATH 10360 Calculus B Eligibility: Eligible 37/70 2 of 2 sections open Add MATH 10360 to Plan A Add MATH 10360 to Plan B Add MATH 10360 to Plan C" [ref=e64] [cursor=pointer]':
+                - cell "MATH 10360" [ref=e65]:
+                  - generic [ref=e66]: MATH 10360
+                - cell "Calculus B" [ref=e67]
+                - 'cell "Eligibility: Eligible" [ref=e68]':
+                  - 'status "Eligibility: Eligible" [ref=e69]': Eligible
+                - cell "37/70 2 of 2 sections open" [ref=e70]:
+                  - generic [ref=e71]:
+                    - generic [ref=e72]: 37/70
+                    - generic [ref=e73]: 2 of 2 sections open
+                - cell [ref=e74]
+                - cell "Add MATH 10360 to Plan A Add MATH 10360 to Plan B Add MATH 10360 to Plan C" [ref=e75]:
+                  - generic [ref=e76]:
+                    - button "Add MATH 10360 to Plan A" [ref=e77]: + A
+                    - button "Add MATH 10360 to Plan B" [ref=e78]: + B
+                    - button "Add MATH 10360 to Plan C" [ref=e79]: + C
+              - 'row "MATH 10550 Calculus I Eligibility: Eligible 6/30 1 of 1 section open Math Req Add MATH 10550 to Plan A Add MATH 10550 to Plan B Add MATH 10550 to Plan C" [ref=e80] [cursor=pointer]':
+                - cell "MATH 10550" [ref=e81]:
+                  - generic [ref=e82]: MATH 10550
+                - cell "Calculus I" [ref=e83]
+                - 'cell "Eligibility: Eligible" [ref=e84]':
+                  - 'status "Eligibility: Eligible" [ref=e85]': Eligible
+                - cell "6/30 1 of 1 section open" [ref=e86]:
+                  - generic [ref=e87]:
+                    - generic [ref=e88]: 6/30
+                    - generic [ref=e89]: 1 of 1 section open
+                - cell "Math Req" [ref=e90]:
+                  - generic [ref=e92]: Math Req
+                - cell "Add MATH 10550 to Plan A Add MATH 10550 to Plan B Add MATH 10550 to Plan C" [ref=e93]:
+                  - generic [ref=e94]:
+                    - button "Add MATH 10550 to Plan A" [ref=e95]: + A
+                    - button "Add MATH 10550 to Plan B" [ref=e96]: + B
+                    - button "Add MATH 10550 to Plan C" [ref=e97]: + C
+              - 'row "MATH 10560 Calculus II Eligibility: Eligible 41/60 2 of 2 sections open Math Req Add MATH 10560 to Plan A Add MATH 10560 to Plan B Add MATH 10560 to Plan C" [ref=e98] [cursor=pointer]':
+                - cell "MATH 10560" [ref=e99]:
+                  - generic [ref=e100]: MATH 10560
+                - cell "Calculus II" [ref=e101]
+                - 'cell "Eligibility: Eligible" [ref=e102]':
+                  - 'status "Eligibility: Eligible" [ref=e103]': Eligible
+                - cell "41/60 2 of 2 sections open" [ref=e104]:
+                  - generic [ref=e105]:
+                    - generic [ref=e106]: 41/60
+                    - generic [ref=e107]: 2 of 2 sections open
+                - cell "Math Req" [ref=e108]:
+                  - generic [ref=e110]: Math Req
+                - cell "Add MATH 10560 to Plan A Add MATH 10560 to Plan B Add MATH 10560 to Plan C" [ref=e111]:
+                  - generic [ref=e112]:
+                    - button "Add MATH 10560 to Plan A" [ref=e113]: + A
+                    - button "Add MATH 10560 to Plan B" [ref=e114]: + B
+                    - button "Add MATH 10560 to Plan C" [ref=e115]: + C
+              - 'row "MATH 20550 Calculus III Eligibility: Eligible 42/60 2 of 2 sections open Math Req Add MATH 20550 to Plan A Add MATH 20550 to Plan B Add MATH 20550 to Plan C" [ref=e116] [cursor=pointer]':
+                - cell "MATH 20550" [ref=e117]:
+                  - generic [ref=e118]: MATH 20550
+                - cell "Calculus III" [ref=e119]
+                - 'cell "Eligibility: Eligible" [ref=e120]':
+                  - 'status "Eligibility: Eligible" [ref=e121]': Eligible
+                - cell "42/60 2 of 2 sections open" [ref=e122]:
+                  - generic [ref=e123]:
+                    - generic [ref=e124]: 42/60
+                    - generic [ref=e125]: 2 of 2 sections open
+                - cell "Math Req" [ref=e126]:
+                  - generic [ref=e128]: Math Req
+                - cell "Add MATH 20550 to Plan A Add MATH 20550 to Plan B Add MATH 20550 to Plan C" [ref=e129]:
+                  - generic [ref=e130]:
+                    - button "Add MATH 20550 to Plan A" [ref=e131]: + A
+                    - button "Add MATH 20550 to Plan B" [ref=e132]: + B
+                    - button "Add MATH 20550 to Plan C" [ref=e133]: + C
+              - 'row "MATH 20580 Introduction to Linear Algebra and Differential Equations Eligibility: Eligible 49/60 2 of 2 sections open Math Req Add MATH 20580 to Plan A Add MATH 20580 to Plan B Add MATH 20580 to Plan C" [ref=e134] [cursor=pointer]':
+                - cell "MATH 20580" [ref=e135]:
+                  - generic [ref=e136]: MATH 20580
+                - cell "Introduction to Linear Algebra and Differential Equations" [ref=e137]
+                - 'cell "Eligibility: Eligible" [ref=e138]':
+                  - 'status "Eligibility: Eligible" [ref=e139]': Eligible
+                - cell "49/60 2 of 2 sections open" [ref=e140]:
+                  - generic [ref=e141]:
+                    - generic [ref=e142]: 49/60
+                    - generic [ref=e143]: 2 of 2 sections open
+                - cell "Math Req" [ref=e144]:
+                  - generic [ref=e146]: Math Req
+                - cell "Add MATH 20580 to Plan A Add MATH 20580 to Plan B Add MATH 20580 to Plan C" [ref=e147]:
+                  - generic [ref=e148]:
+                    - button "Add MATH 20580 to Plan A" [ref=e149]: + A
+                    - button "Add MATH 20580 to Plan B" [ref=e150]: + B
+                    - button "Add MATH 20580 to Plan C" [ref=e151]: + C
+              - 'row "MATH 67890 Independent Summer Research Eligibility: Eligible 47/65 1 of 1 section open Add MATH 67890 to Plan A Add MATH 67890 to Plan B Add MATH 67890 to Plan C" [ref=e152] [cursor=pointer]':
+                - cell "MATH 67890" [ref=e153]:
+                  - generic [ref=e154]: MATH 67890
+                - cell "Independent Summer Research" [ref=e155]
+                - 'cell "Eligibility: Eligible" [ref=e156]':
+                  - 'status "Eligibility: Eligible" [ref=e157]': Eligible
+                - cell "47/65 1 of 1 section open" [ref=e158]:
+                  - generic [ref=e159]:
+                    - generic [ref=e160]: 47/65
+                    - generic [ref=e161]: 1 of 1 section open
+                - cell [ref=e162]
+                - cell "Add MATH 67890 to Plan A Add MATH 67890 to Plan B Add MATH 67890 to Plan C" [ref=e163]:
+                  - generic [ref=e164]:
+                    - button "Add MATH 67890 to Plan A" [ref=e165]: + A
+                    - button "Add MATH 67890 to Plan B" [ref=e166]: + B
+                    - button "Add MATH 67890 to Plan C" [ref=e167]: + C
+          - generic [ref=e168]:
+            - heading "Weekly Schedule" [level=2] [ref=e170]
+            - generic [ref=e171]:
+              - note:
+                - paragraph [ref=e172]: Add courses to your plan to see them on the schedule.
+              - generic [ref=e173]:
+                - generic [ref=e175]: Mon
+                - generic [ref=e176]: Tue
+                - generic [ref=e177]: Wed
+                - generic [ref=e178]: Thu
+                - generic [ref=e179]: Fri
+              - generic [ref=e181]:
+                - generic [ref=e182]: 8a
+                - generic [ref=e183]: 9a
+                - generic [ref=e184]: 10a
+                - generic [ref=e185]: 11a
+                - generic [ref=e186]: 12p
+                - generic [ref=e187]: 1p
+                - generic [ref=e188]: 2p
+                - generic [ref=e189]: 3p
+                - generic [ref=e190]: 4p
+                - generic [ref=e191]: 5p
+                - generic [ref=e192]: 6p
+                - generic [ref=e193]: 7p
+                - generic [ref=e194]: 8p
+                - generic [ref=e195]: 9p
+  - button "Open Next.js Dev Tools" [ref=e276] [cursor=pointer]:
+    - img [ref=e277]

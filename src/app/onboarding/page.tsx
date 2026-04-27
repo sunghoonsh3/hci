@@ -11,6 +11,7 @@ export default function OnboardingPage() {
   const { clearAll } = usePlans();
   const [rawText, setRawText] = useState("");
   const [error, setError] = useState("");
+  const [isParsing, setIsParsing] = useState(false);
 
   if (audit) {
     return (
@@ -83,18 +84,46 @@ export default function OnboardingPage() {
     );
   }
 
-  function handleParse() {
+  async function handleParse() {
     setError("");
     if (!rawText.trim()) {
       setError("Please paste your degree audit text.");
       return;
     }
-    const parsed = setAuditText(rawText);
-    if (!parsed) {
-      setError(
-        "Could not parse any courses from the text. Make sure you copied the full degree audit from GPS/Degree Works.",
-      );
-      return;
+    setIsParsing(true);
+    try {
+      const result = await setAuditText(rawText);
+      if (!result.ok) {
+        switch (result.error.kind) {
+          case "empty":
+            setError("Please paste your degree audit text.");
+            break;
+          case "too-long":
+            setError(
+              `Audit too long (${result.error.chars.toLocaleString()} chars). Trim it down and try again.`,
+            );
+            break;
+          case "rate-limited": {
+            const wait = result.error.retryAfterSeconds;
+            setError(
+              wait
+                ? `Too many parse attempts. Try again in ${wait}s.`
+                : "Too many parse attempts. Try again shortly.",
+            );
+            break;
+          }
+          case "invalid-shape":
+            setError(
+              "Parser returned an unexpected shape. Make sure you copied the full degree audit from GPS/Degree Works.",
+            );
+            break;
+          case "server":
+            setError(`Parse failed: ${result.error.message}`);
+            break;
+        }
+      }
+    } finally {
+      setIsParsing(false);
     }
   }
 
@@ -117,7 +146,8 @@ export default function OnboardingPage() {
         value={rawText}
         onChange={(e) => setRawText(e.target.value)}
         placeholder="Paste your full degree audit text here..."
-        className="w-full h-64 p-4 border border-gray-300 rounded-lg text-sm font-mono resize-y focus:outline-none focus:ring-2 focus:ring-[#1B6B3A] focus:border-transparent"
+        disabled={isParsing}
+        className="w-full h-64 p-4 border border-gray-300 rounded-lg text-sm font-mono resize-y focus:outline-none focus:ring-2 focus:ring-[#1B6B3A] focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
       />
 
       {error && (
@@ -129,10 +159,17 @@ export default function OnboardingPage() {
       <button
         type="button"
         onClick={handleParse}
-        className="mt-4 bg-[#1B6B3A] text-white px-6 py-2.5 rounded-lg font-medium hover:bg-[#155a2f] transition-colors"
+        disabled={isParsing}
+        aria-busy={isParsing}
+        className="mt-4 bg-[#1B6B3A] text-white px-6 py-2.5 rounded-lg font-medium hover:bg-[#155a2f] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
       >
-        Parse Audit
+        {isParsing ? "Parsing audit…" : "Parse Audit"}
       </button>
+      {isParsing && (
+        <p className="mt-2 text-xs text-gray-600">
+          This usually takes a few seconds.
+        </p>
+      )}
     </div>
   );
 }
