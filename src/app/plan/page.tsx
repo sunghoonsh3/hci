@@ -368,42 +368,6 @@ export default function PlanPage() {
             </button>
           );
         })}
-        <div
-          className="flex items-center gap-2 ml-4"
-          role="group"
-          aria-label="Show on weekly schedule"
-        >
-          <span className="text-sm text-gray-700">Show on schedule:</span>
-          {SLOTS.map((slot) => {
-            const on = visibleSlots[slot];
-            return (
-              <button
-                key={slot}
-                type="button"
-                role="switch"
-                aria-checked={on}
-                aria-label={`Show Plan ${slot} on weekly schedule`}
-                onClick={() => toggleSlotVisible(slot)}
-                className="px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors"
-                style={
-                  on
-                    ? {
-                        backgroundColor: PLAN_COLORS[slot],
-                        borderColor: PLAN_COLORS[slot],
-                        color: "white",
-                      }
-                    : {
-                        backgroundColor: "white",
-                        borderColor: "#d1d5db",
-                        color: "#374151",
-                      }
-                }
-              >
-                {slot}
-              </button>
-            );
-          })}
-        </div>
       </div>
 
       <div className="grid grid-cols-[1fr_320px] gap-6">
@@ -593,9 +557,46 @@ export default function PlanPage() {
         </div>
 
         <div>
-          <h2 className="text-sm font-semibold text-gray-800 mb-2">
-            Weekly Schedule
-          </h2>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-sm font-semibold text-gray-800">
+              Weekly Schedule
+            </h2>
+            <div
+              className="flex items-center gap-1.5"
+              role="group"
+              aria-label="Show plans on weekly schedule"
+            >
+              {SLOTS.map((slot) => {
+                const on = visibleSlots[slot];
+                return (
+                  <button
+                    key={slot}
+                    type="button"
+                    role="switch"
+                    aria-checked={on}
+                    aria-label={`Show Plan ${slot} on weekly schedule`}
+                    onClick={() => toggleSlotVisible(slot)}
+                    className="w-7 h-7 rounded-md text-xs font-semibold border transition-colors"
+                    style={
+                      on
+                        ? {
+                            backgroundColor: PLAN_COLORS[slot],
+                            borderColor: PLAN_COLORS[slot],
+                            color: "white",
+                          }
+                        : {
+                            backgroundColor: "white",
+                            borderColor: "#d1d5db",
+                            color: "#9ca3af",
+                          }
+                    }
+                  >
+                    {slot}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
           <WeeklyCalendar
             events={events}
             highlightedId={highlightedSection}
