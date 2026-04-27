@@ -166,7 +166,17 @@ export default function PlanPage() {
   const { plans, removeFromPlan, moveToPlan, addToPlan, loaded } = usePlans();
   const { audit } = useAudit();
   const [activeSlot, setActiveSlot] = useState<PlanSlot>("A");
-  const [showAllPlans, setShowAllPlans] = useState(false);
+  const [visibleSlots, setVisibleSlots] = useState<Record<PlanSlot, boolean>>({
+    A: true,
+    B: true,
+    C: true,
+  });
+  const visibleSlotsList = SLOTS.filter((s) => visibleSlots[s]);
+  const anySlotVisible = visibleSlotsList.length > 0;
+  const showAllPlans = visibleSlotsList.length === SLOTS.length;
+  function toggleSlotVisible(slot: PlanSlot) {
+    setVisibleSlots((prev) => ({ ...prev, [slot]: !prev[slot] }));
+  }
   const [courseDataMap, setCourseDataMap] = useState<
     Record<number, CourseDTO>
   >({});
@@ -224,7 +234,7 @@ export default function PlanPage() {
 
   const slotEntries = plans.filter((p) => p.planSlot === activeSlot);
 
-  const calendarEntries = showAllPlans ? plans : slotEntries;
+  const calendarEntries = plans.filter((p) => visibleSlots[p.planSlot]);
   const events: CalendarEvent[] = [];
   const untimed: {
     sectionId: number;
@@ -358,15 +368,42 @@ export default function PlanPage() {
             </button>
           );
         })}
-        <label className="flex items-center gap-2 ml-4 text-sm text-gray-700">
-          <input
-            type="checkbox"
-            checked={showAllPlans}
-            onChange={(e) => setShowAllPlans(e.target.checked)}
-            className="rounded"
-          />
-          Show all plans on calendar
-        </label>
+        <div
+          className="flex items-center gap-2 ml-4"
+          role="group"
+          aria-label="Show on weekly schedule"
+        >
+          <span className="text-sm text-gray-700">Show on schedule:</span>
+          {SLOTS.map((slot) => {
+            const on = visibleSlots[slot];
+            return (
+              <button
+                key={slot}
+                type="button"
+                role="switch"
+                aria-checked={on}
+                aria-label={`Show Plan ${slot} on weekly schedule`}
+                onClick={() => toggleSlotVisible(slot)}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors"
+                style={
+                  on
+                    ? {
+                        backgroundColor: PLAN_COLORS[slot],
+                        borderColor: PLAN_COLORS[slot],
+                        color: "white",
+                      }
+                    : {
+                        backgroundColor: "white",
+                        borderColor: "#d1d5db",
+                        color: "#374151",
+                      }
+                }
+              >
+                {slot}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <div className="grid grid-cols-[1fr_320px] gap-6">
@@ -566,13 +603,15 @@ export default function PlanPage() {
               setHighlightedSection((prev) => (prev === id ? null : id))
             }
             emptyMessage={
-              events.length === 0 && untimed.length > 0
-                ? showAllPlans
-                  ? "All planned courses are async or have no fixed meeting time."
-                  : `Plan ${activeSlot} has no courses with fixed meeting times.`
-                : showAllPlans
-                  ? "No courses planned across any slot yet."
-                  : `No courses in Plan ${activeSlot} yet.`
+              !anySlotVisible
+                ? "No plans selected. Toggle A, B, or C to show schedules."
+                : events.length === 0 && untimed.length > 0
+                  ? showAllPlans
+                    ? "All planned courses are async or have no fixed meeting time."
+                    : `Plan ${visibleSlotsList.join(", ")} has no courses with fixed meeting times.`
+                  : showAllPlans
+                    ? "No courses planned across any slot yet."
+                    : `No courses in Plan ${visibleSlotsList.join(", ")} yet.`
             }
           />
           {untimed.length > 0 && (
@@ -601,32 +640,23 @@ export default function PlanPage() {
               </ul>
             </div>
           )}
-          {showAllPlans && (
+          {visibleSlotsList.length > 1 && (
             <div className="flex items-center gap-4 mt-2 text-xs text-gray-600">
-              <div className="flex items-center gap-1">
+              {SLOTS.map((slot) => (
                 <div
-                  className="w-3 h-3 rounded"
-                  style={{ backgroundColor: "#1B6B3A" }}
-                  aria-hidden="true"
-                />
-                <span>Plan A</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div
-                  className="w-3 h-3 rounded"
-                  style={{ backgroundColor: "#2563eb" }}
-                  aria-hidden="true"
-                />
-                <span>Plan B</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div
-                  className="w-3 h-3 rounded"
-                  style={{ backgroundColor: "#6b7280" }}
-                  aria-hidden="true"
-                />
-                <span>Plan C</span>
-              </div>
+                  key={slot}
+                  className={`flex items-center gap-1 ${
+                    visibleSlots[slot] ? "" : "opacity-40 line-through"
+                  }`}
+                >
+                  <div
+                    className="w-3 h-3 rounded"
+                    style={{ backgroundColor: PLAN_COLORS[slot] }}
+                    aria-hidden="true"
+                  />
+                  <span>Plan {slot}</span>
+                </div>
+              ))}
             </div>
           )}
         </div>
