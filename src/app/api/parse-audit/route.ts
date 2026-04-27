@@ -5,7 +5,7 @@ import { ParsedAuditSchema } from "@/lib/schemas";
 import { rateLimit, clientIp } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 const LIMIT_PER_WINDOW = 5;
 const WINDOW_MS = 60_000;
