@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useAudit } from "@/contexts/AuditContext";
@@ -117,6 +117,9 @@ export default function SearchClient({
   initialOpenOnly: boolean;
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const fromRecovery = searchParams.get("from") === "recovery";
+  const fromCourseId = searchParams.get("fromCourse");
   const { audit } = useAudit();
   const {
     plans,
@@ -206,8 +209,10 @@ export default function SearchClient({
     if (subject) sp.set("subject", subject);
     if (keyword) sp.set("keyword", keyword);
     if (openOnly) sp.set("open", "true");
+    if (fromRecovery) sp.set("from", "recovery");
+    if (fromCourseId) sp.set("fromCourse", fromCourseId);
     router.push(`/search?${sp.toString()}`);
-  }, [subject, keyword, openOnly, router]);
+  }, [subject, keyword, openOnly, fromRecovery, fromCourseId, router]);
 
   function getStatus(course: Course): EligibilityStatus {
     const allCourses = audit
@@ -326,6 +331,19 @@ export default function SearchClient({
 
   return (
     <div>
+      {fromRecovery && fromCourseId && (
+        <button
+          type="button"
+          onClick={() =>
+            router.push(`/course/${fromCourseId}?recovery=1`)
+          }
+          aria-label="Back to recovery options"
+          className="mb-3 inline-flex items-center text-sm text-gray-700 hover:text-gray-900"
+        >
+          ← Back to recovery options
+        </button>
+      )}
+
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-bold text-gray-900">
           Search Results{" "}

@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAudit } from "@/contexts/AuditContext";
 import { usePlans } from "@/contexts/PlansContext";
 import {
@@ -112,6 +112,7 @@ export default function CourseDetailClient({
   courseTitleMap?: Record<string, string>;
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { audit } = useAudit();
   const {
     plans,
@@ -122,7 +123,9 @@ export default function CourseDetailClient({
     findSlotsForSection,
   } = usePlans();
   const [showPreCheck, setShowPreCheck] = useState(false);
-  const [showRecovery, setShowRecovery] = useState(false);
+  const [showRecovery, setShowRecovery] = useState(
+    () => searchParams.get("recovery") === "1",
+  );
   const { show } = useToast();
 
   const allCourses = useMemo(

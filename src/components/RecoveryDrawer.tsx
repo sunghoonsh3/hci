@@ -71,6 +71,17 @@ export default function RecoveryDrawer({
   const [showMove, setShowMove] = useState(false);
   const [showPermission, setShowPermission] = useState(false);
   const [permissionSent, setPermissionSent] = useState(false);
+  const [permissionTo, setPermissionTo] = useState(
+    () =>
+      `${course.sections[0]?.instructors[0]?.name ?? "Instructor"}@nd.edu`,
+  );
+  const [permissionSubject, setPermissionSubject] = useState(
+    () => `Permission to enroll: ${course.subject} ${course.courseNumber}`,
+  );
+  const [permissionMessage, setPermissionMessage] = useState(
+    () =>
+      `Dear Professor,\n\nI am writing to request permission to enroll in ${course.subject} ${course.courseNumber}: ${course.courseTitle} for Summer 2026.\n\n${selfDescription} I believe this course aligns with my academic goals.\n\nThank you for your consideration.\n\nBest regards,\n${signoffName}`,
+  );
   const sentTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const drawerRef = useRef<HTMLDivElement>(null);
 
@@ -169,7 +180,10 @@ export default function RecoveryDrawer({
     {
       title: "Find Alternatives",
       desc: `Search for other ${course.subject} courses`,
-      action: () => router.push(`/search?subject=${course.subject}`),
+      action: () =>
+        router.push(
+          `/search?subject=${course.subject}&from=recovery&fromCourse=${course.id}`,
+        ),
       icon: "🔍",
       testId: "recovery-find-alternatives",
     },
@@ -388,32 +402,48 @@ export default function RecoveryDrawer({
             </h3>
             <div className="space-y-3 text-sm">
               <div>
-                <label className="block text-xs text-gray-600 mb-1">To</label>
+                <label
+                  htmlFor="permission-to"
+                  className="block text-xs text-gray-600 mb-1"
+                >
+                  To
+                </label>
                 <input
-                  readOnly
-                  value={`${course.sections[0]?.instructors[0]?.name ?? "Instructor"}@nd.edu`}
-                  className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-50 text-gray-700"
+                  id="permission-to"
+                  type="text"
+                  value={permissionTo}
+                  onChange={(e) => setPermissionTo(e.target.value)}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#0C2340]/20 focus:border-[#0C2340]"
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-600 mb-1">
+                <label
+                  htmlFor="permission-subject"
+                  className="block text-xs text-gray-600 mb-1"
+                >
                   Subject
                 </label>
                 <input
-                  readOnly
-                  value={`Permission to enroll: ${course.subject} ${course.courseNumber}`}
-                  className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-50 text-gray-700"
+                  id="permission-subject"
+                  type="text"
+                  value={permissionSubject}
+                  onChange={(e) => setPermissionSubject(e.target.value)}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#0C2340]/20 focus:border-[#0C2340]"
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-600 mb-1">
+                <label
+                  htmlFor="permission-message"
+                  className="block text-xs text-gray-600 mb-1"
+                >
                   Message
                 </label>
                 <textarea
-                  readOnly
-                  rows={5}
-                  value={`Dear Professor,\n\nI am writing to request permission to enroll in ${course.subject} ${course.courseNumber}: ${course.courseTitle} for Summer 2026.\n\n${selfDescription} I believe this course aligns with my academic goals.\n\nThank you for your consideration.\n\nBest regards,\n${signoffName}`}
-                  className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-50 text-gray-700"
+                  id="permission-message"
+                  rows={8}
+                  value={permissionMessage}
+                  onChange={(e) => setPermissionMessage(e.target.value)}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#0C2340]/20 focus:border-[#0C2340]"
                 />
               </div>
               <div className="flex gap-2">
