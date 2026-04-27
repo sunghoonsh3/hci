@@ -264,13 +264,38 @@ export default function SearchClient({
   const visibleCourses = displayCourses.slice(0, visibleCount);
   const remaining = displayCourses.length - visibleCourses.length;
 
+  function handleRemoveFromAllPlans(course: Course) {
+    const entries = plans.filter((p) => p.courseId === course.id);
+    if (entries.length === 0) return;
+    const slotsLabel = [...new Set(entries.map((e) => e.planSlot))]
+      .sort()
+      .join(", ");
+    for (const entry of entries) {
+      removeFromPlan(entry.sectionId, entry.planSlot);
+    }
+    show(
+      `Removed ${course.subject} ${course.courseNumber} from Plan ${slotsLabel}`,
+      {
+        undo: () => {
+          for (const entry of entries) {
+            addToPlan(entry.courseId, entry.sectionId, entry.planSlot, {
+              subject: course.subject,
+              courseNumber: course.courseNumber,
+              courseTitle: course.courseTitle,
+            });
+          }
+        },
+      },
+    );
+  }
+
   function handleAddToPlan(course: Course) {
     const openSection = course.sections.find(
       (s) => s.seatsAvailable === null || s.seatsAvailable > 0,
     );
     if (!openSection) {
       show(`${course.subject} ${course.courseNumber} has no open seats`, {
-        variant: "warning",
+        variant: "error",
       });
       return;
     }
@@ -298,15 +323,6 @@ export default function SearchClient({
 
   return (
     <div>
-      <button
-        type="button"
-        onClick={() => router.back()}
-        aria-label="Go back to previous page"
-        className="mb-3 inline-flex items-center text-sm text-gray-700 hover:text-gray-900"
-      >
-        ← Back
-      </button>
-
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-bold text-gray-900">
           Search Results{" "}
@@ -480,9 +496,22 @@ export default function SearchClient({
                     </td>
                     <td className="px-4 py-3 text-right">
                       {inPlan ? (
-                        <span className="text-xs text-green-700 font-medium">
-                          In Plan ✓
-                        </span>
+                        <div className="flex flex-col items-end gap-1 text-xs">
+                          <span className="text-green-700 font-medium">
+                            In Plan ✓
+                          </span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemoveFromAllPlans(course);
+                            }}
+                            aria-label={`Remove ${course.subject} ${course.courseNumber} from plan`}
+                            className="text-red-700 hover:text-red-900 font-medium hover:underline"
+                          >
+                            Remove
+                          </button>
+                        </div>
                       ) : (
                         <button
                           type="button"

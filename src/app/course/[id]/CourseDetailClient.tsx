@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAudit } from "@/contexts/AuditContext";
 import { usePlans } from "@/contexts/PlansContext";
 import {
@@ -90,6 +91,7 @@ export default function CourseDetailClient({
   course: Course;
   courseTitleMap?: Record<string, string>;
 }) {
+  const router = useRouter();
   const { audit } = useAudit();
   const { addToPlan, removeFromPlan, isSectionInPlan, findSlotsForSection } =
     usePlans();
@@ -174,6 +176,15 @@ export default function CourseDetailClient({
 
   return (
     <div>
+      <button
+        type="button"
+        onClick={() => router.back()}
+        aria-label="Go back to previous page"
+        className="mb-3 inline-flex items-center text-sm text-gray-700 hover:text-gray-900"
+      >
+        ← Back
+      </button>
+
       <div className="text-sm text-gray-600 mb-4">
         <Link href="/search" className="hover:text-gray-900">
           Search
