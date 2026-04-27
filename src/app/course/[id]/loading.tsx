@@ -1,4 +1,7 @@
-export default function CourseLoading() {
+import { isDemoMode } from "@/lib/demoMode";
+
+export default async function CourseLoading() {
+  if (await isDemoMode()) return null;
   return (
     <div
       role="status"

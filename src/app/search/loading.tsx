@@ -1,4 +1,7 @@
-export default function SearchLoading() {
+import { isDemoMode } from "@/lib/demoMode";
+
+export default async function SearchLoading() {
+  if (await isDemoMode()) return null;
   return (
     <div
       role="status"

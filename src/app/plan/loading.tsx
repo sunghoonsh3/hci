@@ -1,4 +1,7 @@
-export default function PlanLoading() {
+import { isDemoMode } from "@/lib/demoMode";
+
+export default async function PlanLoading() {
+  if (await isDemoMode()) return null;
   return (
     <div
       role="status"
