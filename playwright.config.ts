@@ -9,6 +9,7 @@ export default defineConfig({
     baseURL: "https://hci-opal-sigma.vercel.app",
     headless: true,
     screenshot: "only-on-failure",
+    video: { mode: "on", size: { width: 1440, height: 900 } },
   },
   projects: [
     {
