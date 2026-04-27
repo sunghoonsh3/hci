@@ -138,6 +138,15 @@ export default function SearchClient({
   const [coreOnly, setCoreOnly] = useState(false);
   const [majorOnly, setMajorOnly] = useState(false);
   const [courseMap, setCourseMap] = useState<Record<number, CourseDTO>>({});
+  const [visibleSlots, setVisibleSlots] = useState<Record<PlanSlot, boolean>>({
+    A: true,
+    B: true,
+    C: true,
+  });
+  const anySlotVisible = PLAN_SLOTS.some((s) => visibleSlots[s]);
+  function toggleSlotVisible(slot: PlanSlot) {
+    setVisibleSlots((prev) => ({ ...prev, [slot]: !prev[slot] }));
+  }
 
   const { show } = useToast();
 
@@ -180,6 +189,7 @@ export default function SearchClient({
     if (plans.length === 0) return [];
     const events: CalendarEvent[] = [];
     for (const entry of plans) {
+      if (!visibleSlots[entry.planSlot]) continue;
       const course = courseMap[entry.courseId];
       if (!course) continue;
       const section = course.sections.find((s) => s.id === entry.sectionId);
@@ -199,7 +209,7 @@ export default function SearchClient({
       }
     }
     return events;
-  }, [plans, courseMap]);
+  }, [plans, courseMap, visibleSlots]);
 
   const applyFilters = useCallback(() => {
     // Only subject/keyword hit the server (large dataset). openOnly is
@@ -612,11 +622,50 @@ export default function SearchClient({
             <h2 className="text-sm font-semibold text-gray-800">
               Weekly Schedule
             </h2>
+            <div
+              className="flex items-center gap-1.5"
+              role="group"
+              aria-label="Show plans on weekly schedule"
+            >
+              {PLAN_SLOTS.map((slot) => {
+                const on = visibleSlots[slot];
+                return (
+                  <button
+                    key={slot}
+                    type="button"
+                    role="switch"
+                    aria-checked={on}
+                    aria-label={`Show Plan ${slot} on weekly schedule`}
+                    onClick={() => toggleSlotVisible(slot)}
+                    className="w-7 h-7 rounded-md text-xs font-semibold border transition-colors"
+                    style={
+                      on
+                        ? {
+                            backgroundColor: PLAN_COLORS[slot],
+                            borderColor: PLAN_COLORS[slot],
+                            color: "white",
+                          }
+                        : {
+                            backgroundColor: "white",
+                            borderColor: "#d1d5db",
+                            color: "#9ca3af",
+                          }
+                    }
+                  >
+                    {slot}
+                  </button>
+                );
+              })}
+            </div>
           </div>
           <WeeklyCalendar
             events={calendarEvents}
             compact
-            emptyMessage="Add courses to your plan to see them on the schedule."
+            emptyMessage={
+              !anySlotVisible
+                ? "No plans selected. Toggle A, B, or C to show schedules."
+                : "Add courses to your plan to see them on the schedule."
+            }
           />
         </div>
       </div>
