@@ -413,11 +413,13 @@ export default function SearchClient({
                 );
                 const inPlan = isInPlan(course.id);
                 const sectionsLabel =
-                  seats.openSections === 0
-                    ? "All sections full"
-                    : seats.openSections === seats.total
-                      ? `${seats.total} of ${seats.total} open`
-                      : `${seats.openSections} of ${seats.total} open`;
+                  seats.total === 1
+                    ? seats.openSections === 0
+                      ? "Single section, full"
+                      : "Single section"
+                    : seats.openSections === 0
+                      ? "All sections full"
+                      : `${seats.openSections} of ${seats.total} sections open`;
                 return (
                   <tr
                     key={course.id}
