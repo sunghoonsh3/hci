@@ -18,14 +18,37 @@ export default async function SearchPage({
     distinct: ["subject"],
     orderBy: { subject: "asc" },
   });
+  const subjectList = subjects.map((s) => s.subject);
+
+  // Students type the catalog form ("CSE 20212"), but `subject` lives in
+  // its own column. Detect a leading subject token so the keyword half can
+  // hit `courseNumber` / `courseTitle` cleanly. An explicit dropdown subject
+  // wins: if the parsed token disagrees with it, leave the keyword alone
+  // rather than silently overriding the dropdown.
+  let effectiveSubject = subject;
+  let effectiveKeyword = keyword;
+  const leadMatch = /^([A-Za-z]{2,4})\s+(.+)$/.exec(keyword.trim());
+  if (leadMatch) {
+    const parsedUpper = leadMatch[1].toUpperCase();
+    const canonical = subjectList.find((s) => s.toUpperCase() === parsedUpper);
+    if (canonical) {
+      if (!effectiveSubject) {
+        effectiveSubject = canonical;
+        effectiveKeyword = leadMatch[2].trim();
+      } else if (effectiveSubject.toUpperCase() === parsedUpper) {
+        effectiveKeyword = leadMatch[2].trim();
+      }
+    }
+  }
 
   const where: Record<string, unknown> = {};
-  if (subject) where.subject = subject;
-  if (keyword) {
+  if (effectiveSubject) where.subject = effectiveSubject;
+  if (effectiveKeyword) {
     where.OR = [
-      { courseTitle: { contains: keyword, mode: "insensitive" as const } },
-      { description: { contains: keyword, mode: "insensitive" as const } },
-      { courseNumber: { contains: keyword, mode: "insensitive" as const } },
+      { courseTitle: { contains: effectiveKeyword, mode: "insensitive" as const } },
+      { description: { contains: effectiveKeyword, mode: "insensitive" as const } },
+      { courseNumber: { contains: effectiveKeyword, mode: "insensitive" as const } },
+      { subject: { contains: effectiveKeyword, mode: "insensitive" as const } },
     ];
   }
 
